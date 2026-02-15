@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
-    "@azure/msal-browser": "^4.26.1",
+    "@azure/msal-browser": "^5.2.0",
     "@fluentui/react-components": "^9.72.6",
     "@storybook/addon-a11y": "^10.0.6",
     "@storybook/addon-docs": "^10.0.6",
