@@ -1,0 +1,39 @@
+# Build outputs
+dist/
+storybook-static/
+*.tsbuildinfo
+coverage/
+
+# Logs
+*.log
+log.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+UserInterfaceState.xcuserstate
+*~
+*.sw[mnpcod]
+
+# IDEs
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Dependencies
+node_modules/
+
+# Temp files
+*.tmp
+*.tmp.*
+$RECYCLE.BIN/
+.cache/
+
+# Environment
+.env
+.env.local
+
+# Testing
+testResults/
+

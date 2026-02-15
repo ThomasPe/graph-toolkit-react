@@ -1,0 +1,17 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:0-18",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "streetsidesoftware.code-spell-checker",
+        "nicolasparada.innerhtml",
+        "runem.lit-plugin",
+        "esbenp.prettier-vscode",
+        "rebornix.project-snippets",
+        "dbaeumer.vscode-eslint",
+        "mutantdino.resourcemonitor"
+      ]
+    }
+  },
+  "forwardPorts": [3000, 6006]
+}

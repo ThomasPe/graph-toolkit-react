@@ -1,0 +1,5 @@
+*-css.ts
+*.md
+**/dist
+**/generated
+**/lib

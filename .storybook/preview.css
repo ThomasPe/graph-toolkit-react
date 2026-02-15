@@ -1,0 +1,77 @@
+a {
+  text-decoration: underline !important;
+}
+
+html,
+body,
+#root,
+#storybook-root {
+  height: 100%;
+  width: 100%;
+  font-family: var(
+    --default-font-family,
+    'Segoe UI',
+    'Segoe UI Web (West European)',
+    'Segoe UI',
+    -apple-system,
+    BlinkMacSystemFont,
+    Roboto,
+    'Helvetica Neue',
+    sans-serif
+  );
+  padding: 0 !important;
+}
+
+.docs-img-centered {
+  display: block;
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body {
+  margin: 0;
+}
+
+
+/* fixes link color and attribute value colors in storybook inline code blocks */
+.sbdocs-a,
+.css-zj0253 * .token.attr-value {
+  color: #0360b9 !important;
+}
+
+/* fix attribute names in html rendering */
+.mtk4,
+.language-html .token.attr-name,
+span.token.script.language-javascript.literal-property.property {
+  color: #e50000 !important;
+}
+
+/* fix javascript class name */
+span.token.script.language-javascript.class-name {
+  color: #247b95;
+}
+
+/* fix number colors in monaco editor */
+.mtk7 {
+  color: #088155 !important;
+}
+
+.css-3ltsna:focus-visible {
+  outline: auto;
+}
+
+/* changes to eliminate padding/margins inside embedded stories in docs page */
+.docs-story > div {
+  padding: 0;
+  margin: 0;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.css-1wjen9k .innerZoomElementWrapper > div {
+  border: 0 !important;
+}
+
+/* responsive fixes for small screens */
+@media (width <= 768px) {
+}
