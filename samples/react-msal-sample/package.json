@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@azure/msal-browser": "^4.26.1",
+    "@azure/msal-browser": "^5.2.0",
     "@fluentui/react-components": "^9.72.6",
     "@fluentui/react-icons": "^2.0.276",
     "@medienstudio/graph-toolkit-react": "file:../..",
