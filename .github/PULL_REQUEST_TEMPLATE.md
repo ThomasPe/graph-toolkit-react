@@ -21,7 +21,6 @@ Closes # <!-- REQUIRED: Add the issue number (ex: #12) so the issue is automatic
 - [ ] All public APIs (classes, methods, etc) have been documented following the jsdoc syntax
 - [ ] Storybook stories have been added/updated where appropriate
 - [ ] Added appropriate documentation if needed
-- [ ] License header has been added to all new source files
 - [ ] Contains **NO** breaking changes
 
 ### Other information

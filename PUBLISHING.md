@@ -43,6 +43,22 @@ Current workflow publishes with:
 
 - `next` tag (alpha/beta channel)
 
+This repository is currently configured to use Changesets prerelease mode for the `next` channel.
+
+### Prerelease Mode (Changesets)
+
+Enable prerelease mode (once per prerelease cycle):
+
+```bash
+npx changeset pre enter next
+```
+
+Exit prerelease mode when ready to return to stable versioning:
+
+```bash
+npx changeset pre exit
+```
+
 Consumers can install prereleases with:
 
 ```bash
