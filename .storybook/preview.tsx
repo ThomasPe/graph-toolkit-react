@@ -3,27 +3,27 @@ import React from 'react';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 
 const preview: Preview = {
-    parameters: {
-        actions: { argTypesRegex: '^on[A-Z].*' },
-        controls: {
-            matchers: {
-                color: /(background|color)$/i,
-                date: /Date$/i,
-            },
-        },
-        options: {
-            storySort: {
-                order: ['Components', '*'],
-            },
-        },
+  parameters: {
+    actions: { argTypesRegex: '^on[A-Z].*' },
+    controls: {
+      matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/i,
+      },
     },
-    decorators: [
-        (Story) => (
-            <FluentProvider theme={webLightTheme}>
-                <Story />
-            </FluentProvider>
-        ),
-    ],
+    options: {
+      storySort: {
+        order: ['Components', '*'],
+      },
+    },
+  },
+  decorators: [
+    (Story) => (
+      <FluentProvider theme={webLightTheme}>
+        <Story />
+      </FluentProvider>
+    ),
+  ],
 };
 
 export default preview;

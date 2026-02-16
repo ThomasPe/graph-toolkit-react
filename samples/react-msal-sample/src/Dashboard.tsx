@@ -1,6 +1,14 @@
 import React from 'react';
 import { Person, useProvider } from '@devsym/graph-toolkit-react';
-import { Button, Title3, Subtitle1, Body1, Card, makeStyles, tokens } from '@fluentui/react-components';
+import {
+  Button,
+  Title3,
+  Subtitle1,
+  Body1,
+  Card,
+  makeStyles,
+  tokens,
+} from '@fluentui/react-components';
 import { SignOut24Regular, Person24Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
@@ -71,8 +79,9 @@ export const Dashboard: React.FC = () => {
 
         <div className={styles.info}>
           <Body1>
-            This sample demonstrates how to use the Person component with native MSAL browser authentication. The
-            Person component below displays your user information fetched from Microsoft Graph using the &quot;me&quot; query.
+            This sample demonstrates how to use the Person component with native MSAL browser
+            authentication. The Person component below displays your user information fetched from
+            Microsoft Graph using the &quot;me&quot; query.
           </Body1>
         </div>
 

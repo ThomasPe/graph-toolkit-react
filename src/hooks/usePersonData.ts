@@ -155,14 +155,11 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         isTimestampFresh(cached.presenceCachedAt, personCacheOptions.presenceTtlMs)
       );
       const hasFreshPhoto = Boolean(
-        cached?.photoCachedAt && isTimestampFresh(cached.photoCachedAt, personCacheOptions.photoTtlMs)
+        cached?.photoCachedAt &&
+        isTimestampFresh(cached.photoCachedAt, personCacheOptions.photoTtlMs)
       );
 
-      if (
-        hasFreshUser &&
-        (!fetchPresence || hasFreshPresence) &&
-        (!fetchPhoto || hasFreshPhoto)
-      ) {
+      if (hasFreshUser && (!fetchPresence || hasFreshPresence) && (!fetchPhoto || hasFreshPhoto)) {
         if (!cancelled) {
           setData({
             user: cached?.user ?? null,

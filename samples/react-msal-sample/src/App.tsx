@@ -38,9 +38,18 @@ function App() {
   return (
     <FluentProvider theme={webLightTheme}>
       {ready && provider ? (
-        <GraphProvider provider={provider}>{state === 'SignedIn' ? <Dashboard /> : <Login />}</GraphProvider>
+        <GraphProvider provider={provider}>
+          {state === 'SignedIn' ? <Dashboard /> : <Login />}
+        </GraphProvider>
       ) : (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+          }}
+        >
           Loading...
         </div>
       )}

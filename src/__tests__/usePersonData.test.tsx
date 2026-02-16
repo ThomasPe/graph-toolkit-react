@@ -3,11 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { User } from '@microsoft/microsoft-graph-types';
 import { usePersonData } from '../hooks/usePersonData';
 import { useGraphClient } from '../hooks/useGraphClient';
-import {
-  usePersonCacheOptions,
-  useProvider,
-  useProviderState,
-} from '../providers/ProviderContext';
+import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
 import * as personCache from '../utils/personCache';
 
 vi.mock('../hooks/useGraphClient', () => ({
