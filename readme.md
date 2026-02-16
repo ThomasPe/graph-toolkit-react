@@ -229,7 +229,7 @@ class MyAuthProvider implements IProvider {
 
 Explore all components interactively in our Storybook documentation:
 
-**[View Storybook →](https://thomaspe.github.io/microsoft-graph-toolkit/)** _(Deployed to GitHub Pages on every main branch update)_
+**[View Storybook →](https://thomaspe.github.io/graph-toolkit-react/)** _(Deployed to GitHub Pages on every main branch update)_
 
 Run locally:
 ```bash
