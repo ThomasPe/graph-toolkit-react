@@ -69,17 +69,14 @@ jobs:
             exit 1
           fi
 
-          echo "OIDC environment detected. Checking npm Trusted Publishing authentication..."
-          if ! npm whoami --registry https://registry.npmjs.org >/tmp/npm-whoami.out 2>/tmp/npm-whoami.err; then
-            echo "::error::npm authentication preflight failed. Trusted Publisher mapping is likely missing or mismatched."
-            echo "::error::Expected mapping: owner=ThomasPe, repo=graph-toolkit-react, workflow=.github/workflows/release.yml, branch=main."
-            echo "::error::Check npm package '@devsym/graph-toolkit-react' -> Settings -> Trusted publishers."
-            echo "--- npm whoami stderr ---"
-            sed -n '1,120p' /tmp/npm-whoami.err || true
-            exit 1
-          fi
-
-          echo "npm authenticated as: $(cat /tmp/npm-whoami.out)"
+          echo "OIDC environment detected."
+          echo "Repository: ${GITHUB_REPOSITORY}"
+          echo "Ref: ${GITHUB_REF}"
+          echo "Workflow ref: ${GITHUB_WORKFLOW_REF}"
+          echo "npm: $(npm -v)"
+          echo "registry: $(npm config get registry)"
+          echo "::notice::Skipping 'npm whoami' because it can return E401 before OIDC token exchange in Trusted Publishing flows."
+          echo "::notice::If publish fails, verify npm Trusted Publisher mapping: owner=ThomasPe, repo=graph-toolkit-react, workflow=.github/workflows/release.yml, branch=main."
 
       - name: Create release PR or publish
         uses: changesets/action@v1
