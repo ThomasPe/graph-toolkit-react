@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.0-next.2
+
+### Patch Changes
+
+- 2a00518: Initial alpha release preparation:
+  - adds native `MsalBrowserProvider` support in the package export surface
+  - updates docs for installation, scopes, and provider usage
+  - refreshes sample app guidance and setup documentation
+  - includes release metadata for publishing via Changesets
+
 All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
