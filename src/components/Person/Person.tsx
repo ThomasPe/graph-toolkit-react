@@ -81,8 +81,8 @@ export const Person: React.FC<PersonProps> = ({
 
   const defaultPresence = showPresence && graphPresence
     ? {
-        status: mapPresence(graphPresence.availability as string | null),
-      }
+      status: mapPresence(graphPresence.availability as string | null),
+    }
     : undefined;
 
   const resolvedPresence = personaProps.presence ?? defaultPresence;

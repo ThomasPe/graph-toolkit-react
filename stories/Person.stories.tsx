@@ -5,18 +5,18 @@ import { GraphProvider } from '../src/providers/ProviderContext';
 import { MockProvider } from '../src/providers/MockProvider';
 
 /**
- * The Person component displays user information from Microsoft Graph using Fluent UI Persona.
+ * Person stories are organized to mirror Fluent UI Persona story groups:
+ * - Default
+ * - Lines
+ * - Size
+ * - Text Alignment
+ * - Text Position
+ * - Presence
  *
- * Features:
- * - Multiple view modes (avatar, oneline, twolines, threelines, fourlines)
- * - Presence badge support
- * - Direct Fluent Persona prop passthrough
- * - Photo loading from Microsoft Graph
- * - Mock provider for development/testing
- * - Text alignment options (start, center)
- * - Text position options (before, after, below)
- * - Presence-only Persona support
- * - Full Fluent UI Persona configuration support
+ * Graph-specific differences are captured in dedicated stories:
+ * - Graph: Direct Data (personDetails)
+ * - Graph: Image Fallback (fetchImage=false)
+ * - Graph: Loading State
  */
 const meta = {
   title: 'Components/Person',
@@ -25,8 +25,13 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'Display a person with avatar, name, job title, and presence information from Microsoft Graph.',
+        component: `Display a person with avatar, text lines, and presence by composing Fluent UI Persona with Microsoft Graph data.
+
+Story organization follows Fluent Persona docs, while Graph-specific stories focus on:
+- identity resolution (userId / userPrincipalName / email)
+- direct data mode (personDetails)
+- Graph photo fetching and initials fallback
+- Graph presence mapping through showPresence`,
       },
     },
   },
@@ -103,16 +108,22 @@ const meta = {
       control: 'text',
       description: 'User Principal Name (UPN) to fetch from Microsoft Graph',
     },
+    email: {
+      control: 'text',
+      description: 'Email used as identity fallback to fetch from Microsoft Graph',
+    },
+    personDetails: {
+      control: 'object',
+      description: 'Provide details directly and skip Graph user fetch',
+    },
   },
 } satisfies Meta<typeof Person>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/**
- * Default person view with one line of text (name only)
- */
 export const Default: Story = {
+  name: 'Default',
   args: {
     userId: 'test-user',
     view: 'oneline',
@@ -122,65 +133,69 @@ export const Default: Story = {
   },
 };
 
-/**
- * Avatar only - no text displayed
- */
-export const AvatarOnly: Story = {
+export const Lines: Story = {
+  name: 'Lines',
+  render: (args) => (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <Person {...args} view="avatar" />
+      <Person {...args} view="oneline" />
+      <Person {...args} view="twolines" />
+      <Person {...args} view="threelines" />
+      <Person {...args} view="fourlines" />
+    </div>
+  ),
   args: {
     userId: 'test-user',
-    view: 'avatar',
-    size: 'large',
-  },
-};
-
-/**
- * One line view - displays name only
- */
-export const OneLine: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'oneline',
     size: 'medium',
+    showPresence: false,
   },
 };
 
-/**
- * Two lines view - displays name and job title
- */
-export const TwoLines: Story = {
+export const Size: Story = {
+  name: 'Size',
+  render: (args) => (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <Person {...args} size="extra-small" />
+      <Person {...args} size="small" />
+      <Person {...args} size="medium" />
+      <Person {...args} size="large" />
+      <Person {...args} size="extra-large" />
+      <Person {...args} size="huge" />
+    </div>
+  ),
   args: {
     userId: 'test-user',
     view: 'twolines',
+    showPresence: true,
     size: 'medium',
   },
 };
 
-/**
- * Three lines view - displays name, job title, and department
- */
-export const ThreeLines: Story = {
+export const TextAlignment: Story = {
+  name: 'Text Alignment',
+  render: (args) => (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <Person {...args} textAlignment="start" />
+      <Person {...args} textAlignment="center" />
+    </div>
+  ),
   args: {
     userId: 'test-user',
     view: 'threelines',
-    size: 'medium',
+    showPresence: true,
+    size: 'large',
   },
 };
 
-/**
- * Four lines view - adds office location/mail as quaternary text
- */
-export const FourLines: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'fourlines',
-    size: 'medium',
-  },
-};
-
-/**
- * With presence badge showing user availability
- */
-export const WithPresence: Story = {
+export const TextPosition: Story = {
+  name: 'Text Position',
+  render: (args) => (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <Person {...args} textPosition="after" />
+      <Person {...args} textPosition="before" />
+      <Person {...args} textPosition="below" textAlignment="center" />
+    </div>
+  ),
   args: {
     userId: 'test-user',
     view: 'twolines',
@@ -189,33 +204,14 @@ export const WithPresence: Story = {
   },
 };
 
-/**
- * Presence-only view from Fluent Persona API
- */
-export const PresenceOnly: Story = {
-  args: {
-    userId: 'test-user',
-    showPresence: true,
-    presenceOnly: true,
-    size: 'large',
-  },
-};
-
-/**
- * Small avatar size
- */
-export const SmallSize: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'oneline',
-    size: 'small',
-  },
-};
-
-/**
- * Large avatar size
- */
-export const LargeSize: Story = {
+export const Presence: Story = {
+  name: 'Presence',
+  render: (args) => (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <Person {...args} showPresence />
+      <Person {...args} showPresence presenceOnly />
+    </div>
+  ),
   args: {
     userId: 'test-user',
     view: 'twolines',
@@ -223,52 +219,34 @@ export const LargeSize: Story = {
   },
 };
 
-/**
- * Extra large avatar size
- */
-export const ExtraLargeSize: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'threelines',
-    size: 'extra-large',
-    showPresence: true,
-  },
-};
-
-/**
- * Using personDetails prop to provide data directly (no Graph fetch)
- */
-export const WithDirectData: Story = {
+export const GraphDirectData: Story = {
+  name: 'Graph: Direct Data',
   args: {
     personDetails: {
       displayName: 'John Doe',
       jobTitle: 'Software Engineer',
       department: 'Engineering',
+      officeLocation: 'Redmond',
       mail: 'john.doe@contoso.com',
     },
-    view: 'threelines',
+    view: 'fourlines',
     size: 'medium',
+    showPresence: false,
   },
 };
 
-/**
- * Clickable person card
- */
-export const Clickable: Story = {
+export const GraphImageFallback: Story = {
+  name: 'Graph: Image Fallback',
   args: {
     userId: 'test-user',
     view: 'twolines',
     size: 'medium',
-    onClick: () => {
-      alert('Clicked!');
-    },
+    fetchImage: false,
   },
 };
 
-/**
- * Loading state
- */
-export const Loading: Story = {
+export const GraphLoadingState: Story = {
+  name: 'Graph: Loading State',
   decorators: [
     (Story) => {
       // Use a provider that's not signed in to show loading
@@ -283,80 +261,6 @@ export const Loading: Story = {
   args: {
     userId: 'test-user',
     view: 'twolines',
-  },
-};
-
-/**
- * Text centered alignment
- */
-export const TextCentered: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'twolines',
-    size: 'large',
-    textAlignment: 'center',
-  },
-};
-
-/**
- * Text positioned before avatar
- */
-export const TextBefore: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'twolines',
     size: 'medium',
-    textPosition: 'before',
-  },
-};
-
-/**
- * Text positioned below avatar
- */
-export const TextBelow: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'threelines',
-    size: 'large',
-    textPosition: 'below',
-    textAlignment: 'center',
-  },
-};
-
-/**
- * Huge size token
- */
-export const HugeSize: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'twolines',
-    size: 'huge',
-    showPresence: true,
-  },
-};
-
-/**
- * Inline layout with text before
- */
-export const InlineReversed: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'oneline',
-    size: 'small',
-    textPosition: 'before',
-  },
-};
-
-/**
- * Card-like layout with centered text below
- */
-export const CardLayout: Story = {
-  args: {
-    userId: 'test-user',
-    view: 'threelines',
-    size: 'extra-large',
-    textPosition: 'below',
-    textAlignment: 'center',
-    showPresence: true,
   },
 };
