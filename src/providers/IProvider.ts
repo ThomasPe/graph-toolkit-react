@@ -2,11 +2,7 @@
  * Provider interface for Microsoft Graph authentication
  */
 
-export enum ProviderState {
-  Loading = 'Loading',
-  SignedOut = 'SignedOut',
-  SignedIn = 'SignedIn',
-}
+export type ProviderState = 'Loading' | 'SignedOut' | 'SignedIn';
 
 export interface IProvider {
   /**

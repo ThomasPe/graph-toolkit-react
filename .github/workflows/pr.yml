@@ -39,6 +39,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Install sample dependencies
+        run: npm ci --prefix samples/react-msal-sample
+
+      - name: Type check sample
+        run: npm --prefix samples/react-msal-sample exec tsc --noEmit
+
       - name: Test
         run: npm run test
 

@@ -89,9 +89,8 @@ export const Dashboard: React.FC = () => {
           <Person
             userId="me"
             view="threelines"
-            size="large"
+            avatarSize="large"
             showPresence={true}
-            personCardInteraction="hover"
           />
         </div>
 

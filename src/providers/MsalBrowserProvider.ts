@@ -15,7 +15,7 @@ export class MsalBrowserProvider implements IProvider {
   private readonly msalInstance: PublicClientApplication;
   private readonly defaultScopes: string[];
   private account: AccountInfo | null = null;
-  private state: ProviderState = ProviderState.Loading;
+  private state: ProviderState = 'Loading';
   private listeners: Array<() => void> = [];
 
   constructor(msalInstance: PublicClientApplication, defaultScopes: string[]) {
@@ -33,9 +33,9 @@ export class MsalBrowserProvider implements IProvider {
     this.account = active ?? accounts[0] ?? null;
     if (this.account) {
       this.msalInstance.setActiveAccount(this.account);
-      this.setState(ProviderState.SignedIn);
+      this.setState('SignedIn');
     } else {
-      this.setState(ProviderState.SignedOut);
+      this.setState('SignedOut');
     }
   }
 
@@ -48,14 +48,14 @@ export class MsalBrowserProvider implements IProvider {
       this.msalInstance.setActiveAccount(this.account);
     }
 
-    this.setState(ProviderState.SignedIn);
+    this.setState('SignedIn');
   }
 
   async logout(): Promise<void> {
     const account = this.msalInstance.getActiveAccount() ?? this.account ?? undefined;
     await this.msalInstance.logoutPopup({ account });
     this.account = null;
-    this.setState(ProviderState.SignedOut);
+    this.setState('SignedOut');
   }
 
   async getAccessToken(scopes?: string[]): Promise<string> {
