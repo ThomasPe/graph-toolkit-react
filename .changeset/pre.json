@@ -6,6 +6,7 @@
   },
   "changesets": [
     "first-alpha-release",
-    "funny-shrimps-happen"
+    "funny-shrimps-happen",
+    "red-cycles-flow"
   ]
 }
