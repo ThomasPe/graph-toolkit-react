@@ -70,6 +70,7 @@ import { Person } from '@devsym/graph-toolkit-react';
 ```
 
 
+<a id="getting-started"></a>
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -225,6 +226,7 @@ class MyAuthProvider implements IProvider {
 }
 ```
 
+<a id="storybook"></a>
 ## 📚 Storybook
 
 Explore all components interactively in our Storybook documentation:
@@ -315,6 +317,7 @@ stories/
 - Comprehensive test coverage
 - First stable release (1.0.0)
 
+<a id="contribute"></a>
 ## 🤝 Contribute
 
 This **community-driven project** provides React developers with components for Microsoft Graph. Contributions are welcome!
