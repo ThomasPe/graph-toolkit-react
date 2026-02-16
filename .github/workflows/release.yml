@@ -28,6 +28,12 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
+            - name: Print tool versions
+              run: |
+                  node -v
+                  npm -v
+                  npx changeset --version
+
             - name: Type check
               run: npm run type-check
 
