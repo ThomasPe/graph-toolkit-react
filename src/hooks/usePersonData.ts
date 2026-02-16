@@ -152,7 +152,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
       );
       const hasFreshPresence = Boolean(
         cached?.presenceCachedAt &&
-          isTimestampFresh(cached.presenceCachedAt, personCacheOptions.presenceTtlMs)
+        isTimestampFresh(cached.presenceCachedAt, personCacheOptions.presenceTtlMs)
       );
       const hasFreshPhoto = Boolean(
         cached?.photoCachedAt && isTimestampFresh(cached.photoCachedAt, personCacheOptions.photoTtlMs)
