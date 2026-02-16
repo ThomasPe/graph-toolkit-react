@@ -46,7 +46,7 @@ jobs:
                   title: "chore: release packages"
                   commit: "chore: release packages"
                   version: npm run version-packages
-                  publish: npm run publish-packages -- --tag next
+                  publish: npm run publish-packages
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
