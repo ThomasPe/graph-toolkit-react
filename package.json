@@ -1,5 +1,5 @@
 {
-  "name": "@medienstudio/graph-toolkit-react",
+  "name": "@devsym/graph-toolkit-react",
   "version": "0.1.0-alpha.1",
   "description": "React components for Microsoft Graph powered by Fluent UI",
   "main": "./dist/index.js",

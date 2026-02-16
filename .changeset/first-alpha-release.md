@@ -1,5 +1,5 @@
 ---
-"@medienstudio/graph-toolkit-react": patch
+"@devsym/graph-toolkit-react": patch
 ---
 
 Initial alpha release preparation:

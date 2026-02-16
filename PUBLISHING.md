@@ -62,7 +62,7 @@ npx changeset pre exit
 Consumers can install prereleases with:
 
 ```bash
-npm install @medienstudio/graph-toolkit-react@next
+npm install @devsym/graph-toolkit-react@next
 ```
 
 When ready for stable releases, update the workflow publish command from `--tag next` to `--tag latest`.

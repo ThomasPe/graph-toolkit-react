@@ -1,51 +1,51 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+    push:
+        branches: [main]
+    workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+    contents: write
+    pull-requests: write
+    id-token: write
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+    release:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: npm
-          registry-url: https://registry.npmjs.org
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+                  cache: npm
+                  registry-url: https://registry.npmjs.org
 
-      - name: Install dependencies
-        run: npm ci
+            - name: Install dependencies
+              run: npm ci
 
-      - name: Type check
-        run: npm run type-check
+            - name: Type check
+              run: npm run type-check
 
-      - name: Lint
-        run: npm run lint
+            - name: Lint
+              run: npm run lint
 
-      - name: Test
-        run: npm run test
+            - name: Test
+              run: npm run test
 
-      - name: Build
-        run: npm run build
+            - name: Build
+              run: npm run build
 
-      - name: Create release PR or publish
-        uses: changesets/action@v1
-        with:
-          title: 'chore: release packages'
-          commit: 'chore: release packages'
-          version: npm run version-packages
-          publish: npm run publish-packages -- --tag next
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+            - name: Create release PR or publish
+              uses: changesets/action@v1
+              with:
+                  title: "chore: release packages"
+                  commit: "chore: release packages"
+                  version: npm run version-packages
+                  publish: npm run publish-packages -- --tag next
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

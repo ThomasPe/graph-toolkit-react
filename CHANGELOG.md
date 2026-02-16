@@ -23,7 +23,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- Initial alpha release of `@medienstudio/graph-toolkit-react`.
+- Initial alpha release of `@devsym/graph-toolkit-react`.
 - `Person` component powered by Fluent UI.
 - Provider abstraction (`IProvider`) with `MockProvider` and `MsalBrowserProvider`.
 - React `GraphProvider` context and Graph hooks.

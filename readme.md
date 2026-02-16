@@ -43,12 +43,12 @@ Instead of maintaining the original web component approach, this fork:
 ## 📦 Package
 
 ```bash
-npm install @medienstudio/graph-toolkit-react
+npm install @devsym/graph-toolkit-react
 ```
 
 | Package | Version | Description |
 | ------- | ------- | ----------- |
-| `@medienstudio/graph-toolkit-react` | `0.1.0-alpha.1` | React components for Microsoft Graph powered by Fluent UI |
+| `@devsym/graph-toolkit-react` | `0.1.0-alpha.1` | React components for Microsoft Graph powered by Fluent UI |
 
 ## 🎨 Components
 
@@ -58,7 +58,7 @@ Currently available in alpha:
 A flexible component for displaying user information from Microsoft Graph.
 
 ```tsx
-import { Person } from '@medienstudio/graph-toolkit-react';
+import { Person } from '@devsym/graph-toolkit-react';
 
 <Person 
   userId="user@contoso.com"
@@ -85,7 +85,7 @@ import { Person } from '@medienstudio/graph-toolkit-react';
 ### Installation
 
 ```bash
-npm install --save @medienstudio/graph-toolkit-react
+npm install --save @devsym/graph-toolkit-react
 ```
 
 Also install required peer dependencies in your app if they are not already present:
@@ -106,7 +106,7 @@ If you only use `TeamsHostedProvider` (Teams-hosted app with consumer-managed Te
 
 ```tsx
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
-import { GraphProvider, MockProvider, Person } from '@medienstudio/graph-toolkit-react';
+import { GraphProvider, MockProvider, Person } from '@devsym/graph-toolkit-react';
 
 function App() {
   const provider = new MockProvider(); // Use MockProvider for development
@@ -139,7 +139,7 @@ import {
   MsalBrowserProvider,
   Person,
   ProviderState,
-} from '@medienstudio/graph-toolkit-react';
+} from '@devsym/graph-toolkit-react';
 
 const msal = new PublicClientApplication({
   auth: {
@@ -172,7 +172,7 @@ import {
   GraphProvider,
   Person,
   TeamsHostedProvider,
-} from '@medienstudio/graph-toolkit-react';
+} from '@devsym/graph-toolkit-react';
 import { authentication } from '@microsoft/teams-js';
 
 const exchangeForGraphToken = createBackendTokenExchange({
@@ -214,7 +214,7 @@ Use explicit mode selection in your app:
 | Load profile photo (`fetchImage`) | `User.Read` | Falls back to initials if photo is unavailable |
 
 ```tsx
-import { IProvider, ProviderState } from '@medienstudio/graph-toolkit-react';
+import { IProvider, ProviderState } from '@devsym/graph-toolkit-react';
 
 class MyAuthProvider implements IProvider {
   state = ProviderState.SignedOut;

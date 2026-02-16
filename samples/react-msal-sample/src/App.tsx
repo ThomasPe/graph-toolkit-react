@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
-import { GraphProvider, MsalBrowserProvider, ProviderState } from '@medienstudio/graph-toolkit-react';
+import { GraphProvider, MsalBrowserProvider, ProviderState } from '@devsym/graph-toolkit-react';
 import { PublicClientApplication } from '@azure/msal-browser';
 import { authConfig, msalConfig } from './authConfig';
 import { Login } from './Login';

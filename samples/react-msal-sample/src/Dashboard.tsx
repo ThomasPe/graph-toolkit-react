@@ -1,5 +1,5 @@
 import React from 'react';
-import { Person, useProvider } from '@medienstudio/graph-toolkit-react';
+import { Person, useProvider } from '@devsym/graph-toolkit-react';
 import { Button, Title3, Subtitle1, Body1, Card, makeStyles, tokens } from '@fluentui/react-components';
 import { SignOut24Regular, Person24Regular } from '@fluentui/react-icons';
 

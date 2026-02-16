@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Title2, Body1, Card, makeStyles, tokens } from '@fluentui/react-components';
 import { ShieldCheckmark24Regular } from '@fluentui/react-icons';
 import { authConfig } from './authConfig';
-import { useProvider } from '@medienstudio/graph-toolkit-react';
+import { useProvider } from '@devsym/graph-toolkit-react';
 
 const useStyles = makeStyles({
   container: {

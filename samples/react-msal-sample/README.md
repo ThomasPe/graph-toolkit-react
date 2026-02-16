@@ -4,7 +4,7 @@ This sample demonstrates browser-hosted authentication with `MsalBrowserProvider
 
 For Teams-hosted apps, use `TeamsHostedProvider` with consumer-managed TeamsJS login and backend token exchange as documented in the root [README](../../readme.md).
 
-This sample demonstrates how to use **@medienstudio/graph-toolkit-react** with MSAL (Microsoft Authentication Library) authentication to display user information using the Person component.
+This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (Microsoft Authentication Library) authentication to display user information using the Person component.
 
 ## Features
 
@@ -127,7 +127,7 @@ Ensure you selected **Single-page application** as the platform type, not "Web"
 2. Verify your client ID and tenant ID are correct
 3. Ensure you've granted the required scopes (see [Scopes by feature](../../readme.md#scopes-by-feature))
 
-### "Cannot find module '@medienstudio/graph-toolkit-react'"
+### "Cannot find module '@devsym/graph-toolkit-react'"
 
 The sample uses a local file reference. Make sure you've built the main library:
 
