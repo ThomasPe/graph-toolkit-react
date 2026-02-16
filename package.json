@@ -22,7 +22,7 @@
     "dev": "vite build --watch",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "publish-packages": "changeset publish --provenance",
+    "publish-packages": "changeset publish",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
