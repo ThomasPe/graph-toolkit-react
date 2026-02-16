@@ -59,19 +59,27 @@ export const Login: React.FC = () => {
       <Card className={styles.card}>
         <ShieldCheckmark24Regular className={styles.icon} />
         <Title2>Graph Toolkit React</Title2>
-        <Body1>Sign in with your Microsoft account to view your profile using the Person component.</Body1>
+        <Body1>
+          Sign in with your Microsoft account to view your profile using the Person component.
+        </Body1>
 
         <div className={styles.info}>
           <Body1 style={{ fontWeight: 600 }}>Configuration Required:</Body1>
           <Body1>
-            Before signing in, update the <code>authConfig.ts</code> file with your Azure AD application credentials:
+            Before signing in, update the <code>authConfig.ts</code> file with your Azure AD
+            application credentials:
           </Body1>
           <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
             <li>
-              <Body1>Client ID: <code>{authConfig.clientId === 'YOUR_CLIENT_ID_HERE' ? 'NOT SET' : 'SET'}</code></Body1>
+              <Body1>
+                Client ID:{' '}
+                <code>{authConfig.clientId === 'YOUR_CLIENT_ID_HERE' ? 'NOT SET' : 'SET'}</code>
+              </Body1>
             </li>
             <li>
-              <Body1>Authority: <code>{authConfig.authority}</code></Body1>
+              <Body1>
+                Authority: <code>{authConfig.authority}</code>
+              </Body1>
             </li>
           </ul>
         </div>
