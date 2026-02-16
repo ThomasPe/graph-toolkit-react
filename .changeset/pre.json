@@ -4,5 +4,8 @@
   "initialVersions": {
     "@devsym/graph-toolkit-react": "0.1.0-alpha.1"
   },
-  "changesets": ["first-alpha-release"]
+  "changesets": [
+    "first-alpha-release",
+    "funny-shrimps-happen"
+  ]
 }
