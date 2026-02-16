@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-next.3
+
+### Minor Changes
+
+- 694fbd7: Graph API caching for Person control
+
 ## 0.1.0-next.2
 
 ### Patch Changes
