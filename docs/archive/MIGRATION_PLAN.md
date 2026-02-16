@@ -306,7 +306,9 @@ export default preview;
 
 ```typescript
 // src/components/Person/Person.types.ts
-export interface PersonProps {
+import type { PersonaProps } from '@fluentui/react-components';
+
+export interface PersonProps extends PersonaProps {
   // Identity
   userId?: string;
   userPrincipalName?: string;
@@ -322,19 +324,15 @@ export interface PersonProps {
   };
   
   // Display options
-  view?: 'avatar' | 'oneline' | 'twolines' | 'threelines';
+  view?: 'avatar' | 'oneline' | 'twolines' | 'threelines' | 'fourlines';
   showPresence?: boolean;
-  avatarSize?: 'small' | 'medium' | 'large' | 'extra-large';
   
-  // Interaction
-  onClick?: (person: PersonDetails) => void;
-  showPersonCard?: boolean; // Future: hover card
-  
-  // Customization
+  // Fetch options
   fetchImage?: boolean;
-  className?: string;
 }
 ```
+
+Current implementation note: `Person` uses direct Fluent `PersonaProps` passthrough. Legacy compatibility props such as `avatarSize`, `numericSize`, `onPersonaClick`, and custom `onClick(person)` are removed.
 
 ### 4.2 Implementation Tasks
 
@@ -357,6 +355,7 @@ export interface PersonProps {
   - `oneline`: Avatar + display name
   - `twolines`: Avatar + name + job title
   - `threelines`: Avatar + name + job title + department
+  - `fourlines`: Avatar + name + job title + department + officeLocation/mail
 
 - [ ] Implement presence support
   - Fetch presence from Graph

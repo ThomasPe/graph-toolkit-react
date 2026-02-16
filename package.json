@@ -22,7 +22,7 @@
     "dev": "vite build --watch",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "publish-packages": "changeset publish --provenance",
+    "publish-packages": "changeset publish --tag next --provenance",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
@@ -44,7 +44,8 @@
   "author": "",
   "license": "MIT",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "next"
   },
   "peerDependencies": {
     "@azure/msal-browser": "^4.0.0 || ^5.0.0",

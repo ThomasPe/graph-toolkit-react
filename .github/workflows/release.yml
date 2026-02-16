@@ -46,6 +46,36 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Preflight Trusted Publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          echo "Package: ${PACKAGE_NAME}"
+
+          if [[ "${PACKAGE_NAME}" != @devsym/* ]]; then
+            echo "::error::Expected package scope '@devsym'. Found '${PACKAGE_NAME}'."
+            exit 1
+          fi
+
+          if [[ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" || -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ]]; then
+            echo "::error::OIDC environment is unavailable. Ensure workflow permissions include 'id-token: write'."
+            exit 1
+          fi
+
+          echo "OIDC environment detected. Checking npm Trusted Publishing authentication..."
+          if ! npm whoami --registry https://registry.npmjs.org >/tmp/npm-whoami.out 2>/tmp/npm-whoami.err; then
+            echo "::error::npm authentication preflight failed. Trusted Publisher mapping is likely missing or mismatched."
+            echo "::error::Expected mapping: owner=ThomasPe, repo=graph-toolkit-react, workflow=.github/workflows/release.yml, branch=main."
+            echo "::error::Check npm package '@devsym/graph-toolkit-react' -> Settings -> Trusted publishers."
+            echo "--- npm whoami stderr ---"
+            sed -n '1,120p' /tmp/npm-whoami.err || true
+            exit 1
+          fi
+
+          echo "npm authenticated as: $(cat /tmp/npm-whoami.out)"
+
       - name: Create release PR or publish
         uses: changesets/action@v1
         with:

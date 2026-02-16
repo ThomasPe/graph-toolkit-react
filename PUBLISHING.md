@@ -11,8 +11,9 @@ This repository uses [Changesets](https://github.com/changesets/changesets) for 
 ## One-time Setup
 
 1. Ensure npm publishing is enabled for the package owner.
-2. Add repository secret `NPM_TOKEN` with publish permission to npm.
+2. Configure npm **Trusted Publisher** for this package and this GitHub workflow.
 3. Confirm package name and access in `package.json`.
+4. Keep workflow permission `id-token: write` enabled.
 
 ## Day-to-day Workflow
 

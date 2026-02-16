@@ -89,7 +89,7 @@ export const Dashboard: React.FC = () => {
           <Person
             userId="me"
             view="threelines"
-            avatarSize="large"
+            size="large"
             showPresence={true}
           />
         </div>
