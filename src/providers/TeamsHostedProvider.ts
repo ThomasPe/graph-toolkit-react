@@ -91,7 +91,7 @@ export class TeamsHostedProvider implements IProvider {
     params: ExchangeForGraphTokenParams
   ) => Promise<string | ExchangedGraphToken>;
   private readonly refreshSkewMs: number;
-  private state: ProviderState = ProviderState.SignedOut;
+  private state: ProviderState = 'SignedOut';
   private listeners: StateListener[] = [];
   private readonly tokenCache = new Map<string, CachedToken>();
 
@@ -109,17 +109,17 @@ export class TeamsHostedProvider implements IProvider {
   async login(): Promise<void> {
     try {
       await this.getAccessToken();
-      this.setState(ProviderState.SignedIn);
+      this.setState('SignedIn');
     } catch (error) {
       this.clearCache();
-      this.setState(ProviderState.SignedOut);
+      this.setState('SignedOut');
       throw error;
     }
   }
 
   async logout(): Promise<void> {
     this.clearCache();
-    this.setState(ProviderState.SignedOut);
+    this.setState('SignedOut');
   }
 
   async getAccessToken(scopes?: string[]): Promise<string> {
@@ -143,7 +143,7 @@ export class TeamsHostedProvider implements IProvider {
 
     const normalized = this.normalizeExchangedToken(exchanged);
     this.tokenCache.set(cacheKey, normalized);
-    this.setState(ProviderState.SignedIn);
+    this.setState('SignedIn');
 
     return normalized.accessToken;
   }

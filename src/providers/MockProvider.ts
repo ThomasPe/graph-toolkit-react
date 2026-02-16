@@ -7,16 +7,16 @@ import { IProvider, ProviderState } from './IProvider';
 type StateListener = () => void;
 
 export class MockProvider implements IProvider {
-  private state: ProviderState = ProviderState.SignedOut;
+  private state: ProviderState = 'SignedOut';
   private listeners: StateListener[] = [];
   constructor(options?: { autoSignIn?: boolean; mockUserId?: string }) {
     if (options?.autoSignIn) {
-      this.state = ProviderState.SignedIn;
+      this.state = 'SignedIn';
     }
   }
 
   getAccessToken(): Promise<string> {
-    if (this.state !== ProviderState.SignedIn) {
+    if (this.state !== 'SignedIn') {
       return Promise.reject(new Error('Not signed in'));
     }
     // Return a dummy token string; callers should only use this in mock graph flows
@@ -24,12 +24,12 @@ export class MockProvider implements IProvider {
   }
 
   async login(): Promise<void> {
-    this.state = ProviderState.SignedIn;
+    this.state = 'SignedIn';
     this.emit();
   }
 
   async logout(): Promise<void> {
-    this.state = ProviderState.SignedOut;
+    this.state = 'SignedOut';
     this.emit();
   }
 

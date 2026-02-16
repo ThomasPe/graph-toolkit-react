@@ -218,7 +218,7 @@ Use explicit mode selection in your app:
 import { IProvider, ProviderState } from '@devsym/graph-toolkit-react';
 
 class MyAuthProvider implements IProvider {
-  state = ProviderState.SignedOut;
+  state: ProviderState = 'SignedOut';
   
   async login(): Promise<void> { /* ... */ }
   async logout(): Promise<void> { /* ... */ }

@@ -21,7 +21,7 @@ interface GraphProviderContextValue {
 
 const GraphProviderContext = createContext<GraphProviderContextValue>({
   provider: null,
-  state: ProviderState.Loading,
+  state: 'Loading',
   personCacheOptions: DEFAULT_PERSON_CACHE_OPTIONS,
 });
 
@@ -37,7 +37,7 @@ export const GraphProvider: React.FC<GraphProviderProps> = ({
   personCacheOptions,
 }) => {
   const getSnapshot = useCallback(
-    () => provider?.getState?.() ?? ProviderState.Loading,
+    () => provider?.getState?.() ?? 'Loading',
     [provider]
   );
 
