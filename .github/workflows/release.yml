@@ -46,11 +46,6 @@ jobs:
             - name: Build
               run: npm run build
 
-            - name: Verify npm authentication
-              run: npm whoami
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
             - name: Create release PR or publish
               uses: changesets/action@v1
               with:
@@ -60,4 +55,3 @@ jobs:
                   publish: npm run publish-packages
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
