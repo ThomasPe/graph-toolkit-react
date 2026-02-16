@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.4
+
+### Major Changes
+
+- 9fd6ca1: Migrate provider state typing from enum to Fluent UI style string literals with `ProviderState` as a string literal union.
+
 ## 0.1.0-next.3
 
 ### Minor Changes
