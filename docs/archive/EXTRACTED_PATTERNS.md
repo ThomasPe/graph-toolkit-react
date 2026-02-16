@@ -15,9 +15,11 @@
 **Display configuration:**
 - `view` - ViewType: `avatar` | `oneline` | `twolines` | `threelines` | `fourlines`
 - `showPresence` - boolean
-- `avatarSize` - Size variant
+- `avatarSize` - Size variant (historical mgt-person prop)
 - `avatarType` - `photo` | `initials`
 - `fetchImage` - boolean (default true)
+
+Current toolkit note: the React `Person` component now passes Fluent `PersonaProps` directly. Use `size` (Persona prop) instead of compatibility wrappers such as `avatarSize`/`numericSize`.
 
 **Interaction:**
 - `personCardInteraction` - Controls person card behavior

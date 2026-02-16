@@ -8,13 +8,14 @@ import { MockProvider } from '../src/providers/MockProvider';
  * The Person component displays user information from Microsoft Graph using Fluent UI Persona.
  *
  * Features:
- * - Multiple view modes (avatar, oneline, twolines, threelines)
+ * - Multiple view modes (avatar, oneline, twolines, threelines, fourlines)
  * - Presence badge support
- * - Customizable avatar size (preset or numeric)
+ * - Direct Fluent Persona prop passthrough
  * - Photo loading from Microsoft Graph
  * - Mock provider for development/testing
  * - Text alignment options (start, center)
  * - Text position options (before, after, below)
+ * - Presence-only Persona support
  * - Full Fluent UI Persona configuration support
  */
 const meta = {
@@ -43,25 +44,18 @@ const meta = {
   argTypes: {
     view: {
       control: 'select',
-      options: ['avatar', 'oneline', 'twolines', 'threelines'],
+      options: ['avatar', 'oneline', 'twolines', 'threelines', 'fourlines'],
       description: 'Display mode for the person component',
       table: {
         defaultValue: { summary: 'oneline' },
       },
     },
-    avatarSize: {
+    size: {
       control: 'select',
-      options: ['small', 'medium', 'large', 'extra-large'],
-      description: 'Size of the avatar',
+      options: ['extra-small', 'small', 'medium', 'large', 'extra-large', 'huge'],
+      description: 'Fluent UI Persona size token',
       table: {
         defaultValue: { summary: 'medium' },
-      },
-    },
-    numericSize: {
-      control: 'number',
-      description: 'Numeric size of the avatar (overrides avatarSize if provided)',
-      table: {
-        defaultValue: { summary: 'undefined' },
       },
     },
     textAlignment: {
@@ -83,6 +77,13 @@ const meta = {
     showPresence: {
       control: 'boolean',
       description: 'Show presence badge on avatar',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    presenceOnly: {
+      control: 'boolean',
+      description: 'Render PresenceBadge only instead of avatar',
       table: {
         defaultValue: { summary: 'false' },
       },
@@ -116,7 +117,7 @@ export const Default: Story = {
     userId: 'test-user',
     view: 'oneline',
     showPresence: false,
-    avatarSize: 'medium',
+    size: 'medium',
     fetchImage: true,
   },
 };
@@ -128,7 +129,7 @@ export const AvatarOnly: Story = {
   args: {
     userId: 'test-user',
     view: 'avatar',
-    avatarSize: 'large',
+    size: 'large',
   },
 };
 
@@ -139,7 +140,7 @@ export const OneLine: Story = {
   args: {
     userId: 'test-user',
     view: 'oneline',
-    avatarSize: 'medium',
+    size: 'medium',
   },
 };
 
@@ -150,7 +151,7 @@ export const TwoLines: Story = {
   args: {
     userId: 'test-user',
     view: 'twolines',
-    avatarSize: 'medium',
+    size: 'medium',
   },
 };
 
@@ -161,7 +162,18 @@ export const ThreeLines: Story = {
   args: {
     userId: 'test-user',
     view: 'threelines',
-    avatarSize: 'medium',
+    size: 'medium',
+  },
+};
+
+/**
+ * Four lines view - adds office location/mail as quaternary text
+ */
+export const FourLines: Story = {
+  args: {
+    userId: 'test-user',
+    view: 'fourlines',
+    size: 'medium',
   },
 };
 
@@ -173,7 +185,19 @@ export const WithPresence: Story = {
     userId: 'test-user',
     view: 'twolines',
     showPresence: true,
-    avatarSize: 'medium',
+    size: 'medium',
+  },
+};
+
+/**
+ * Presence-only view from Fluent Persona API
+ */
+export const PresenceOnly: Story = {
+  args: {
+    userId: 'test-user',
+    showPresence: true,
+    presenceOnly: true,
+    size: 'large',
   },
 };
 
@@ -184,7 +208,7 @@ export const SmallSize: Story = {
   args: {
     userId: 'test-user',
     view: 'oneline',
-    avatarSize: 'small',
+    size: 'small',
   },
 };
 
@@ -195,7 +219,7 @@ export const LargeSize: Story = {
   args: {
     userId: 'test-user',
     view: 'twolines',
-    avatarSize: 'large',
+    size: 'large',
   },
 };
 
@@ -206,7 +230,7 @@ export const ExtraLargeSize: Story = {
   args: {
     userId: 'test-user',
     view: 'threelines',
-    avatarSize: 'extra-large',
+    size: 'extra-large',
     showPresence: true,
   },
 };
@@ -223,7 +247,7 @@ export const WithDirectData: Story = {
       mail: 'john.doe@contoso.com',
     },
     view: 'threelines',
-    avatarSize: 'medium',
+    size: 'medium',
   },
 };
 
@@ -234,9 +258,9 @@ export const Clickable: Story = {
   args: {
     userId: 'test-user',
     view: 'twolines',
-    avatarSize: 'medium',
-    onClick: (person) => {
-      alert(`Clicked on ${person.displayName}`);
+    size: 'medium',
+    onClick: () => {
+      alert('Clicked!');
     },
   },
 };
@@ -269,7 +293,7 @@ export const TextCentered: Story = {
   args: {
     userId: 'test-user',
     view: 'twolines',
-    avatarSize: 'large',
+    size: 'large',
     textAlignment: 'center',
   },
 };
@@ -281,7 +305,7 @@ export const TextBefore: Story = {
   args: {
     userId: 'test-user',
     view: 'twolines',
-    avatarSize: 'medium',
+    size: 'medium',
     textPosition: 'before',
   },
 };
@@ -293,20 +317,20 @@ export const TextBelow: Story = {
   args: {
     userId: 'test-user',
     view: 'threelines',
-    avatarSize: 'large',
+    size: 'large',
     textPosition: 'below',
     textAlignment: 'center',
   },
 };
 
 /**
- * Custom numeric size
+ * Huge size token
  */
-export const CustomNumericSize: Story = {
+export const HugeSize: Story = {
   args: {
     userId: 'test-user',
     view: 'twolines',
-    numericSize: 72,
+    size: 'huge',
     showPresence: true,
   },
 };
@@ -318,7 +342,7 @@ export const InlineReversed: Story = {
   args: {
     userId: 'test-user',
     view: 'oneline',
-    avatarSize: 'small',
+    size: 'small',
     textPosition: 'before',
   },
 };
@@ -330,7 +354,7 @@ export const CardLayout: Story = {
   args: {
     userId: 'test-user',
     view: 'threelines',
-    avatarSize: 'extra-large',
+    size: 'extra-large',
     textPosition: 'below',
     textAlignment: 'center',
     showPresence: true,

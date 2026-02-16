@@ -9,25 +9,6 @@ import { getInitials } from '../../utils/graph';
 import { PersonProps } from './Person.types';
 
 /**
- * Map component size to Fluent UI Persona size
- */
-const mapSize = (
-  size?: string
-): 'extra-small' | 'small' | 'medium' | 'large' | 'extra-large' | 'huge' => {
-  switch (size) {
-    case 'small':
-      return 'small';
-    case 'large':
-      return 'large';
-    case 'extra-large':
-      return 'extra-large';
-    case 'medium':
-    default:
-      return 'medium';
-  }
-};
-
-/**
  * Map Graph presence to Fluent UI presence status
  */
 const mapPresence = (availability?: string | null): PresenceBadgeStatus => {
@@ -56,17 +37,11 @@ export const Person: React.FC<PersonProps> = ({
   personDetails,
   view = 'oneline',
   showPresence = false,
-  avatarSize = 'medium',
-  textAlignment,
-  textPosition,
-  numericSize,
   fetchImage = true,
-  onClick,
-  className,
-  style,
+  ...personaProps
 }) => {
   // Fetch data if not provided directly
-  const { user, presence, photoUrl, loading } = usePersonData({
+  const { user, presence: graphPresence, photoUrl, loading } = usePersonData({
     userId: personDetails ? undefined : userId || userPrincipalName || email,
     fetchPresence: showPresence,
     fetchPhoto: fetchImage,
@@ -74,17 +49,12 @@ export const Person: React.FC<PersonProps> = ({
 
   // Use provided details or fetched user
   const person = personDetails || user;
-  const size = (numericSize ?? mapSize(avatarSize)) as React.ComponentProps<typeof Persona>['size'];
 
   if (loading) {
     return (
       <Persona
-        size={size}
-        name="Loading..."
-        textAlignment={textAlignment}
-        textPosition={textPosition}
-        className={className}
-        style={style}
+        {...personaProps}
+        name={personaProps.name ?? 'Loading...'}
       />
     );
   }
@@ -96,44 +66,50 @@ export const Person: React.FC<PersonProps> = ({
   const displayName = person.displayName || 'Unknown User';
   const initials = getInitials(displayName);
 
-  // Build persona props based on view
-  const personaProps: React.ComponentProps<typeof Persona> = {
-    size,
-    name: displayName,
-    textAlignment,
-    textPosition,
-    avatar: {
-      image: photoUrl ? { src: photoUrl } : undefined,
-      initials: photoUrl ? undefined : initials,
-    },
-    className,
-    style,
+  const defaultSecondaryText =
+    view !== 'avatar' && (view === 'twolines' || view === 'threelines' || view === 'fourlines')
+      ? person.jobTitle ?? undefined
+      : undefined;
+  const defaultTertiaryText =
+    view !== 'avatar' && (view === 'threelines' || view === 'fourlines')
+      ? person.department ?? undefined
+      : undefined;
+  const defaultQuaternaryText =
+    view !== 'avatar' && view === 'fourlines'
+      ? person.officeLocation ?? person.mail ?? undefined
+      : undefined;
+
+  const defaultPresence = showPresence && graphPresence
+    ? {
+        status: mapPresence(graphPresence.availability as string | null),
+      }
+    : undefined;
+
+  const resolvedPresence = personaProps.presence ?? defaultPresence;
+
+  const resolvedAvatar = personaProps.avatar ?? {
+    image: photoUrl ? { src: photoUrl } : undefined,
+    initials: photoUrl ? undefined : initials,
   };
 
-  if (showPresence && presence) {
-    personaProps.presence = {
-      status: mapPresence(presence.availability as string | null),
-    };
-  }
+  const resolvedName = personaProps.name ?? displayName;
 
-  // Only show secondary/tertiary text for non-avatar views
-  if (view !== 'avatar') {
-    if (view === 'twolines' || view === 'threelines') {
-      personaProps.secondaryText = person.jobTitle ?? undefined;
-    }
+  const resolvedSecondaryText =
+    personaProps.secondaryText ?? defaultSecondaryText;
+  const resolvedTertiaryText =
+    personaProps.tertiaryText ?? defaultTertiaryText;
+  const resolvedQuaternaryText =
+    personaProps.quaternaryText ?? defaultQuaternaryText;
 
-    if (view === 'threelines') {
-      personaProps.tertiaryText = person.department ?? undefined;
-    }
-  }
-
-  if (onClick) {
-    personaProps.onClick = () => {
-      if (user) {
-        onClick(user);
-      }
-    };
-  }
-
-  return <Persona {...personaProps} />;
+  return (
+    <Persona
+      {...personaProps}
+      name={resolvedName}
+      avatar={resolvedAvatar}
+      presence={resolvedPresence}
+      secondaryText={resolvedSecondaryText}
+      tertiaryText={resolvedTertiaryText}
+      quaternaryText={resolvedQuaternaryText}
+    />
+  );
 };

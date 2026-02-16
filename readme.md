@@ -62,12 +62,16 @@ import { Person } from '@devsym/graph-toolkit-react';
 
 <Person 
   userId="user@contoso.com"
-  view="twoLines"
+  view="twolines"
   showPresence
+  presenceOnly={false}
+  size="large"
   textAlignment="center"
-  onClick={() => console.log('Clicked!')}
+  onClick={() => console.log('Persona clicked!')}
 />
 ```
+
+`Person` supports Fluent UI Persona props directly.
 
 
 <a id="getting-started"></a>
@@ -115,7 +119,7 @@ function App() {
   return (
     <FluentProvider theme={webLightTheme}>
       <GraphProvider provider={provider}>
-        <Person userId="AdeleV@contoso.com" view="twoLines" showPresence />
+        <Person userId="AdeleV@contoso.com" view="twolines" showPresence />
       </GraphProvider>
     </FluentProvider>
   );
