@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- 6bea8c4: Add agent-focused usage documentation (`AGENTS.md`) and link it from the main README. Include `AGENTS.md` in published package files so downstream coding agents can consume scenario-based guidance.
+
+  Add a new migration guide at `docs/MGT_MIGRATION.md` with a general MGT-to-Graph-Toolkit-React path and a dedicated Teams migration section, and link it from the README.
+
 ## 1.0.0-next.5
 
 ### Major Changes
