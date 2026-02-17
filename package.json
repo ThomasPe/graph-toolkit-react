@@ -43,6 +43,10 @@
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThomasPe/graph-toolkit-react"
+  },
   "publishConfig": {
     "access": "public",
     "tag": "next"
