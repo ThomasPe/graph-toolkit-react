@@ -66,7 +66,7 @@ Consumers can install prereleases with:
 npm install @devsym/graph-toolkit-react@next
 ```
 
-When ready for stable releases, update the workflow publish command from `--tag next` to `--tag latest`.
+When ready for stable releases, exit prerelease mode (`npx changeset pre exit`) and switch `publishConfig.tag` to `latest`.
 
 ## Manual Commands (maintainers)
 
@@ -74,7 +74,7 @@ Use these only for local validation, not routine publishing:
 
 ```bash
 npm run version-packages
-npm run publish-packages -- --tag next
+npm run publish-packages
 ```
 
 ## Best Practices
