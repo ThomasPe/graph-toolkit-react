@@ -13,6 +13,8 @@
 
 <h3 align="center">
   <a href="#getting-started">Get Started</a> • 
+  <a href="#migration-from-mgt">Migration</a> • 
+  <a href="#agent-quick-reference">Agent Quick Reference</a> • 
   <a href="#storybook">Storybook</a> • 
   <a href="#contribute">Contribute</a>
 </h3>
@@ -49,6 +51,32 @@ npm install @devsym/graph-toolkit-react
 | Package | Version | Description |
 | ------- | ------- | ----------- |
 | `@devsym/graph-toolkit-react` | `0.1.0-alpha.1` | React components for Microsoft Graph powered by Fluent UI |
+
+<a id="migration-from-mgt"></a>
+## 🔄 Migration from MGT
+
+For migration from Microsoft Graph Toolkit (including Teams-hosted scenarios), use [`docs/MGT_MIGRATION.md`](./docs/MGT_MIGRATION.md).
+
+The guide includes:
+
+- Concept mapping (MGT patterns to this package)
+- Step-by-step migration checklist
+- Teams-specific migration section (`TeamsHostedProvider` + backend token exchange)
+- Common migration pitfalls and validation checklist
+
+<a id="agent-quick-reference"></a>
+## 🤖 Agent Quick Reference
+
+If you are using a coding agent (Copilot/Codex/Claude/etc.), use the scenario-first reference in [`AGENTS.md`](./AGENTS.md).
+
+It includes:
+
+- Provider decision matrix by hosting scenario
+- Minimal copy-ready snippets for `MockProvider`, `MsalBrowserProvider`, `TeamsHostedProvider`, and custom `IProvider`
+- Scopes-by-feature mapping
+- Common failures and exact remediation steps
+
+For end-to-end browser-hosted setup with MSAL, also see [`samples/react-msal-sample/README.md`](./samples/react-msal-sample/README.md).
 
 ## 🎨 Components
 
