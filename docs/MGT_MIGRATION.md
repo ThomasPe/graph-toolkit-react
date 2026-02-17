@@ -12,7 +12,7 @@ This project is a React-first library with Fluent UI v9 components and a provide
 
 ## Migration at a glance
 
-1. Replace MGT components with React components from this package (for now, primarily `Person`).
+1. Replace MGT components with React components from this package.
 2. Replace MGT provider setup with one package provider (`MockProvider`, `MsalBrowserProvider`, `TeamsHostedProvider`, or custom `IProvider`).
 3. Wrap your app with `GraphProvider`.
 4. Map required Graph scopes by feature (`User.Read`, `Presence.Read`, etc.).
