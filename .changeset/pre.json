@@ -5,6 +5,7 @@
     "@devsym/graph-toolkit-react": "0.1.0-alpha.1"
   },
   "changesets": [
+    "bright-horses-end",
     "few-cobras-smell",
     "first-alpha-release",
     "funny-shrimps-happen",
