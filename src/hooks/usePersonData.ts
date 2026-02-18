@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { User, Presence } from '@microsoft/microsoft-graph-types';
 import { useGraphClient } from './useGraphClient';
 import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
-import { MockProvider } from '../providers/MockProvider';
+import { isPersonDataProvider } from '../providers/IPersonDataProvider';
 import {
   getPersonCacheKey,
   isTimestampFresh,
@@ -79,31 +79,20 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
     let cancelled = false;
 
     const fetchData = async () => {
-      if (provider instanceof MockProvider) {
-        // Return static mock data without calling Graph
-        const mockUser: User = {
-          id: '00000000-0000-0000-0000-000000000000',
-          displayName: 'Adele Vance',
-          userPrincipalName: 'adelev@contoso.com',
-          jobTitle: 'Product Manager',
-          department: 'Marketing',
-          officeLocation: '19/3106',
-          mail: 'adelev@contoso.com',
-        } as User;
-        const mockPresence: Presence = {
-          availability: 'Available',
-          activity: 'Available',
-          id: mockUser.id!,
-          odataType: '#microsoft.graph.presence',
-        } as unknown as Presence;
-        const sampleAvatarUrl =
-          'https://ui-avatars.com/api/?name=Adele+Vance&background=0D8ABC&color=ffffff';
+      const identifier = userId || userPrincipalName;
+
+      if (isPersonDataProvider(provider)) {
+        const providerData = await provider.getPersonData({
+          identifier,
+          fetchPresence,
+          fetchPhoto,
+        });
 
         if (!cancelled) {
           setData({
-            user: mockUser,
-            presence: fetchPresence ? mockPresence : null,
-            photoUrl: fetchPhoto ? sampleAvatarUrl : null,
+            user: providerData.user,
+            presence: providerData.presence,
+            photoUrl: providerData.photoUrl,
             loading: false,
             error: null,
           });
@@ -131,7 +120,6 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         return;
       }
 
-      const identifier = userId || userPrincipalName;
       if (!identifier) {
         if (!cancelled) {
           setData({
@@ -181,7 +169,6 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         let didFetchPresence = false;
         let didFetchPhoto = false;
 
-        // Fetch user (`/me` works with User.Read; `/users/{id}` may require broader scopes)
         let user: User | null = hasFreshUser ? (cached?.user ?? null) : null;
 
         if (!user) {
@@ -197,7 +184,6 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         let presence: Presence | null = null;
         let photoUrl: string | null = null;
 
-        // Fetch presence if requested
         if (fetchPresence) {
           if (hasFreshPresence) {
             presence = cached?.presence ?? null;
@@ -213,7 +199,6 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
           }
         }
 
-        // Fetch photo if requested
         if (fetchPhoto) {
           if (hasFreshPhoto) {
             photoUrl = cached?.photoUrl ?? null;

@@ -9,6 +9,7 @@ export * from './components/Person';
 
 // Providers
 export * from './providers/IProvider';
+export * from './providers/IPersonDataProvider';
 export * from './providers/ProviderContext';
 export * from './providers/MockProvider';
 export * from './providers/MsalBrowserProvider';
