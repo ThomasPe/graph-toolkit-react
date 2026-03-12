@@ -2,13 +2,8 @@
  * Native MSAL browser provider for Graph Toolkit React
  */
 
-import {
-  AccountInfo,
-  IPublicClientApplication,
-  InteractionRequiredAuthError,
-  PopupRequest,
-  SilentRequest,
-} from '@azure/msal-browser';
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
+import type { AccountInfo, IPublicClientApplication, PopupRequest, SilentRequest } from '@azure/msal-browser';
 import { IProvider, ProviderState } from './IProvider';
 
 export class MsalBrowserProvider implements IProvider {
