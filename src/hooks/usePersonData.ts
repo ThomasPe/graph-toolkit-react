@@ -145,7 +145,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         return;
       }
 
-  const cacheKey = getPersonCacheKey(identifier);
+      const cacheKey = getPersonCacheKey(identifier);
       const cached = personCacheOptions.enabled ? await readPersonCache(cacheKey) : null;
       const hasFreshUser = Boolean(
         cached?.user && isTimestampFresh(cached.userCachedAt, personCacheOptions.userTtlMs)
