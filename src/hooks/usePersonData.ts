@@ -28,7 +28,18 @@ export interface UsePersonDataOptions {
   userPrincipalName?: string;
   fetchPresence?: boolean;
   fetchPhoto?: boolean;
+  selectFields?: string[];
 }
+
+const DEFAULT_USER_SELECT_FIELDS = [
+  'id',
+  'displayName',
+  'jobTitle',
+  'mail',
+  'department',
+  'officeLocation',
+  'userPrincipalName',
+];
 
 const photoResponseToDataUrl = async (photoResponse: unknown): Promise<string | null> => {
   if (!photoResponse) {
@@ -66,7 +77,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
   const provider = useProvider();
   const providerState = useProviderState();
   const personCacheOptions = usePersonCacheOptions();
-  const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true } = options;
+  const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true, selectFields = [] } = options;
   const [data, setData] = useState<PersonData>({
     user: null,
     presence: null,
@@ -146,6 +157,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
       }
 
       const cacheKey = getPersonCacheKey(identifier);
+      const resolvedSelectFields = [...new Set([...DEFAULT_USER_SELECT_FIELDS, ...selectFields])].join(',');
       const cached = personCacheOptions.enabled ? await readPersonCache(cacheKey) : null;
       const hasFreshUser = Boolean(
         cached?.user && isTimestampFresh(cached.userCachedAt, personCacheOptions.userTtlMs)
@@ -187,7 +199,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         if (!user) {
           user = (await graphClient
             .api(isCurrentUserQuery ? '/me' : `/users/${identifier}`)
-            .select('id,displayName,jobTitle,mail,department,officeLocation,userPrincipalName')
+            .select(resolvedSelectFields)
             .get()) as User;
           didFetchUser = true;
         }
@@ -284,16 +296,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
     return () => {
       cancelled = true;
     };
-  }, [
-    graphClient,
-    provider,
-    providerState,
-    userId,
-    userPrincipalName,
-    fetchPresence,
-    fetchPhoto,
-    personCacheOptions,
-  ]);
+  }, [graphClient, provider, providerState, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, selectFields]);
 
   return data;
 };

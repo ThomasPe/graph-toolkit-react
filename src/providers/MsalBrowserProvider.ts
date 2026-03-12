@@ -4,21 +4,21 @@
 
 import {
   AccountInfo,
+  IPublicClientApplication,
   InteractionRequiredAuthError,
   PopupRequest,
-  PublicClientApplication,
   SilentRequest,
 } from '@azure/msal-browser';
 import { IProvider, ProviderState } from './IProvider';
 
 export class MsalBrowserProvider implements IProvider {
-  private readonly msalInstance: PublicClientApplication;
+  private readonly msalInstance: IPublicClientApplication;
   private readonly defaultScopes: string[];
   private account: AccountInfo | null = null;
   private state: ProviderState = 'Loading';
   private listeners: Array<() => void> = [];
 
-  constructor(msalInstance: PublicClientApplication, defaultScopes: string[]) {
+  constructor(msalInstance: IPublicClientApplication, defaultScopes: string[]) {
     this.msalInstance = msalInstance;
     this.defaultScopes = defaultScopes;
   }

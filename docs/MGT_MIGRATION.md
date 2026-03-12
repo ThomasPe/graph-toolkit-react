@@ -24,6 +24,8 @@ This project is a React-first library with Fluent UI v9 components and a provide
 | --- | --- |
 | Global provider state | App-level provider instance passed to `GraphProvider` |
 | `mgt-person` / MGT person UI | `Person` React component |
+| `line1-property` ... `line4-property` | `line1Property` ... `line4Property` on `Person` |
+| `mgt-person` line templates | `renderLine1` ... `renderLine4` render callbacks |
 | Provider configured outside React tree | Provider explicitly created in app code |
 | Implicit token usage in MGT elements | Token access encapsulated by provider implementation |
 
@@ -79,6 +81,25 @@ export function App() {
 - Presence badge behavior is correct when `Presence.Read` is granted/missing
 - Photo fallback to initials is acceptable
 - Sign-in and sign-out paths work for your host environment
+
+### MGT line customization parity
+
+If you used `line1-property` through `line4-property` in MGT, use `line1Property` through `line4Property` on `Person`.
+Comma-separated fallbacks are supported, for example `line2Property="mail,userPrincipalName"`.
+Presence pseudo-fields such as `presenceAvailability` and `presenceActivity` are also supported.
+
+If you used MGT line templates, replace them with React render callbacks:
+
+```tsx
+<Person
+  userId="me"
+  view="fourlines"
+  renderLine1={({ text }) => <span>Name: {text}</span>}
+  renderLine2={({ text }) => <span>Role: {text}</span>}
+  renderLine3={({ text }) => <span>Org: {text}</span>}
+  renderLine4={({ text }) => <span>Location: {text}</span>}
+/>
+```
 
 ## Teams migration (specific guidance)
 

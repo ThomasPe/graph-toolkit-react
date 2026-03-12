@@ -31,7 +31,8 @@ Story organization follows Fluent Persona docs, while Graph-specific stories foc
 - identity resolution (userId / userPrincipalName / email)
 - direct data mode (personDetails)
 - Graph photo fetching and initials fallback
-- Graph presence mapping through showPresence`,
+- Graph presence mapping through showPresence
+- MGT-style line property mapping and render overrides`,
       },
     },
   },
@@ -115,6 +116,38 @@ Story organization follows Fluent Persona docs, while Graph-specific stories foc
     personDetails: {
       control: 'object',
       description: 'Provide details directly and skip Graph user fetch',
+    },
+    line1Property: {
+      control: 'text',
+      description: 'MGT-style property name for line 1. Supports comma-separated fallbacks.',
+    },
+    line2Property: {
+      control: 'text',
+      description: 'MGT-style property name for line 2. Supports comma-separated fallbacks.',
+    },
+    line3Property: {
+      control: 'text',
+      description: 'MGT-style property name for line 3. Supports comma-separated fallbacks.',
+    },
+    line4Property: {
+      control: 'text',
+      description: 'MGT-style property name for line 4. Supports comma-separated fallbacks.',
+    },
+    renderLine1: {
+      control: false,
+      description: 'React render callback for line 1.',
+    },
+    renderLine2: {
+      control: false,
+      description: 'React render callback for line 2.',
+    },
+    renderLine3: {
+      control: false,
+      description: 'React render callback for line 3.',
+    },
+    renderLine4: {
+      control: false,
+      description: 'React render callback for line 4.',
     },
   },
 } satisfies Meta<typeof Person>;
@@ -232,6 +265,36 @@ export const GraphDirectData: Story = {
     view: 'fourlines',
     size: 'medium',
     showPresence: false,
+  },
+};
+
+export const GraphLineProperties: Story = {
+  name: 'Graph: Line Properties',
+  args: {
+    userId: 'test-user',
+    view: 'threelines',
+    line1Property: 'givenName',
+    line2Property: 'mail,userPrincipalName',
+    line3Property: 'presenceAvailability',
+    size: 'medium',
+  },
+};
+
+export const GraphRenderedLines: Story = {
+  name: 'Graph: Rendered Lines',
+  args: {
+    personDetails: {
+      displayName: 'Megan Bowen',
+      jobTitle: 'CEO',
+      department: 'Leadership',
+      officeLocation: 'Seattle',
+    },
+    view: 'fourlines',
+    renderLine1: ({ text }) => <span>Name: {text}</span>,
+    renderLine2: ({ text }) => <span>Role: {text}</span>,
+    renderLine3: ({ text }) => <span>Org: {text}</span>,
+    renderLine4: ({ text }) => <span>Location: {text}</span>,
+    size: 'medium',
   },
 };
 
