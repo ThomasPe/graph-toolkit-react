@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.7
+
+### Patch Changes
+
+- 9533703: Revert MockProvider person photo mock to use the external `ui-avatars.com` URL avatar for now, replacing the bundled base64 data URL image.
+
 ## 1.0.0-next.6
 
 ### Patch Changes
