@@ -77,7 +77,8 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
   const provider = useProvider();
   const providerState = useProviderState();
   const personCacheOptions = usePersonCacheOptions();
-  const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true, selectFields = [] } = options;
+  const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true, selectFields } = options;
+  const resolvedSelectFields = [...new Set([...DEFAULT_USER_SELECT_FIELDS, ...(selectFields ?? [])])].join(',');
   const [data, setData] = useState<PersonData>({
     user: null,
     presence: null,
@@ -144,8 +145,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         return;
       }
 
-      const cacheKey = getPersonCacheKey(identifier);
-      const resolvedSelectFields = [...new Set([...DEFAULT_USER_SELECT_FIELDS, ...selectFields])].join(',');
+  const cacheKey = getPersonCacheKey(identifier);
       const cached = personCacheOptions.enabled ? await readPersonCache(cacheKey) : null;
       const hasFreshUser = Boolean(
         cached?.user && isTimestampFresh(cached.userCachedAt, personCacheOptions.userTtlMs)
@@ -281,7 +281,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
     return () => {
       cancelled = true;
     };
-  }, [graphClient, provider, providerState, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, selectFields]);
+  }, [graphClient, provider, providerState, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, resolvedSelectFields]);
 
   return data;
 };
