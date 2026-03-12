@@ -4,7 +4,7 @@
 
 export { Person } from './Person';
 export type {
-	PersonLineRenderContext,
-	PersonLineRenderer,
-	PersonProps,
+    PersonLineRenderContext,
+    PersonLineRenderer,
+    PersonProps,
 } from './Person.types';
