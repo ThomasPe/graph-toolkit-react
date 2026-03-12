@@ -273,7 +273,7 @@ export const GraphLineProperties: Story = {
   args: {
     userId: 'test-user',
     view: 'threelines',
-    line1Property: 'givenName',
+    line1Property: 'displayName',
     line2Property: 'mail,userPrincipalName',
     line3Property: 'presenceAvailability',
     size: 'medium',
