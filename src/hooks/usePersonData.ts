@@ -78,7 +78,14 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
   const providerState = useProviderState();
   const personCacheOptions = usePersonCacheOptions();
   const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true, selectFields } = options;
-  const resolvedSelectFields = [...new Set([...DEFAULT_USER_SELECT_FIELDS, ...(selectFields ?? [])])].join(',');
+  const resolvedSelectFields = [
+    ...new Set([
+      ...DEFAULT_USER_SELECT_FIELDS,
+      ...(selectFields ?? [])
+        .map((f) => f.trim())
+        .filter((f) => f.length > 0 && /^[a-zA-Z0-9_./]+$/.test(f)),
+    ]),
+  ].join(',');
   const [data, setData] = useState<PersonData>({
     user: null,
     presence: null,
@@ -89,6 +96,9 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
 
   useEffect(() => {
     let cancelled = false;
+    const customSelectFields = resolvedSelectFields
+      .split(',')
+      .filter((f) => !DEFAULT_USER_SELECT_FIELDS.includes(f));
 
     const fetchData = async () => {
       const identifier = userId || userPrincipalName;
@@ -98,6 +108,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
           identifier,
           fetchPresence,
           fetchPhoto,
+          selectFields: customSelectFields.length > 0 ? customSelectFields : undefined,
         });
 
         if (!cancelled) {
