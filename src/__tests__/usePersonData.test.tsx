@@ -156,6 +156,53 @@ describe('usePersonData caching', () => {
     expect(mockedWritePersonCache).toHaveBeenCalledTimes(1);
   });
 
+  it('normalizes selectFields by trimming whitespace, filtering empties and invalid characters', async () => {
+    mockedUsePersonCacheOptions.mockReturnValue({
+      enabled: false,
+      userTtlMs: 60 * 60 * 1000,
+      photoTtlMs: 60 * 60 * 1000,
+      presenceTtlMs: 5 * 60 * 1000,
+    });
+
+    const selectMock = vi.fn().mockReturnValue({
+      get: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        displayName: 'Graph User',
+        userPrincipalName: 'graph@contoso.com',
+      }),
+    });
+
+    const apiMock = vi.fn().mockReturnValue({ select: selectMock });
+    mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
+
+    const { result } = renderHook(() =>
+      usePersonData({
+        userId: 'user-1',
+        fetchPresence: false,
+        fetchPhoto: false,
+        // '  department  ' -> trimmed (already in defaults), '' -> filtered, 'bad&field' -> filtered, 'mobilePhone' -> valid
+        selectFields: ['  department  ', '', 'bad&field', '$inject', 'mobilePhone'],
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    const selectArg: string = selectMock.mock.calls[0][0];
+    const selectedFields = selectArg.split(',');
+    // mobilePhone should be included
+    expect(selectedFields).toContain('mobilePhone');
+    // bad&field and $inject should be excluded
+    expect(selectedFields).not.toContain('bad&field');
+    expect(selectedFields).not.toContain('$inject');
+    // all defaults should still be present
+    expect(selectedFields).toContain('id');
+    expect(selectedFields).toContain('displayName');
+    // no empty strings in select
+    expect(selectedFields.every((f) => f.length > 0)).toBe(true);
+  });
+
   it('bypasses cache when disabled and fetches from Graph', async () => {
     mockedUsePersonCacheOptions.mockReturnValue({
       enabled: false,
@@ -380,6 +427,53 @@ describe('usePersonData with IPersonDataProvider', () => {
       fetchPhoto: false,
     });
     expect(result.current.user).toEqual(mockUser);
+  });
+
+  it('forwards normalized selectFields to provider.getPersonData', async () => {
+    const mockUser: User = {
+      id: 'provider-user-1',
+      displayName: 'Provider User',
+      userPrincipalName: 'provider@contoso.com',
+    } as User;
+
+    const getPersonDataMock = vi.fn().mockResolvedValue({
+      user: mockUser,
+      presence: null,
+      photoUrl: null,
+    });
+
+    const providerWithData: IProvider & IPersonDataProvider = {
+      getAccessToken: vi.fn().mockResolvedValue('token'),
+      login: vi.fn(),
+      logout: vi.fn(),
+      getState: vi.fn().mockReturnValue('SignedIn'),
+      getPersonData: getPersonDataMock,
+    };
+
+    mockedUseProvider.mockReturnValue(providerWithData);
+    mockedUseGraphClient.mockReturnValue(null);
+
+    const { result } = renderHook(() =>
+      usePersonData({
+        userId: 'provider-user-1',
+        fetchPresence: false,
+        fetchPhoto: false,
+        // '  mobilePhone  ' -> trimmed, '' -> filtered, 'bad&field' -> filtered, 'department' -> valid but already in defaults
+        selectFields: ['  mobilePhone  ', '', 'bad&field', 'department'],
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(getPersonDataMock).toHaveBeenCalledWith({
+      identifier: 'provider-user-1',
+      fetchPresence: false,
+      fetchPhoto: false,
+      // 'department' is in DEFAULT_USER_SELECT_FIELDS so it's not forwarded as a custom field
+      selectFields: ['mobilePhone'],
+    });
   });
 
   it('handles provider.getPersonData returning null values gracefully', async () => {

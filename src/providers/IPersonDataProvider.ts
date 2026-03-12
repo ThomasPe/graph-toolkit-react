@@ -21,6 +21,12 @@ export interface ProviderPersonDataRequest {
    * Whether to fetch profile photo
    */
   fetchPhoto: boolean;
+  /**
+   * Additional user profile fields to fetch beyond the default set.
+   * Each entry must be a valid OData field name (letters, digits, underscores, dots, or slashes).
+   * Empty strings and entries containing unsafe characters are ignored.
+   */
+  selectFields?: string[];
 }
 
 /**
