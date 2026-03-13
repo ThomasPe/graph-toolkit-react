@@ -90,16 +90,16 @@ export class MsalBrowserProvider implements IProvider {
       const response = await this.msalInstance.acquireTokenSilent(silentRequest);
       return response.accessToken;
     } catch (error) {
-    if (error instanceof InteractionRequiredAuthError) {
-      const redirectRequest: RedirectRequest = {
-        scopes: targetScopes,
-        account,
-      };
-      await this.msalInstance.acquireTokenRedirect(redirectRequest);
-      throw new RedirectInProgressError('Redirecting for interactive token acquisition.');
-    }
+      if (error instanceof InteractionRequiredAuthError) {
+        const redirectRequest: RedirectRequest = {
+          scopes: targetScopes,
+          account,
+        };
+        await this.msalInstance.acquireTokenRedirect(redirectRequest);
+        throw new RedirectInProgressError('Redirecting for interactive token acquisition.');
+      }
 
-    throw error;
+      throw error;
     }
   }
 
