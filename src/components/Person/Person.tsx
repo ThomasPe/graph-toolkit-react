@@ -157,7 +157,7 @@ export const Person: React.FC<PersonProps> = ({
   // Fetch data if not provided directly
   const { user, presence: graphPresence, photoUrl, loading } = usePersonData({
     userId: personDetails
-      ? (personDetails.id ?? personDetails.userPrincipalName ?? personDetails.email)
+      ? undefined
       : userId || userPrincipalName || email,
     fetchPresence: showPresence || usesPresenceLine,
     fetchPhoto: fetchImage,
