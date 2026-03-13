@@ -115,7 +115,7 @@ Story organization follows Fluent Persona docs, while Graph-specific stories foc
     },
     personDetails: {
       control: 'object',
-      description: 'Provide details directly and skip Graph user fetch',
+      description: 'Provide person details directly. Graph user data may still be fetched when identifiers (id/UPN/email) are present or required.',
     },
     line1Property: {
       control: 'text',
