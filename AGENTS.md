@@ -79,6 +79,8 @@ export function App() {
 }
 ```
 
+The provider uses redirect flow. Set the redirect URI to your app's origin and register it as a **Single-page application (SPA)** in Azure AD.
+
 ### 3) Teams-hosted app (`TeamsHostedProvider`)
 
 ```tsx
