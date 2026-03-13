@@ -476,6 +476,40 @@ describe('usePersonData with IPersonDataProvider', () => {
     });
   });
 
+  it('sets error and loading:false when provider.getPersonData rejects', async () => {
+    const authError = new Error('Auth error: token expired');
+
+    const getPersonDataMock = vi.fn().mockRejectedValue(authError);
+
+    const providerWithData: IProvider & IPersonDataProvider = {
+      getAccessToken: vi.fn().mockResolvedValue('token'),
+      login: vi.fn(),
+      logout: vi.fn(),
+      getState: vi.fn().mockReturnValue('SignedIn'),
+      getPersonData: getPersonDataMock,
+    };
+
+    mockedUseProvider.mockReturnValue(providerWithData);
+    mockedUseGraphClient.mockReturnValue(null);
+
+    const { result } = renderHook(() =>
+      usePersonData({
+        userId: 'user-1',
+        fetchPresence: true,
+        fetchPhoto: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.user).toBeNull();
+    expect(result.current.presence).toBeNull();
+    expect(result.current.photoUrl).toBeNull();
+    expect(result.current.error).toBe(authError);
+  });
+
   it('handles provider.getPersonData returning null values gracefully', async () => {
     const getPersonDataMock = vi.fn().mockResolvedValue({
       user: null,
