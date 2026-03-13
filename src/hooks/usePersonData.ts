@@ -104,21 +104,33 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
       const identifier = userId || userPrincipalName;
 
       if (isPersonDataProvider(provider)) {
-        const providerData = await provider.getPersonData({
-          identifier,
-          fetchPresence,
-          fetchPhoto,
-          selectFields: customSelectFields.length > 0 ? customSelectFields : undefined,
-        });
-
-        if (!cancelled) {
-          setData({
-            user: providerData.user,
-            presence: providerData.presence,
-            photoUrl: providerData.photoUrl,
-            loading: false,
-            error: null,
+        try {
+          const providerData = await provider.getPersonData({
+            identifier,
+            fetchPresence,
+            fetchPhoto,
+            selectFields: customSelectFields.length > 0 ? customSelectFields : undefined,
           });
+
+          if (!cancelled) {
+            setData({
+              user: providerData.user,
+              presence: providerData.presence,
+              photoUrl: providerData.photoUrl,
+              loading: false,
+              error: null,
+            });
+          }
+        } catch (error) {
+          if (!cancelled) {
+            setData({
+              user: null,
+              presence: null,
+              photoUrl: null,
+              loading: false,
+              error: error as Error,
+            });
+          }
         }
         return;
       }
