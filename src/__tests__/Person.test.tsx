@@ -33,13 +33,16 @@ describe('Person', () => {
             user: {
                 id: 'user-1',
                 displayName: 'Adele Vance',
+                givenName: 'Adele',
                 jobTitle: 'Program Manager',
                 department: 'Product',
                 officeLocation: 'Building 1',
+                userPrincipalName: 'adelev@contoso.com',
             },
             presence: {
                 id: 'user-1',
                 availability: 'Available',
+                activity: 'Available',
             },
             photoUrl: undefined,
             loading: false,
@@ -104,6 +107,61 @@ describe('Person', () => {
         const avatar = personaProps.avatar as { image?: unknown; initials?: string };
         expect(avatar.image).toBeUndefined();
         expect(avatar.initials).toBeTruthy();
+    });
+
+    it('supports MGT-style line property mapping with fallbacks and presence fields', () => {
+        render(
+            <Person
+                userId="user-1"
+                view="threelines"
+                line1Property="givenName"
+                line2Property="mail,userPrincipalName"
+                line3Property="presenceAvailability"
+                fetchImage={false}
+            />
+        );
+
+        expect(mockedUsePersonData).toHaveBeenCalledWith({
+            userId: 'user-1',
+            fetchPresence: true,
+            fetchPhoto: false,
+            selectFields: ['givenName', 'mail', 'userPrincipalName'],
+        });
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.primaryText).toBe('Adele');
+        expect(personaProps.secondaryText).toBe('adelev@contoso.com');
+        expect(personaProps.tertiaryText).toBe('Available');
+    });
+
+    it('renders custom line content through React line render callbacks', () => {
+        render(
+            <Person
+                personDetails={{
+                    displayName: 'Megan Bowen',
+                    jobTitle: 'CEO',
+                    department: 'Leadership',
+                    officeLocation: 'HQ',
+                }}
+                view="fourlines"
+                renderLine1={({ text }) => <span data-line="1">Name: {text}</span>}
+                renderLine2={({ text }) => <span data-line="2">Role: {text}</span>}
+                renderLine4={({ text }) => <span data-line="4">Place: {text}</span>}
+            />
+        );
+
+        const personaProps = getLastPersonaProps() as {
+            primaryText?: React.ReactElement;
+            secondaryText?: React.ReactElement;
+            quaternaryText?: React.ReactElement;
+        };
+
+        expect(React.isValidElement(personaProps.primaryText)).toBe(true);
+        expect(React.isValidElement(personaProps.secondaryText)).toBe(true);
+        expect(React.isValidElement(personaProps.quaternaryText)).toBe(true);
+        expect(personaProps.primaryText?.props.children).toContain('Megan Bowen');
+        expect(personaProps.secondaryText?.props.children).toContain('CEO');
+        expect(personaProps.quaternaryText?.props.children).toContain('HQ');
     });
 
 });

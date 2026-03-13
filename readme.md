@@ -101,6 +101,36 @@ import { Person } from '@devsym/graph-toolkit-react';
 
 `Person` supports Fluent UI Persona props directly.
 
+MGT-style line customization is also supported:
+
+```tsx
+<Person
+  userId="me"
+  view="threelines"
+  line1Property="givenName"
+  line2Property="mail,userPrincipalName"
+  line3Property="presenceAvailability"
+/>
+```
+
+For full manual override, use React render callbacks as the replacement for MGT line templates:
+
+```tsx
+<Person
+  personDetails={{
+    displayName: 'Megan Bowen',
+    jobTitle: 'CEO',
+    department: 'Leadership',
+    officeLocation: 'Seattle',
+  }}
+  view="fourlines"
+  renderLine1={({ text }) => <span>Name: {text}</span>}
+  renderLine2={({ text }) => <span>Role: {text}</span>}
+  renderLine3={({ text }) => <span>Org: {text}</span>}
+  renderLine4={({ text }) => <span>Location: {text}</span>}
+/>
+```
+
 
 <a id="getting-started"></a>
 ## 🚀 Getting Started

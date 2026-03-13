@@ -28,7 +28,18 @@ export interface UsePersonDataOptions {
   userPrincipalName?: string;
   fetchPresence?: boolean;
   fetchPhoto?: boolean;
+  selectFields?: string[];
 }
+
+const DEFAULT_USER_SELECT_FIELDS = [
+  'id',
+  'displayName',
+  'jobTitle',
+  'mail',
+  'department',
+  'officeLocation',
+  'userPrincipalName',
+];
 
 const photoResponseToDataUrl = async (photoResponse: unknown): Promise<string | null> => {
   if (!photoResponse) {
@@ -66,7 +77,15 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
   const provider = useProvider();
   const providerState = useProviderState();
   const personCacheOptions = usePersonCacheOptions();
-  const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true } = options;
+  const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true, selectFields } = options;
+  const resolvedSelectFields = [
+    ...new Set([
+      ...DEFAULT_USER_SELECT_FIELDS,
+      ...(selectFields ?? [])
+        .map((f) => f.trim())
+        .filter((f) => f.length > 0 && /^[a-zA-Z0-9_./]+$/.test(f)),
+    ]),
+  ].join(',');
   const [data, setData] = useState<PersonData>({
     user: null,
     presence: null,
@@ -77,25 +96,41 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
 
   useEffect(() => {
     let cancelled = false;
+    const customSelectFields = resolvedSelectFields
+      .split(',')
+      .filter((f) => !DEFAULT_USER_SELECT_FIELDS.includes(f));
 
     const fetchData = async () => {
       const identifier = userId || userPrincipalName;
 
       if (isPersonDataProvider(provider)) {
-        const providerData = await provider.getPersonData({
-          identifier,
-          fetchPresence,
-          fetchPhoto,
-        });
-
-        if (!cancelled) {
-          setData({
-            user: providerData.user,
-            presence: providerData.presence,
-            photoUrl: providerData.photoUrl,
-            loading: false,
-            error: null,
+        try {
+          const providerData = await provider.getPersonData({
+            identifier,
+            fetchPresence,
+            fetchPhoto,
+            selectFields: customSelectFields.length > 0 ? customSelectFields : undefined,
           });
+
+          if (!cancelled) {
+            setData({
+              user: providerData.user,
+              presence: providerData.presence,
+              photoUrl: providerData.photoUrl,
+              loading: false,
+              error: null,
+            });
+          }
+        } catch (error) {
+          if (!cancelled) {
+            setData({
+              user: null,
+              presence: null,
+              photoUrl: null,
+              loading: false,
+              error: error as Error,
+            });
+          }
         }
         return;
       }
@@ -174,7 +209,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         if (!user) {
           user = (await graphClient
             .api(isCurrentUserQuery ? '/me' : `/users/${identifier}`)
-            .select('id,displayName,jobTitle,mail,department,officeLocation,userPrincipalName')
+            .select(resolvedSelectFields)
             .get()) as User;
           didFetchUser = true;
         }
@@ -269,16 +304,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
     return () => {
       cancelled = true;
     };
-  }, [
-    graphClient,
-    provider,
-    providerState,
-    userId,
-    userPrincipalName,
-    fetchPresence,
-    fetchPhoto,
-    personCacheOptions,
-  ]);
+  }, [graphClient, provider, providerState, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, resolvedSelectFields]);
 
   return data;
 };
