@@ -48,6 +48,12 @@ export class MsalBrowserProvider implements IProvider {
 
   async logout(): Promise<void> {
     const account = this.msalInstance.getActiveAccount() ?? this.account ?? undefined;
+
+    // Clear cached account and update provider state before starting logout redirect
+    this.account = null;
+    this.msalInstance.setActiveAccount(null);
+    this.setState('SignedOut');
+
     await this.msalInstance.logoutRedirect({ account });
   }
 
