@@ -6,6 +6,22 @@ import { InteractionRequiredAuthError } from '@azure/msal-browser';
 import type { AccountInfo, IPublicClientApplication, RedirectRequest, SilentRequest } from '@azure/msal-browser';
 import { IProvider, ProviderState } from './IProvider';
 
+/**
+ * Error indicating that an interactive redirect has been initiated and token acquisition
+ * will continue after navigation completes.
+ */
+export class RedirectInProgressError extends Error {
+  /**
+   * Creates a new instance of RedirectInProgressError.
+   *
+   * @param message - A human-readable description of the redirect state.
+   */
+  constructor(message: string) {
+    super(message);
+    this.name = 'RedirectInProgressError';
+  }
+}
+
 export class MsalBrowserProvider implements IProvider {
   private readonly msalInstance: IPublicClientApplication;
   private readonly defaultScopes: string[];
@@ -74,16 +90,16 @@ export class MsalBrowserProvider implements IProvider {
       const response = await this.msalInstance.acquireTokenSilent(silentRequest);
       return response.accessToken;
     } catch (error) {
-      if (error instanceof InteractionRequiredAuthError) {
-        const redirectRequest: RedirectRequest = {
-          scopes: targetScopes,
-          account,
-        };
-        await this.msalInstance.acquireTokenRedirect(redirectRequest);
-        throw new Error('Redirecting for interactive token acquisition.');
-      }
+    if (error instanceof InteractionRequiredAuthError) {
+      const redirectRequest: RedirectRequest = {
+        scopes: targetScopes,
+        account,
+      };
+      await this.msalInstance.acquireTokenRedirect(redirectRequest);
+      throw new RedirectInProgressError('Redirecting for interactive token acquisition.');
+    }
 
-      throw error;
+    throw error;
     }
   }
 
