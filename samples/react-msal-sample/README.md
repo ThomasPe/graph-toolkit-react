@@ -8,7 +8,7 @@ This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (M
 
 ## Features
 
-- ✅ MSAL authentication with popup flow
+- ✅ MSAL authentication with redirect flow
 - ✅ Person component displaying current user ("me" query)
 - ✅ Fluent UI design system
 - ✅ TypeScript support
@@ -31,9 +31,7 @@ This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (M
 4. Configure your app:
    - **Name**: Graph Toolkit React Sample (or any name you prefer)
    - **Supported account types**: Accounts in any organizational directory and personal Microsoft accounts
-   - **Redirect URI**: 
-     - Platform: **Single-page application (SPA)**
-     - URI: `http://localhost:3000`
+   - **Redirect URI**: Platform **Single-page application (SPA)** with `http://localhost:3000`
 5. Click **Register**
 
 ### 2. Configure API Permissions
@@ -67,6 +65,7 @@ npm install
 3. Configure authentication in `src/authConfig.ts` by setting your `clientId` and `authority`.
    - Keep `scopes` to the minimum required for your scenario.
    - For scope requirements by feature, see [Scopes by feature](../../readme.md#scopes-by-feature).
+   - Register the sample's redirect URI as `http://localhost:3000`.
 
 > **Tip**: You can also use `'common'` instead of your tenant ID to support any Microsoft account:
 > ```typescript
@@ -82,6 +81,8 @@ npm run dev
 ```
 
 The app will open at [http://localhost:3000](http://localhost:3000)
+
+The sample is intentionally pinned to `http://localhost:3000` for local MSAL setup. If port 3000 is already in use, stop the conflicting process before starting the sample instead of letting Vite switch ports.
 
 ## Implementation Notes
 
@@ -115,11 +116,19 @@ src/
 
 ### "Redirect URI mismatch" error
 
-Make sure the redirect URI in your Azure AD app registration matches your active dev URL (for example `http://localhost:3000` or `http://localhost:3001`).
+Make sure the redirect URI in your Azure AD app registration matches `http://localhost:3000` exactly with platform type **Single-page application (SPA)**.
+
+### Popup opens to a white page and sign-in never starts
+
+This sample uses redirect flow, not popup. If you see a white popup, make sure you are using the latest version of `MsalBrowserProvider` which uses `loginRedirect()`.
 
 ### "AADSTS50011: The redirect URI specified in the request does not match"
 
-Ensure you selected **Single-page application** as the platform type, not "Web"
+Ensure you selected **Single-page application** as the platform type, not "Web", and that you registered `http://localhost:3000`.
+
+### "BrowserAuthError: no_token_request_cache_error"
+
+This can occur if `handleRedirectPromise()` is not called on page load. Ensure `provider.initialize()` is awaited before rendering.
 
 ### Person component shows loading state indefinitely
 
