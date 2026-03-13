@@ -440,4 +440,48 @@ describe('MsalBrowserProvider.logout', () => {
     expect(handler).toHaveBeenCalledTimes(1);
     expect(provider.getState()).toBe('SignedOut');
   });
+
+  it('uses cached account when getActiveAccount returns null', async () => {
+    const logoutRedirect = vi.fn().mockResolvedValue(undefined);
+
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        // Redirect response sets the cached account
+        handleRedirectPromise: vi.fn().mockResolvedValue({ account }),
+        // getActiveAccount always returns null (e.g. after another tab cleared it)
+        getActiveAccount: vi.fn().mockReturnValue(null),
+        getAllAccounts: vi.fn().mockReturnValue([]),
+        setActiveAccount: vi.fn(),
+        logoutRedirect,
+      } as never,
+      ['User.Read']
+    );
+
+    await provider.initialize();
+    await provider.logout();
+
+    expect(logoutRedirect).toHaveBeenCalledWith({ account });
+  });
+
+  it('calls logoutRedirect with undefined account when no account is available', async () => {
+    const logoutRedirect = vi.fn().mockResolvedValue(undefined);
+
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockResolvedValue(null),
+        getActiveAccount: vi.fn().mockReturnValue(null),
+        getAllAccounts: vi.fn().mockReturnValue([]),
+        setActiveAccount: vi.fn(),
+        logoutRedirect,
+      } as never,
+      ['User.Read']
+    );
+
+    await provider.initialize();
+    await provider.logout();
+
+    expect(logoutRedirect).toHaveBeenCalledWith({ account: undefined });
+  });
 });
