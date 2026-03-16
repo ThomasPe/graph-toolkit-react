@@ -6,7 +6,7 @@ import { GraphProvider, useProvider, useProviderState } from '../providers/Provi
 import { MockProvider } from '../providers/MockProvider';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
 import { IProvider } from '../providers/IProvider';
-import { MsalBrowserProvider } from '../providers/MsalBrowserProvider';
+import { MsalBrowserProvider, RedirectInProgressError } from '../providers/MsalBrowserProvider';
 
 describe('ProviderContext', () => {
   it('exposes provider and state transitions', async () => {
@@ -261,7 +261,7 @@ describe('MsalBrowserProvider.getAccessToken', () => {
     expect(acquireTokenRedirect).not.toHaveBeenCalled();
   });
 
-  it('invokes acquireTokenRedirect and throws when InteractionRequiredAuthError is caught', async () => {
+  it('invokes acquireTokenRedirect and throws RedirectInProgressError when InteractionRequiredAuthError is caught', async () => {
     const interactionError = new InteractionRequiredAuthError('interaction_required');
     const acquireTokenSilent = vi.fn().mockRejectedValue(interactionError);
     const acquireTokenRedirect = vi.fn().mockResolvedValue(undefined);
@@ -279,9 +279,15 @@ describe('MsalBrowserProvider.getAccessToken', () => {
       ['User.Read']
     );
 
-    await expect(provider.getAccessToken()).rejects.toThrow(
-      'Redirecting for interactive token acquisition.'
-    );
+    let caughtError: unknown;
+    try {
+      await provider.getAccessToken();
+    } catch (e) {
+      caughtError = e;
+    }
+
+    expect(caughtError).toBeInstanceOf(RedirectInProgressError);
+    expect((caughtError as RedirectInProgressError).message).toBe('Redirecting for interactive token acquisition.');
     expect(acquireTokenRedirect).toHaveBeenCalledWith({ scopes: ['User.Read'], account });
   });
 
@@ -303,9 +309,15 @@ describe('MsalBrowserProvider.getAccessToken', () => {
       ['User.Read']
     );
 
-    await expect(provider.getAccessToken(['Mail.Read'])).rejects.toThrow(
-      'Redirecting for interactive token acquisition.'
-    );
+    let caughtError: unknown;
+    try {
+      await provider.getAccessToken(['Mail.Read']);
+    } catch (e) {
+      caughtError = e;
+    }
+
+    expect(caughtError).toBeInstanceOf(RedirectInProgressError);
+    expect((caughtError as RedirectInProgressError).message).toBe('Redirecting for interactive token acquisition.');
     expect(acquireTokenRedirect).toHaveBeenCalledWith({ scopes: ['Mail.Read'], account });
   });
 
