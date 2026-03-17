@@ -75,9 +75,9 @@ vi.mock('../hooks/usePeopleSearch', () => ({
   usePeopleSearch: vi.fn(),
 }));
 
-describe('PeoplePicker', () => {
-  const mockedUsePeopleSearch = vi.mocked(usePeopleSearch);
+const mockedUsePeopleSearch = vi.mocked(usePeopleSearch);
 
+describe('PeoplePicker', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedUsePeopleSearch.mockReturnValue({
@@ -261,11 +261,14 @@ describe('MockProvider.searchPeople', () => {
     expect(results[0].displayName).toBe('Alex Wilber');
   });
 
-  it('returns multiple results for a shared department', async () => {
+  it('returns matching results for a UPN fragment shared by multiple people', async () => {
     const provider = new MockProvider();
-    const results = await provider.searchPeople('Marketing');
-    // Adele Vance and Alex Wilber share 'Marketing' in their display/mail/upn? No — let's test by name fragment
-    expect(results.length).toBeGreaterThanOrEqual(0);
+    // Both Adele (adelev) and Alex (alexw) have '@contoso.com' in their UPN
+    const results = await provider.searchPeople('contoso.com');
+    expect(results.length).toBeGreaterThan(1);
+    const names = results.map((p) => p.displayName);
+    expect(names).toContain('Adele Vance');
+    expect(names).toContain('Alex Wilber');
   });
 
   it('returns empty array when no match', async () => {
@@ -326,5 +329,3 @@ describe('PeoplePicker - option secondary content', () => {
     expect(option.getAttribute('data-value')).toBe('1');
   });
 });
-
-const mockedUsePeopleSearch = vi.mocked(usePeopleSearch);

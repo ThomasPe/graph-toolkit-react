@@ -20,6 +20,9 @@ import { usePeopleSearch } from '../../hooks/usePeopleSearch';
 import { getInitials } from '../../utils/graph';
 import { PeoplePickerPerson, PeoplePickerProps } from './PeoplePicker.types';
 
+/** Sentinel value used for the "No people found" option */
+const NO_RESULTS_OPTION_VALUE = '__no_results__';
+
 /**
  * Resolve the display label for a person
  */
@@ -93,6 +96,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   const handleOptionSelect = useCallback(
     (_e: React.SyntheticEvent | Event, data: TagPickerOnOptionSelectData) => {
       const newPeople = data.selectedOptions
+        .filter((id) => id !== NO_RESULTS_OPTION_VALUE)
         .map((id) => peopleLookup.get(id))
         .filter((p): p is PeoplePickerPerson => p !== undefined);
 
@@ -158,7 +162,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
       </TagPickerControl>
       <TagPickerList>
         {searchQuery.length >= searchMinChars && !searchLoading && filteredResults.length === 0 && (
-          <TagPickerOption value="__no_results__" text="No people found" style={{ pointerEvents: 'none', color: 'var(--colorNeutralForegroundDisabled)' }}>
+          <TagPickerOption value={NO_RESULTS_OPTION_VALUE} text="No people found" style={{ pointerEvents: 'none', color: 'var(--colorNeutralForegroundDisabled)' }}>
             No people found
           </TagPickerOption>
         )}
