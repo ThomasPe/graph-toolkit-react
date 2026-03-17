@@ -12,11 +12,11 @@
 </p>
 
 <h3 align="center">
-  <a href="#getting-started">Get Started</a> • 
-  <a href="#migration-from-mgt">Migration</a> • 
-  <a href="#agent-quick-reference">Agent Quick Reference</a> • 
-  <a href="#storybook">Storybook</a> • 
-  <a href="#contribute">Contribute</a>
+  <a href="#-getting-started">Get Started</a> • 
+  <a href="#-migration-from-mgt">Migration</a> • 
+  <a href="#-agent-quick-reference">Agent Quick Reference</a> • 
+  <a href="#-storybook">Storybook</a> • 
+  <a href="#-contribute">Contribute</a>
 </h3>
 
 ## 🎯 Project Vision
