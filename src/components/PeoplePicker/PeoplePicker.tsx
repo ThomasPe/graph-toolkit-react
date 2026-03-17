@@ -133,7 +133,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
       <TagPickerControl>
         <TagPickerGroup>
           {effectiveSelected.map((person) => (
-            <InteractionTag key={person.id} value={person.id} shape="circular">
+            <InteractionTag key={person.id} value={person.id} shape="rounded">
               <InteractionTagPrimary
                 media={
                   <Avatar
