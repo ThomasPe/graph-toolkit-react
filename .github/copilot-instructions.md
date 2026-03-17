@@ -21,3 +21,8 @@
 - Document all interface properties with clear descriptions of their purpose and expected values.
 - Include `@param` and `@returns` tags for methods and functions.
 - Follow the JSDoc patterns established in files like `IProvider.ts` for consistency.
+
+## UI changes
+
+- Whenever a PR modifies UI, include at least one screenshot in the PR description.
+- Whenever a commit or progress update modifies UI, include a screenshot link for that change as part of the accompanying update.

@@ -140,7 +140,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                   <Avatar
                     name={person.displayName ?? undefined}
                     initials={getInitials(person.displayName ?? undefined)}
-                    size={20}
+                    size={16}
                   />
                 }
               >
