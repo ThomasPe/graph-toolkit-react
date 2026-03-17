@@ -53,7 +53,7 @@ npm run dev
 
 Open http://localhost:3000 and sign in with your Microsoft account!
 
-If port 3000 is already in use, free that port first. This sample is intentionally pinned to `localhost:3000` so the MSAL redirect URI matches the app registration exactly.
+If port 3000 is already in use, free that port first. This sample is intentionally pinned to `http://localhost:3000` so the MSAL redirect URI matches the app registration exactly.
 
 ## Troubleshooting
 
