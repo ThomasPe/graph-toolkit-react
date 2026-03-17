@@ -3,8 +3,24 @@
  */
 
 import { InteractionRequiredAuthError } from '@azure/msal-browser';
-import type { AccountInfo, IPublicClientApplication, PopupRequest, SilentRequest } from '@azure/msal-browser';
+import type { AccountInfo, IPublicClientApplication, RedirectRequest, SilentRequest } from '@azure/msal-browser';
 import { IProvider, ProviderState } from './IProvider';
+
+/**
+ * Error indicating that an interactive redirect has been initiated and token acquisition
+ * will continue after navigation completes.
+ */
+export class RedirectInProgressError extends Error {
+  /**
+   * Creates a new instance of RedirectInProgressError.
+   *
+   * @param message - A human-readable description of the redirect state.
+   */
+  constructor(message: string) {
+    super(message);
+    this.name = 'RedirectInProgressError';
+  }
+}
 
 export class MsalBrowserProvider implements IProvider {
   private readonly msalInstance: IPublicClientApplication;
@@ -20,7 +36,14 @@ export class MsalBrowserProvider implements IProvider {
 
   async initialize(): Promise<void> {
     await this.msalInstance.initialize();
-    await this.msalInstance.handleRedirectPromise();
+
+    const response = await this.msalInstance.handleRedirectPromise();
+    if (response?.account) {
+      this.account = response.account;
+      this.msalInstance.setActiveAccount(this.account);
+      this.setState('SignedIn');
+      return;
+    }
 
     const active = this.msalInstance.getActiveAccount();
     const accounts = this.msalInstance.getAllAccounts();
@@ -35,22 +58,19 @@ export class MsalBrowserProvider implements IProvider {
   }
 
   async login(): Promise<void> {
-    const request: PopupRequest = { scopes: this.defaultScopes };
-    const response = await this.msalInstance.loginPopup(request);
-    this.account = response.account;
-
-    if (this.account) {
-      this.msalInstance.setActiveAccount(this.account);
-    }
-
-    this.setState('SignedIn');
+    const request: RedirectRequest = { scopes: this.defaultScopes };
+    await this.msalInstance.loginRedirect(request);
   }
 
   async logout(): Promise<void> {
     const account = this.msalInstance.getActiveAccount() ?? this.account ?? undefined;
-    await this.msalInstance.logoutPopup({ account });
+
+    // Clear cached account and update provider state before starting logout redirect
     this.account = null;
+    this.msalInstance.setActiveAccount(null);
     this.setState('SignedOut');
+
+    await this.msalInstance.logoutRedirect({ account });
   }
 
   async getAccessToken(scopes?: string[]): Promise<string> {
@@ -71,12 +91,12 @@ export class MsalBrowserProvider implements IProvider {
       return response.accessToken;
     } catch (error) {
       if (error instanceof InteractionRequiredAuthError) {
-        const popupRequest: PopupRequest = {
+        const redirectRequest: RedirectRequest = {
           scopes: targetScopes,
           account,
         };
-        const response = await this.msalInstance.acquireTokenPopup(popupRequest);
-        return response.accessToken;
+        await this.msalInstance.acquireTokenRedirect(redirectRequest);
+        throw new RedirectInProgressError('Redirecting for interactive token acquisition.');
       }
 
       throw error;

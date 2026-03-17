@@ -224,6 +224,8 @@ function App() {
 }
 ```
 
+The provider uses redirect flow. Set the redirect URI to your app's origin and register it as a **Single-page application (SPA)** platform in Azure AD.
+
 #### `TeamsHostedProvider` quick start (consumer-managed Teams login)
 
 Use this when your app is hosted in Microsoft Teams and your app code already handles TeamsJS auth for multiple APIs.
