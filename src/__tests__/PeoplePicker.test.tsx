@@ -305,9 +305,8 @@ describe('usePeopleSearch with MockProvider', () => {
   it('returns empty results for empty query', async () => {
     const provider = new MockProvider({ autoSignIn: true });
     const results = await provider.searchPeople('');
-    // empty string matches everything but provider filters by includes('')
-    // all people names include '' (empty string) so all should be returned
-    expect(results.length).toBeGreaterThan(0);
+    // Empty queries are short-circuited and return an empty array
+    expect(results).toHaveLength(0);
   });
 });
 
