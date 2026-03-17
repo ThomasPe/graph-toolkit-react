@@ -67,6 +67,7 @@ export const usePeopleSearch = (
 
     const search = async () => {
       setLoading(true);
+      const sanitizedQuery = query.replace(/"/g, '');
       try {
         if (isPeopleSearchProvider(provider)) {
           const data = await provider.searchPeople(query, maxResults);
@@ -77,7 +78,7 @@ export const usePeopleSearch = (
           const response = await graphClient
             .api('/users')
             .header('ConsistencyLevel', 'eventual')
-            .search(`"displayName:${query}" OR "mail:${query}" OR "userPrincipalName:${query}"`)
+            .search(`"displayName:${sanitizedQuery}" OR "mail:${sanitizedQuery}" OR "userPrincipalName:${sanitizedQuery}"`)
             .select(PEOPLE_SEARCH_SELECT_FIELDS)
             .top(maxResults)
             .get() as { value?: PeopleSearchResult[] };
