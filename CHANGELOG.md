@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- 055120f: Switch MsalBrowserProvider from popup to redirect flow for simpler, more robust authentication.
+
 ## 1.0.0-next.8
 
 ### Minor Changes
