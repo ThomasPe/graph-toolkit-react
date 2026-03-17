@@ -59,14 +59,18 @@ vi.mock('@fluentui/react-components', async () => {
     InteractionTag: ({ children, value }: { children: React.ReactNode; value: string }) => (
       <div data-testid="interaction-tag" data-value={value}>{children}</div>
     ),
-    InteractionTagPrimary: ({ children, media }: { children: React.ReactNode; media?: React.ReactNode }) => (
-      <div data-testid="interaction-tag-primary">{media}{children}</div>
+    InteractionTagPrimary: ({ children, media, hasSecondaryAction }: {
+      children: React.ReactNode;
+      media?: React.ReactNode;
+      hasSecondaryAction?: boolean;
+    }) => (
+      <div data-testid="interaction-tag-primary" data-has-secondary-action={hasSecondaryAction ? 'true' : 'false'}>{media}{children}</div>
     ),
     InteractionTagSecondary: ({ 'aria-label': ariaLabel }: { 'aria-label'?: string }) => (
       <button data-testid="interaction-tag-secondary" aria-label={ariaLabel} />
     ),
-    Avatar: ({ name, initials }: { name?: string; initials?: string }) => (
-      <div data-testid="avatar" data-name={name} data-initials={initials} />
+    Avatar: ({ name, initials, size }: { name?: string; initials?: string; size?: number }) => (
+      <div data-testid="avatar" data-name={name} data-initials={initials} data-size={size} />
     ),
   };
 });
@@ -104,6 +108,22 @@ describe('PeoplePicker', () => {
     expect(tags).toHaveLength(2);
     expect(tags[0].getAttribute('data-value')).toBe('1');
     expect(tags[1].getAttribute('data-value')).toBe('2');
+  });
+
+  it('marks selected interaction tags as having a secondary action', () => {
+    const selected = [{ id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com' }];
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    const primary = screen.getByTestId('interaction-tag-primary');
+    expect(primary.getAttribute('data-has-secondary-action')).toBe('true');
+  });
+
+  it('uses a compact avatar size for selected interaction tags', () => {
+    const selected = [{ id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com' }];
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-size')).toBe('16');
   });
 
   it('shows search results in the dropdown', () => {
