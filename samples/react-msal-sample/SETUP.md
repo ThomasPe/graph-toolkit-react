@@ -11,9 +11,9 @@ Before running this sample, you need to register an application in Azure AD.
 1. Open: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
 2. Click **+ New registration**
 3. Fill in:
-  - **Name**: `Graph Toolkit React Sample`
-  - **Supported account types**: Select "Accounts in any organizational directory and personal Microsoft accounts"
-  - **Redirect URI**: Select **Single-page application (SPA)** and enter `http://localhost:3000`
+   - **Name**: `Graph Toolkit React Sample`
+   - **Supported account types**: Select "Accounts in any organizational directory and personal Microsoft accounts"
+   - **Redirect URI**: Select **Single-page application (SPA)** and enter `http://localhost:3000`
 4. Click **Register**
 
 ### After Registration:
