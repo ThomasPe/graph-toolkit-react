@@ -1,5 +1,6 @@
 /**
- * Person data provider interface for fetching user information, presence, and photos
+ * Person data provider interface for fetching user information, presence, and photos,
+ * and optionally searching for people.
  */
 
 import { Presence, User } from '@microsoft/microsoft-graph-types';
@@ -71,5 +72,63 @@ export const isPersonDataProvider = (
     typeof provider === 'object' &&
     provider !== null &&
     typeof (provider as Partial<IPersonDataProvider>).getPersonData === 'function'
+  );
+};
+
+/**
+ * Result item returned by a people search operation
+ */
+export interface PeopleSearchResult {
+  /**
+   * The unique identifier for the person
+   */
+  id: string;
+  /**
+   * The person's display name
+   */
+  displayName?: string | null;
+  /**
+   * The person's primary mail address
+   */
+  mail?: string | null;
+  /**
+   * The person's user principal name
+   */
+  userPrincipalName?: string | null;
+  /**
+   * The person's job title
+   */
+  jobTitle?: string | null;
+  /**
+   * The department the person belongs to
+   */
+  department?: string | null;
+}
+
+/**
+ * Optional interface that providers can implement to support people search
+ */
+export interface IPeopleSearchProvider {
+  /**
+   * Search for people matching the given query string
+   * @param query - The search query (display name, email, or UPN fragment)
+   * @param maxResults - Maximum number of results to return (default: 10)
+   * @returns Promise resolving to an array of matching people
+   */
+  searchPeople(query: string, maxResults?: number): Promise<PeopleSearchResult[]>;
+}
+
+/**
+ * Type guard to check if a provider implements the IPeopleSearchProvider interface
+ * @param provider - The provider to check
+ * @returns True if the provider implements IPeopleSearchProvider
+ */
+export const isPeopleSearchProvider = (
+  provider: IProvider | null
+): provider is IProvider & IPeopleSearchProvider => {
+  return (
+    typeof provider === 'object' &&
+    provider !== null &&
+    typeof (provider as Partial<IPeopleSearchProvider>).searchPeople === 'function'
   );
 };
