@@ -16,6 +16,7 @@ import {
   TagPickerOption,
   TagPickerOnOptionSelectData,
 } from '@fluentui/react-components';
+import { SearchRegular } from '@fluentui/react-icons';
 import { usePeopleSearch } from '../../hooks/usePeopleSearch';
 import { getInitials } from '../../utils/graph';
 import { PeoplePickerPerson, PeoplePickerProps } from './PeoplePicker.types';
@@ -130,7 +131,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
       size={size}
       disabled={disabled}
     >
-      <TagPickerControl>
+      <TagPickerControl expandIcon={<SearchRegular />}>
         <TagPickerGroup>
           {effectiveSelected.map((person) => (
             <InteractionTag key={person.id} value={person.id} shape="circular">
