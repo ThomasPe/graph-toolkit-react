@@ -372,7 +372,7 @@ stories/
 - ✅ Sample app with MSAL sign-in and `Person` (`userId="me"`) at `samples/react-msal-sample`
 
 **Next Steps**:
-- Additional components (PeoplePicker, PersonCard, Login)
+- Additional components (PeoplePicker, PersonCard, Login) — see [`docs/COMPONENT_ROADMAP.md`](./docs/COMPONENT_ROADMAP.md) for the full ranked list
 - Expanded provider guidance and production auth examples
 - Comprehensive test coverage
 - First stable release (1.0.0)
@@ -409,6 +409,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - **Fluent UI**: [react.fluentui.dev](https://react.fluentui.dev/)
 - **Microsoft Graph**: [graph.microsoft.com](https://graph.microsoft.com)
+- **Component Roadmap**: [docs/COMPONENT_ROADMAP.md](./docs/COMPONENT_ROADMAP.md)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 - **Publishing**: [PUBLISHING.md](PUBLISHING.md)
 
