@@ -5,11 +5,17 @@
     "@devsym/graph-toolkit-react": "0.1.0-alpha.1"
   },
   "changesets": [
+    "add-people-picker-component",
     "bright-horses-end",
+    "curly-bears-tap",
     "few-cobras-smell",
+    "few-wolves-sing",
     "first-alpha-release",
+    "fix-people-picker-chip-border-radius",
+    "fix-readme-jump-links",
     "funny-shrimps-happen",
     "green-groups-argue",
+    "people-picker-search-expand-icon",
     "polite-rivers-share",
     "red-cycles-flow"
   ]

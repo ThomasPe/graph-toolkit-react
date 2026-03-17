@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.0-next.9
+
+### Minor Changes
+
+- d8745f4: Add `PeoplePicker` component backed by Microsoft Graph people search.
+  - New `PeoplePicker` component using Fluent UI `TagPicker` with avatar tags and search dropdown
+  - New `usePeopleSearch` hook for searching users via Graph API (`/users?$search=...`) or `MockProvider` mock data
+  - New `IPeopleSearchProvider` interface and `isPeopleSearchProvider` type guard in `IPersonDataProvider`
+  - `MockProvider` now implements `IPeopleSearchProvider` with a 10-person mock roster
+  - New `PeoplePickerPerson` and `PeoplePickerProps` exported types
+  - Supports controlled and uncontrolled modes, `maxPeople` limit, `searchMinChars`, and standard Fluent UI `size`/`appearance`/`disabled` props
+
+### Patch Changes
+
+- 055120f: Switch MsalBrowserProvider from popup to redirect flow for simpler, more robust authentication.
+- a4273b9: Adjust the selected `PeoplePicker` chip avatar size so it fits the rounded removable tag more naturally.
+- a4273b9: Fix `PeoplePicker` selected-person chip border radius to use Fluent UI v9 `rounded` shape instead of `circular`.
+- 2a47eaf: Fix broken README navigation jump links to use the correct GitHub-generated heading anchors (emoji-prefixed headings generate anchors with a leading hyphen).
+- 9643c3c: Use the search icon as the expand icon for the `PeoplePicker` component.
+
 ## 1.0.0-next.8
 
 ### Minor Changes
