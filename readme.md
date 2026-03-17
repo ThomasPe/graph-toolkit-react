@@ -5,7 +5,7 @@
 <h4 align="center">Modern React Components for <a href="https://graph.microsoft.com">Microsoft Graph</a> powered by <a href="https://react.fluentui.dev/">Fluent UI</a></h4>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/alpha-0.1.0-orange" alt="Alpha Release">
+  <a href="https://www.npmjs.com/package/@devsym/graph-toolkit-react"><img src="https://img.shields.io/badge/alpha-0.1.0-orange" alt="Alpha Release"></a>
   <img src="https://img.shields.io/badge/React-18%2F19-blue" alt="React 18/19">
   <img src="https://img.shields.io/badge/Fluent_UI-9.72-purple" alt="Fluent UI 9">
   <img src="https://img.shields.io/badge/TypeScript-5.9-blue" alt="TypeScript 5.9">
@@ -52,7 +52,6 @@ npm install @devsym/graph-toolkit-react
 | ------- | ------- | ----------- |
 | `@devsym/graph-toolkit-react` | `0.1.0-alpha.1` | React components for Microsoft Graph powered by Fluent UI |
 
-<a id="migration-from-mgt"></a>
 ## 🔄 Migration from MGT
 
 For migration from Microsoft Graph Toolkit (including Teams-hosted scenarios), use [`docs/MGT_MIGRATION.md`](./docs/MGT_MIGRATION.md).
@@ -64,7 +63,6 @@ The guide includes:
 - Teams-specific migration section (`TeamsHostedProvider` + backend token exchange)
 - Common migration pitfalls and validation checklist
 
-<a id="agent-quick-reference"></a>
 ## 🤖 Agent Quick Reference
 
 If you are using a coding agent (Copilot/Codex/Claude/etc.), use the scenario-first reference in [`AGENTS.md`](./AGENTS.md).
@@ -132,7 +130,6 @@ For full manual override, use React render callbacks as the replacement for MGT 
 ```
 
 
-<a id="getting-started"></a>
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -290,7 +287,6 @@ class MyAuthProvider implements IProvider {
 }
 ```
 
-<a id="storybook"></a>
 ## 📚 Storybook
 
 Explore all components interactively in our Storybook documentation:
@@ -381,7 +377,6 @@ stories/
 - Comprehensive test coverage
 - First stable release (1.0.0)
 
-<a id="contribute"></a>
 ## 🤝 Contribute
 
 This **community-driven project** provides React developers with components for Microsoft Graph. Contributions are welcome!
