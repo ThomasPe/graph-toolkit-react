@@ -100,10 +100,13 @@ export const usePeopleSearch = (
       }
     };
 
-    void search();
+    const debounceHandle = setTimeout(() => {
+      void search();
+    }, 300);
 
     return () => {
       cancelled = true;
+      clearTimeout(debounceHandle);
     };
   }, [query, graphClient, provider, providerState, minChars, maxResults]);
 
