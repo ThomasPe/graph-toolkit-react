@@ -5,7 +5,7 @@
 <h4 align="center">Modern React Components for <a href="https://graph.microsoft.com">Microsoft Graph</a> powered by <a href="https://react.fluentui.dev/">Fluent UI</a></h4>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/alpha-0.1.0-orange" alt="Alpha Release">
+  <a href="https://www.npmjs.com/package/@devsym/graph-toolkit-react"><img src="https://img.shields.io/badge/alpha-0.1.0-orange" alt="Alpha Release"></a>
   <img src="https://img.shields.io/badge/React-18%2F19-blue" alt="React 18/19">
   <img src="https://img.shields.io/badge/Fluent_UI-9.72-purple" alt="Fluent UI 9">
   <img src="https://img.shields.io/badge/TypeScript-5.9-blue" alt="TypeScript 5.9">
