@@ -9,10 +9,10 @@ The **Priority Score** (Usefulness ÷ Effort) indicates the most cost-effective 
 
 ## Current state
 
-| Component | Status |
-| --- | --- |
-| `Person` | ✅ Shipped |
-| `PeoplePicker` | ✅ Shipped |
+| Component | MGT reference | Status |
+| --- | --- | --- |
+| `Person` | [`mgt-person`](https://learn.microsoft.com/graph/toolkit/components/person) | ✅ Shipped |
+| `PeoplePicker` | [`mgt-people-picker`](https://learn.microsoft.com/graph/toolkit/components/people-picker) | ✅ Shipped |
 
 ---
 
@@ -49,7 +49,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-login` |
+| MGT component | [`mgt-login`](https://learn.microsoft.com/graph/toolkit/components/login) |
+| Key Fluent UI controls | `Button`, `Persona`, `Menu`, `MenuItem` |
 | Porting effort | **2 / 6** |
 | Usefulness | **9 / 10** |
 | Priority score | **4.5** |
@@ -71,7 +72,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-people` |
+| MGT component | [`mgt-people`](https://learn.microsoft.com/graph/toolkit/components/people) |
+| Key Fluent UI controls | `AvatarGroup`, `AvatarGroupItem`, `AvatarGroupPopover` |
 | Porting effort | **2 / 6** |
 | Usefulness | **8 / 10** |
 | Priority score | **4.0** |
@@ -93,7 +95,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-person-card` |
+| MGT component | [`mgt-person-card`](https://learn.microsoft.com/graph/toolkit/components/person-card) |
+| Key Fluent UI controls | `Popover`, `PopoverSurface`, `Card`, `CardHeader`, `Persona` |
 | Porting effort | **3 / 6** |
 | Usefulness | **8 / 10** |
 | Priority score | **2.7** |
@@ -115,7 +118,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-agenda` |
+| MGT component | [`mgt-agenda`](https://learn.microsoft.com/graph/toolkit/components/agenda) |
+| Key Fluent UI controls | `Card`, `CardHeader`, `Text`, `Badge`, `Divider`, `Persona` |
 | Porting effort | **3 / 6** |
 | Usefulness | **7 / 10** |
 | Priority score | **2.3** |
@@ -137,7 +141,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-file-list` |
+| MGT component | [`mgt-file-list`](https://learn.microsoft.com/graph/toolkit/components/file-list) |
+| Key Fluent UI controls | `DataGrid`, `DataGridRow`, `DataGridCell`, `TableCellLayout` |
 | Porting effort | **3 / 6** |
 | Usefulness | **7 / 10** |
 | Priority score | **2.3** |
@@ -159,7 +164,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-teams-channel-picker` |
+| MGT component | [`mgt-teams-channel-picker`](https://learn.microsoft.com/graph/toolkit/components/teams-channel-picker) |
+| Key Fluent UI controls | `TagPicker`, `TagPickerInput`, `TagPickerList`, `InteractionTag` |
 | Porting effort | **3 / 6** |
 | Usefulness | **6 / 10** |
 | Priority score | **2.0** |
@@ -181,7 +187,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT components | `mgt-search-box`, `mgt-search-results` |
+| MGT components | [`mgt-search-box`](https://learn.microsoft.com/graph/toolkit/components/search-box), [`mgt-search-results`](https://learn.microsoft.com/graph/toolkit/components/search-results) |
+| Key Fluent UI controls | `SearchBox`, `List`, `Card`, `Spinner`, `Persona` |
 | Porting effort | **4 / 6** |
 | Usefulness | **7 / 10** |
 | Priority score | **1.75** |
@@ -204,7 +211,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT components | `mgt-tasks`, `mgt-todo` |
+| MGT components | [`mgt-tasks`](https://learn.microsoft.com/graph/toolkit/components/tasks), [`mgt-todo`](https://learn.microsoft.com/graph/toolkit/components/todo) |
+| Key Fluent UI controls | `Checkbox`, `Input`, `Button`, `Badge`, `Spinner` |
 | Porting effort | **4 / 6** |
 | Usefulness | **6 / 10** |
 | Priority score | **1.5** |
@@ -227,7 +235,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-picker` |
+| MGT component | [`mgt-picker`](https://learn.microsoft.com/graph/toolkit/components/picker) |
+| Key Fluent UI controls | `TagPicker`, `Combobox`, `Option`, `InteractionTag` |
 | Porting effort | **4 / 6** |
 | Usefulness | **5 / 10** |
 | Priority score | **1.25** |
@@ -249,7 +258,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-organization` |
+| MGT component | [`mgt-person-card`](https://learn.microsoft.com/graph/toolkit/components/person-card) (Organization tab) |
+| Key Fluent UI controls | `Card`, `CardHeader`, `Avatar`, `Button`, `Spinner` |
 | Porting effort | **5 / 6** |
 | Usefulness | **5 / 10** |
 | Priority score | **1.0** |
@@ -271,7 +281,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-chat` |
+| MGT component | [`mgt-chat`](https://learn.microsoft.com/graph/toolkit/components/chat) |
+| Key Fluent UI controls | `Textarea`, `Button`, `Persona`, `Divider`, `Spinner` |
 | Porting effort | **6 / 6** |
 | Usefulness | **6 / 10** |
 | Priority score | **1.0** |
@@ -294,7 +305,8 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 | Property | Value |
 | --- | --- |
-| MGT component | `mgt-taxonomy-picker` |
+| MGT component | [`mgt-taxonomy-picker`](https://learn.microsoft.com/graph/toolkit/components/taxonomy-picker) |
+| Key Fluent UI controls | `Combobox`, `Option`, `OptionGroup`, `Tree`, `TreeItem` |
 | Porting effort | **6 / 6** |
 | Usefulness | **3 / 10** |
 | Priority score | **0.5** |
@@ -315,20 +327,20 @@ Components are ordered by **Priority Score** (highest first), making the list a 
 
 ## Summary table
 
-| Rank | Component | MGT Name | Effort | Usefulness | Priority Score |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Login | `mgt-login` | 2 | 9 | 4.5 |
-| 2 | People | `mgt-people` | 2 | 8 | 4.0 |
-| 3 | PersonCard | `mgt-person-card` | 3 | 8 | 2.7 |
-| 4 | Agenda | `mgt-agenda` | 3 | 7 | 2.3 |
-| 5 | FileList | `mgt-file-list` | 3 | 7 | 2.3 |
-| 6 | TeamsChannelPicker | `mgt-teams-channel-picker` | 3 | 6 | 2.0 |
-| 7 | SearchBox + SearchResults | `mgt-search-box`, `mgt-search-results` | 4 | 7 | 1.75 |
-| 8 | Tasks / Todo | `mgt-tasks`, `mgt-todo` | 4 | 6 | 1.5 |
-| 9 | Picker | `mgt-picker` | 4 | 5 | 1.25 |
-| 10 | Organization | `mgt-organization` | 5 | 5 | 1.0 |
-| 11 | Chat | `mgt-chat` | 6 | 6 | 1.0 |
-| 12 | TaxonomyPicker | `mgt-taxonomy-picker` | 6 | 3 | 0.5 |
+| Rank | Component | MGT reference | Effort | Usefulness | Priority Score | Key Fluent UI controls |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Login | [`mgt-login`](https://learn.microsoft.com/graph/toolkit/components/login) | 2 | 9 | 4.5 | `Button`, `Persona`, `Menu`, `MenuItem` |
+| 2 | People | [`mgt-people`](https://learn.microsoft.com/graph/toolkit/components/people) | 2 | 8 | 4.0 | `AvatarGroup`, `AvatarGroupItem`, `AvatarGroupPopover` |
+| 3 | PersonCard | [`mgt-person-card`](https://learn.microsoft.com/graph/toolkit/components/person-card) | 3 | 8 | 2.7 | `Popover`, `PopoverSurface`, `Card`, `CardHeader`, `Persona` |
+| 4 | Agenda | [`mgt-agenda`](https://learn.microsoft.com/graph/toolkit/components/agenda) | 3 | 7 | 2.3 | `Card`, `CardHeader`, `Text`, `Badge`, `Divider`, `Persona` |
+| 5 | FileList | [`mgt-file-list`](https://learn.microsoft.com/graph/toolkit/components/file-list) | 3 | 7 | 2.3 | `DataGrid`, `DataGridRow`, `DataGridCell`, `TableCellLayout` |
+| 6 | TeamsChannelPicker | [`mgt-teams-channel-picker`](https://learn.microsoft.com/graph/toolkit/components/teams-channel-picker) | 3 | 6 | 2.0 | `TagPicker`, `TagPickerInput`, `TagPickerList`, `InteractionTag` |
+| 7 | SearchBox + SearchResults | [`mgt-search-box`](https://learn.microsoft.com/graph/toolkit/components/search-box), [`mgt-search-results`](https://learn.microsoft.com/graph/toolkit/components/search-results) | 4 | 7 | 1.75 | `SearchBox`, `List`, `Card`, `Spinner`, `Persona` |
+| 8 | Tasks / Todo | [`mgt-tasks`](https://learn.microsoft.com/graph/toolkit/components/tasks), [`mgt-todo`](https://learn.microsoft.com/graph/toolkit/components/todo) | 4 | 6 | 1.5 | `Checkbox`, `Input`, `Button`, `Badge`, `Spinner` |
+| 9 | Picker | [`mgt-picker`](https://learn.microsoft.com/graph/toolkit/components/picker) | 4 | 5 | 1.25 | `TagPicker`, `Combobox`, `Option`, `InteractionTag` |
+| 10 | Organization | [`mgt-person-card`](https://learn.microsoft.com/graph/toolkit/components/person-card) (org tab) | 5 | 5 | 1.0 | `Card`, `CardHeader`, `Avatar`, `Button`, `Spinner` |
+| 11 | Chat | [`mgt-chat`](https://learn.microsoft.com/graph/toolkit/components/chat) | 6 | 6 | 1.0 | `Textarea`, `Button`, `Persona`, `Divider`, `Spinner` |
+| 12 | TaxonomyPicker | [`mgt-taxonomy-picker`](https://learn.microsoft.com/graph/toolkit/components/taxonomy-picker) | 6 | 3 | 0.5 | `Combobox`, `Option`, `OptionGroup`, `Tree`, `TreeItem` |
 
 ---
 
