@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-next.9
+
+### Patch Changes
+
+- 055120f: Switch MsalBrowserProvider from popup to redirect flow for simpler, more robust authentication.
+- 2a47eaf: Fix broken README navigation jump links to use the correct GitHub-generated heading anchors (emoji-prefixed headings generate anchors with a leading hyphen).
+
 ## 1.0.0-next.8
 
 ### Minor Changes

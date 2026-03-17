@@ -6,8 +6,10 @@
   },
   "changesets": [
     "bright-horses-end",
+    "curly-bears-tap",
     "few-cobras-smell",
     "first-alpha-release",
+    "fix-readme-jump-links",
     "funny-shrimps-happen",
     "green-groups-argue",
     "polite-rivers-share",
