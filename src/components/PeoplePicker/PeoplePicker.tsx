@@ -61,6 +61,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   maxPeople,
   searchMinChars = 1,
   maxSearchResults = 10,
+  excludeUserIds = [],
   appearance,
   size,
   disabled,
@@ -77,7 +78,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
 
   const { results: searchResults, loading: searchLoading } = usePeopleSearch(searchQuery, {
     minChars: searchMinChars,
-    maxResults: maxSearchResults,
+    maxResults: maxSearchResults + excludeUserIds.length,
   });
 
   // Build a lookup map so we can resolve a person object from its ID
@@ -117,10 +118,14 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
 
   const isAtMax = maxPeople !== undefined && effectiveSelected.length >= maxPeople;
 
-  // Filter out already-selected options from suggestions
+  // Filter out already-selected options and explicitly excluded IDs from suggestions,
+  // then cap back to maxSearchResults
   const filteredResults = useMemo(
-    () => searchResults.filter((p) => !selectedIds.includes(p.id)),
-    [searchResults, selectedIds]
+    () =>
+      searchResults
+        .filter((p) => !selectedIds.includes(p.id) && !excludeUserIds.includes(p.id))
+        .slice(0, maxSearchResults),
+    [searchResults, selectedIds, excludeUserIds, maxSearchResults]
   );
 
   return (

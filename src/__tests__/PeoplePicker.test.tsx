@@ -228,6 +228,84 @@ describe('PeoplePicker', () => {
     });
   });
 
+  it('requests extra results to compensate for excludeUserIds', () => {
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        { id: 'a', displayName: 'Person A', mail: 'pa@contoso.com', userPrincipalName: 'pa@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
+    render(<PeoplePicker maxSearchResults={5} excludeUserIds={['1', '2', '3']} />);
+
+    const input = screen.getByTestId('tag-picker-input');
+    fireEvent.change(input, { target: { value: 'adele' } });
+
+    expect(mockedUsePeopleSearch).toHaveBeenCalledWith('adele', {
+      minChars: 1,
+      maxResults: 8, // 5 + 3 excluded IDs
+    });
+
+    // Person A is not in excludeUserIds, so it should be rendered
+    const options = screen.getAllByTestId('tag-picker-option');
+    expect(options[0].getAttribute('data-value')).toBe('a');
+  });
+
+  it('filters out excludeUserIds from search results', () => {
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+        { id: '2', displayName: 'Alex Wilber', mail: 'alexw@contoso.com', userPrincipalName: 'alexw@contoso.com', jobTitle: null, department: null },
+        { id: '3', displayName: 'Megan Bowen', mail: 'meganb@contoso.com', userPrincipalName: 'meganb@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
+
+    render(<PeoplePicker excludeUserIds={['1', '3']} />);
+
+    const options = screen.getAllByTestId('tag-picker-option');
+    expect(options).toHaveLength(1);
+    expect(options[0].getAttribute('data-value')).toBe('2');
+  });
+
+  it('caps filtered results to maxSearchResults after exclusion', () => {
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        { id: '1', displayName: 'Person 1', mail: 'p1@contoso.com', userPrincipalName: 'p1@contoso.com', jobTitle: null, department: null },
+        { id: '2', displayName: 'Person 2', mail: 'p2@contoso.com', userPrincipalName: 'p2@contoso.com', jobTitle: null, department: null },
+        { id: '3', displayName: 'Person 3', mail: 'p3@contoso.com', userPrincipalName: 'p3@contoso.com', jobTitle: null, department: null },
+        { id: 'excluded', displayName: 'Excluded', mail: 'ex@contoso.com', userPrincipalName: 'ex@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
+
+    render(<PeoplePicker maxSearchResults={2} excludeUserIds={['excluded']} />);
+
+    // Should show only 2 results (capped by maxSearchResults) with the excluded one filtered out
+    const options = screen.getAllByTestId('tag-picker-option');
+    expect(options).toHaveLength(2);
+    const values = options.map((o) => o.getAttribute('data-value'));
+    expect(values).not.toContain('excluded');
+  });
+
+  it('shows no results when all search results are in excludeUserIds', () => {
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+        { id: '2', displayName: 'Alex Wilber', mail: 'alexw@contoso.com', userPrincipalName: 'alexw@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
+
+    render(<PeoplePicker excludeUserIds={['1', '2']} searchMinChars={1} />);
+
+    const input = screen.getByTestId('tag-picker-input');
+    fireEvent.change(input, { target: { value: 'xyz' } });
+
+    // All results are excluded, so we should see the "No people found" option
+    const noResultsOption = screen.getByTestId('tag-picker-option');
+    expect(noResultsOption.textContent).toContain('No people found');
+  });
+
   it('renders remove buttons for each selected person', () => {
     const selected = [
       { id: '1', displayName: 'Adele Vance' },
