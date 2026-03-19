@@ -40,25 +40,42 @@ const getPersonLabel = (person: PeoplePickerPerson): string =>
 const getPersonSecondary = (person: PeoplePickerPerson): string | undefined =>
   person.mail ?? person.userPrincipalName ?? undefined;
 
-const PeoplePickerAvatar: React.FC<{ person: PeoplePickerPerson; size: 16 | 32 }> = ({
+const BasePeoplePickerAvatar: React.FC<{
+  person: PeoplePickerPerson;
+  size: 16 | 32;
+  photoUrl?: string | null;
+}> = ({
+  person,
+  size,
+  photoUrl,
+}) => (
+  <Avatar
+    name={person.displayName ?? undefined}
+    image={photoUrl ? { src: photoUrl } : undefined}
+    initials={photoUrl ? undefined : getInitials(person.displayName ?? undefined)}
+    size={size}
+  />
+);
+
+const FetchedPeoplePickerAvatar: React.FC<{ person: PeoplePickerPerson; size: 16 | 32 }> = ({
   person,
   size,
 }) => {
   const { photoUrl: loadedPhotoUrl } = usePersonData({
     userId: person.id,
-    fetchPhoto: !person.photoUrl,
+    fetchPhoto: true,
   });
-  const photoUrl = person.photoUrl ?? loadedPhotoUrl;
 
-  return (
-    <Avatar
-      name={person.displayName ?? undefined}
-      image={photoUrl ? { src: photoUrl } : undefined}
-      initials={photoUrl ? undefined : getInitials(person.displayName ?? undefined)}
-      size={size}
-    />
-  );
+  return <BasePeoplePickerAvatar person={person} size={size} photoUrl={loadedPhotoUrl} />;
 };
+
+const PeoplePickerAvatar: React.FC<{ person: PeoplePickerPerson; size: 16 | 32 }> = ({
+  person,
+  size,
+}) =>
+  person.photoUrl
+    ? <BasePeoplePickerAvatar person={person} size={size} photoUrl={person.photoUrl} />
+    : <FetchedPeoplePickerAvatar person={person} size={size} />;
 
 /**
  * PeoplePicker — a tag-picker backed by Microsoft Graph people search.

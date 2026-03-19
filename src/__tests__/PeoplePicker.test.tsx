@@ -174,6 +174,26 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-initials')).toBeNull();
   });
 
+  it('uses a preloaded photo for selected interaction tags without fetching person data', () => {
+    const selected = [
+      {
+        id: '1',
+        displayName: 'Adele Vance',
+        mail: 'adelev@contoso.com',
+        photoUrl: 'data:image/png;base64,preloaded-selected-photo',
+      },
+    ];
+
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-image-src')).toBe(
+      'data:image/png;base64,preloaded-selected-photo'
+    );
+    expect(avatar.getAttribute('data-initials')).toBeNull();
+    expect(mockedUsePersonData).not.toHaveBeenCalled();
+  });
+
   it('shows search results in the dropdown', () => {
     mockedUsePeopleSearch.mockReturnValue({
       results: [
@@ -217,6 +237,32 @@ describe('PeoplePicker', () => {
     const avatar = screen.getByTestId('avatar');
     expect(avatar.getAttribute('data-image-src')).toBe('data:image/png;base64,dropdown-photo');
     expect(avatar.getAttribute('data-initials')).toBeNull();
+  });
+
+  it('uses a preloaded photo for dropdown options without fetching person data', () => {
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        {
+          id: '1',
+          displayName: 'Adele Vance',
+          mail: 'adelev@contoso.com',
+          userPrincipalName: 'adelev@contoso.com',
+          jobTitle: 'Product Manager',
+          department: 'Marketing',
+          photoUrl: 'data:image/png;base64,preloaded-dropdown-photo',
+        },
+      ],
+      loading: false,
+    });
+
+    render(<PeoplePicker />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-image-src')).toBe(
+      'data:image/png;base64,preloaded-dropdown-photo'
+    );
+    expect(avatar.getAttribute('data-initials')).toBeNull();
+    expect(mockedUsePersonData).not.toHaveBeenCalled();
   });
 
   it('filters out already-selected people from search results', () => {
