@@ -56,4 +56,12 @@ export interface PeoplePickerProps
    * Maximum number of search results to show in the dropdown (default: 10)
    */
   maxSearchResults?: number;
+
+  /**
+   * User IDs to exclude from search results.
+   * When provided, these IDs will be filtered out of the dropdown suggestions.
+   * The search will fetch extra results to compensate so that the dropdown still
+   * shows up to {@link maxSearchResults} items after exclusion.
+   */
+  excludeUserIds?: string[];
 }
