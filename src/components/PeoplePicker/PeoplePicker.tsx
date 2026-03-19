@@ -24,6 +24,9 @@ import { PeoplePickerPerson, PeoplePickerProps } from './PeoplePicker.types';
 /** Sentinel value used for the "No people found" option */
 const NO_RESULTS_OPTION_VALUE = '__no_results__';
 
+/** Hard upper bound for search results requested from the provider */
+const MAX_SEARCH_RESULTS_LIMIT = 50;
+
 /**
  * Resolve the display label for a person
  */
@@ -76,9 +79,19 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
 
   const [searchQuery, setSearchQuery] = useState('');
 
+  const uniqueExcludeUserIds = useMemo(
+    () => Array.from(new Set(excludeUserIds)),
+    [excludeUserIds]
+  );
+
+  const effectiveMaxResults = Math.min(
+    maxSearchResults + uniqueExcludeUserIds.length,
+    MAX_SEARCH_RESULTS_LIMIT
+  );
+
   const { results: searchResults, loading: searchLoading } = usePeopleSearch(searchQuery, {
     minChars: searchMinChars,
-    maxResults: maxSearchResults + excludeUserIds.length,
+    maxResults: effectiveMaxResults,
   });
 
   // Build a lookup map so we can resolve a person object from its ID
