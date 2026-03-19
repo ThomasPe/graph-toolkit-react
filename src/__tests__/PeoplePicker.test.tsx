@@ -271,9 +271,9 @@ describe('PeoplePicker', () => {
     mockedUsePeopleSearch.mockReturnValue({
       results: [
         { id: '1', displayName: 'Person 1', mail: 'p1@contoso.com', userPrincipalName: 'p1@contoso.com', jobTitle: null, department: null },
+        { id: 'excluded', displayName: 'Excluded', mail: 'ex@contoso.com', userPrincipalName: 'ex@contoso.com', jobTitle: null, department: null },
         { id: '2', displayName: 'Person 2', mail: 'p2@contoso.com', userPrincipalName: 'p2@contoso.com', jobTitle: null, department: null },
         { id: '3', displayName: 'Person 3', mail: 'p3@contoso.com', userPrincipalName: 'p3@contoso.com', jobTitle: null, department: null },
-        { id: 'excluded', displayName: 'Excluded', mail: 'ex@contoso.com', userPrincipalName: 'ex@contoso.com', jobTitle: null, department: null },
       ],
       loading: false,
     });
