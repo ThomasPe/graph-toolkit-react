@@ -141,6 +141,7 @@ export class MyProvider implements IProvider {
 | --- | --- | --- |
 | Current user profile (`userId="me"`) | `User.Read` | Required for basic profile fields |
 | Other user profile (`userId="{id/upn}"`) | `User.ReadBasic.All` | May require admin consent |
+| PeoplePicker focus suggestions | `People.Read` | Required for the initial `/me/people` suggestions shown before typing |
 | Presence (`showPresence`) | `Presence.Read` | UI still renders without presence |
 | Profile photo (`fetchImage`) | `User.Read` | Falls back to initials if unavailable |
 

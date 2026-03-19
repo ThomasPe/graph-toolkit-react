@@ -81,11 +81,25 @@ const mapGraphPeopleSuggestion = (person: GraphPeopleSuggestion): PeopleSearchRe
 };
 
 /**
+ * Normalize a people search query before it is sent to a provider or Graph.
+ *
+ * The hook strips quotes used to protect the Graph `$search` expression and trims
+ * surrounding whitespace so provider-backed and Graph-backed searches behave the same way.
+ *
+ * @param query - Raw query from the picker input
+ * @returns A sanitized query suitable for search requests
+ */
+const normalizePeopleSearchQuery = (query: string): string => {
+  return query.trim().replace(/"/g, '').trim();
+};
+
+/**
  * Hook to search for people by name, email, or UPN.
  *
  * When used with a {@link MockProvider} the search is performed locally against mock data.
  * With a real provider the hook queries the Microsoft Graph `/users` endpoint using
- * `$search` with `ConsistencyLevel: eventual`.
+ * `$search` with `ConsistencyLevel: eventual`. When `loadInitialResults` is enabled and
+ * the query is empty, it instead loads initial suggestions from `/me/people`.
  *
  * @param query - The search query string
  * @param options - Optional configuration
@@ -106,13 +120,10 @@ export const usePeopleSearch = (
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!query) {
-      if (!loadInitialResults) {
-        setResults([]);
-        setLoading(false);
-        return;
-      }
-    } else if (query.length < minChars) {
+    const normalizedQuery = normalizePeopleSearchQuery(query);
+    const shouldLoadInitialResults = loadInitialResults && query.length === 0;
+
+    if (!shouldLoadInitialResults && (!normalizedQuery || normalizedQuery.length < minChars)) {
       setResults([]);
       setLoading(false);
       return;
@@ -122,27 +133,19 @@ export const usePeopleSearch = (
 
     const search = async () => {
       setLoading(true);
-      const sanitizedQuery = query.replace(/"/g, '');
       try {
         if (isPeopleSearchProvider(provider)) {
-          const data = await provider.searchPeople(query, maxResults);
+          const data = await provider.searchPeople(
+            shouldLoadInitialResults ? '' : normalizedQuery,
+            maxResults
+          );
           if (!cancelled) {
             setResults(data);
           }
         } else if (providerState === 'SignedIn' && graphClient) {
           let nextResults: PeopleSearchResult[];
 
-          if (sanitizedQuery) {
-            const response = (await graphClient
-              .api('/users')
-              .header('ConsistencyLevel', 'eventual')
-              .search(`"displayName:${sanitizedQuery}" OR "mail:${sanitizedQuery}" OR "userPrincipalName:${sanitizedQuery}"`)
-              .select(PEOPLE_SEARCH_SELECT_FIELDS)
-              .top(maxResults)
-              .get()) as { value?: PeopleSearchResult[] };
-
-            nextResults = response.value ?? [];
-          } else {
+          if (shouldLoadInitialResults) {
             const response = (await graphClient
               .api('/me/people')
               .select(PEOPLE_SUGGESTIONS_SELECT_FIELDS)
@@ -150,6 +153,16 @@ export const usePeopleSearch = (
               .get()) as { value?: GraphPeopleSuggestion[] };
 
             nextResults = (response.value ?? []).map(mapGraphPeopleSuggestion);
+          } else {
+            const response = (await graphClient
+              .api('/users')
+              .header('ConsistencyLevel', 'eventual')
+              .search(`"displayName:${normalizedQuery}" OR "mail:${normalizedQuery}" OR "userPrincipalName:${normalizedQuery}"`)
+              .select(PEOPLE_SEARCH_SELECT_FIELDS)
+              .top(maxResults)
+              .get()) as { value?: PeopleSearchResult[] };
+
+            nextResults = response.value ?? [];
           }
 
           if (!cancelled) {
@@ -170,6 +183,14 @@ export const usePeopleSearch = (
         }
       }
     };
+
+    if (shouldLoadInitialResults) {
+      void search();
+
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const debounceHandle = setTimeout(() => {
       void search();
