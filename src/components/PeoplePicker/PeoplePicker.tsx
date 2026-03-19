@@ -45,7 +45,7 @@ const PeoplePickerAvatar: React.FC<{ person: PeoplePickerPerson; size: 16 | 32 }
   size,
 }) => {
   const { photoUrl: loadedPhotoUrl } = usePersonData({
-    userId: person.photoUrl ? undefined : person.id,
+    userId: person.id,
     fetchPhoto: !person.photoUrl,
   });
   const photoUrl = person.photoUrl ?? loadedPhotoUrl;
