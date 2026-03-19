@@ -32,15 +32,19 @@ vi.mock('@fluentui/react-components', async () => {
     TagPickerGroup: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="tag-picker-group">{children}</div>
     ),
-    TagPickerInput: ({ value, onChange, placeholder }: {
+    TagPickerInput: ({ value, onChange, onFocus, onBlur, placeholder }: {
       value?: string;
       onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+      onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+      onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
       placeholder?: string;
     }) => (
       <input
         data-testid="tag-picker-input"
         value={value}
         onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder={placeholder}
       />
     ),
@@ -220,12 +224,49 @@ describe('PeoplePicker', () => {
     render(<PeoplePicker searchMinChars={2} maxSearchResults={5} />);
 
     const input = screen.getByTestId('tag-picker-input');
+    fireEvent.focus(input);
     fireEvent.change(input, { target: { value: 'adele' } });
 
     expect(mockedUsePeopleSearch).toHaveBeenCalledWith('adele', {
       minChars: 2,
       maxResults: 5,
+      loadInitialResults: true,
     });
+  });
+
+  it('loads initial suggestions when the input receives focus', () => {
+    mockedUsePeopleSearch.mockImplementation((query, options) => ({
+      results:
+        query === '' && options?.loadInitialResults
+          ? [
+              {
+                id: '1',
+                displayName: 'Adele Vance',
+                mail: 'adelev@contoso.com',
+                userPrincipalName: 'adelev@contoso.com',
+                jobTitle: null,
+                department: null,
+              },
+            ]
+          : [],
+      loading: false,
+    }));
+
+    render(<PeoplePicker />);
+
+    expect(screen.queryByTestId('tag-picker-option')).toBeNull();
+
+    const input = screen.getByTestId('tag-picker-input');
+    fireEvent.focus(input);
+
+    expect(mockedUsePeopleSearch).toHaveBeenLastCalledWith('', {
+      minChars: 1,
+      maxResults: 10,
+      loadInitialResults: true,
+    });
+
+    const option = screen.getByTestId('tag-picker-option');
+    expect(option.getAttribute('data-value')).toBe('1');
   });
 
   it('requests extra results to compensate for excludeUserIds', () => {
@@ -238,11 +279,13 @@ describe('PeoplePicker', () => {
     render(<PeoplePicker maxSearchResults={5} excludeUserIds={['1', '2', '3']} />);
 
     const input = screen.getByTestId('tag-picker-input');
+    fireEvent.focus(input);
     fireEvent.change(input, { target: { value: 'adele' } });
 
     expect(mockedUsePeopleSearch).toHaveBeenCalledWith('adele', {
       minChars: 1,
       maxResults: 8, // 5 + 3 excluded IDs
+      loadInitialResults: true,
     });
 
     // Person A is not in excludeUserIds, so it should be rendered
@@ -403,8 +446,8 @@ describe('usePeopleSearch with MockProvider', () => {
   it('returns empty results for empty query', async () => {
     const provider = new MockProvider({ autoSignIn: true });
     const results = await provider.searchPeople('');
-    // Empty queries are short-circuited and return an empty array
-    expect(results).toHaveLength(0);
+    expect(results).toHaveLength(10);
+    expect(results[0].displayName).toBe('Adele Vance');
   });
 });
 
