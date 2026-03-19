@@ -116,6 +116,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   const effectiveSelected = isControlled ? selectedPeople : internalSelectedPeople;
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const uniqueExcludeUserIds = useMemo(
     () => Array.from(new Set(excludeUserIds)),
@@ -130,6 +131,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   const { results: searchResults, loading: searchLoading } = usePeopleSearch(searchQuery, {
     minChars: searchMinChars,
     maxResults: effectiveMaxResults,
+    loadInitialResults: isInputFocused,
   });
 
   // Build a lookup map so we can resolve a person object from its ID
@@ -165,6 +167,14 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  }, []);
+
+  const handleInputFocus = useCallback(() => {
+    setIsInputFocused(true);
+  }, []);
+
+  const handleInputBlur = useCallback(() => {
+    setIsInputFocused(false);
   }, []);
 
   const isAtMax = maxPeople !== undefined && effectiveSelected.length >= maxPeople;
@@ -209,6 +219,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
           <TagPickerInput
             value={searchQuery}
             onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
             placeholder={effectiveSelected.length === 0 ? placeholder : undefined}
             disabled={disabled}
           />

@@ -153,7 +153,7 @@ export class MockProvider implements IProvider, IPersonDataProvider, IPeopleSear
   async searchPeople(query: string, maxResults = 10): Promise<PeopleSearchResult[]> {
     const trimmed = query.trim();
     if (!trimmed) {
-      return [];
+      return MOCK_PEOPLE.slice(0, maxResults);
     }
 
     const lower = trimmed.toLowerCase();

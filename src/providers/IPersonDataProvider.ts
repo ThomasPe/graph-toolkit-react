@@ -116,7 +116,7 @@ export interface PeopleSearchResult {
 export interface IPeopleSearchProvider {
   /**
    * Search for people matching the given query string
-   * @param query - The search query (display name, email, or UPN fragment)
+   * @param query - The search query (display name, email, or UPN fragment). An empty query may return initial suggestions.
    * @param maxResults - Maximum number of results to return (default: 10)
    * @returns Promise resolving to an array of matching people
    */

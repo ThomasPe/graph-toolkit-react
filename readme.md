@@ -272,6 +272,7 @@ Use explicit mode selection in your app:
 | ------- | ------------------------ | ----- |
 | Load current user profile (`userId="me"`) | `User.Read` | Required for basic person data (`displayName`, `mail`, etc.) |
 | Load another user by id/upn (`userId="{id}"`) | `User.ReadBasic.All` | May require admin consent depending on tenant policy |
+| Load PeoplePicker focus suggestions | `People.Read` | Required for the initial `/me/people` suggestions shown before typing |
 | Show presence (`showPresence`) | `Presence.Read` | If not granted, person still renders without presence |
 | Load profile photo (`fetchImage`) | `User.Read` | Falls back to initials if photo is unavailable |
 
@@ -412,4 +413,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 - **Component Roadmap**: [docs/COMPONENT_ROADMAP.md](./docs/COMPONENT_ROADMAP.md)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 - **Publishing**: [PUBLISHING.md](PUBLISHING.md)
-

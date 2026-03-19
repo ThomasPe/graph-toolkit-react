@@ -72,6 +72,7 @@ export function App() {
 | --- | --- |
 | Current user profile (`userId="me"`) | `User.Read` |
 | Other user profile (`userId="{id/upn}"`) | `User.ReadBasic.All` |
+| PeoplePicker focus suggestions | `People.Read` |
 | Presence (`showPresence`) | `Presence.Read` |
 | Profile photo (`fetchImage`) | `User.Read` |
 
