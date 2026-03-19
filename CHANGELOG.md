@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-next.10
+
+### Minor Changes
+
+- d8346a4: Show initial PeoplePicker suggestions when the input receives focus, similar to the Microsoft Graph Toolkit people picker.
+
+### Patch Changes
+
+- 0467ab6: Load profile photos in PeoplePicker dropdown options and selected tags when available.
+
 ## 1.0.0-next.9
 
 ### Minor Changes
