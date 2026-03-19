@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PeoplePicker } from '../components/PeoplePicker';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
+import { usePersonData } from '../hooks/usePersonData';
 import { MockProvider } from '../providers/MockProvider';
 import { isPeopleSearchProvider } from '../providers/IPersonDataProvider';
 
@@ -47,12 +48,14 @@ vi.mock('@fluentui/react-components', async () => {
     TagPickerList: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="tag-picker-list">{children}</div>
     ),
-    TagPickerOption: ({ children, value, text }: {
+    TagPickerOption: ({ children, value, text, media }: {
       children: React.ReactNode;
       value: string;
       text?: string;
+      media?: React.ReactNode;
     }) => (
       <div data-testid="tag-picker-option" data-value={value} data-text={text}>
+        {media}
         {children}
       </div>
     ),
@@ -69,8 +72,24 @@ vi.mock('@fluentui/react-components', async () => {
     InteractionTagSecondary: ({ 'aria-label': ariaLabel }: { 'aria-label'?: string }) => (
       <button data-testid="interaction-tag-secondary" aria-label={ariaLabel} />
     ),
-    Avatar: ({ name, initials, size }: { name?: string; initials?: string; size?: number }) => (
-      <div data-testid="avatar" data-name={name} data-initials={initials} data-size={size} />
+    Avatar: ({
+      name,
+      image,
+      initials,
+      size,
+    }: {
+      name?: string;
+      image?: { src?: string };
+      initials?: string;
+      size?: number;
+    }) => (
+      <div
+        data-testid="avatar"
+        data-name={name}
+        data-image-src={image?.src}
+        data-initials={initials}
+        data-size={size}
+      />
     ),
   };
 });
@@ -79,7 +98,12 @@ vi.mock('../hooks/usePeopleSearch', () => ({
   usePeopleSearch: vi.fn(),
 }));
 
+vi.mock('../hooks/usePersonData', () => ({
+  usePersonData: vi.fn(),
+}));
+
 const mockedUsePeopleSearch = vi.mocked(usePeopleSearch);
+const mockedUsePersonData = vi.mocked(usePersonData);
 
 describe('PeoplePicker', () => {
   beforeEach(() => {
@@ -87,6 +111,13 @@ describe('PeoplePicker', () => {
     mockedUsePeopleSearch.mockReturnValue({
       results: [],
       loading: false,
+    });
+    mockedUsePersonData.mockReturnValue({
+      user: null,
+      presence: null,
+      photoUrl: null,
+      loading: false,
+      error: null,
     });
   });
 
@@ -126,6 +157,23 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-size')).toBe('16');
   });
 
+  it('loads avatar images for selected interaction tags when available', () => {
+    mockedUsePersonData.mockReturnValue({
+      user: null,
+      presence: null,
+      photoUrl: 'data:image/png;base64,selected-photo',
+      loading: false,
+      error: null,
+    });
+
+    const selected = [{ id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com' }];
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-image-src')).toBe('data:image/png;base64,selected-photo');
+    expect(avatar.getAttribute('data-initials')).toBeNull();
+  });
+
   it('shows search results in the dropdown', () => {
     mockedUsePeopleSearch.mockReturnValue({
       results: [
@@ -140,6 +188,35 @@ describe('PeoplePicker', () => {
     expect(options).toHaveLength(2);
     expect(options[0].getAttribute('data-value')).toBe('1');
     expect(options[1].getAttribute('data-value')).toBe('2');
+  });
+
+  it('loads avatar images for dropdown options when available', () => {
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        {
+          id: '1',
+          displayName: 'Adele Vance',
+          mail: 'adelev@contoso.com',
+          userPrincipalName: 'adelev@contoso.com',
+          jobTitle: 'Product Manager',
+          department: 'Marketing',
+        },
+      ],
+      loading: false,
+    });
+    mockedUsePersonData.mockReturnValue({
+      user: null,
+      presence: null,
+      photoUrl: 'data:image/png;base64,dropdown-photo',
+      loading: false,
+      error: null,
+    });
+
+    render(<PeoplePicker />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-image-src')).toBe('data:image/png;base64,dropdown-photo');
+    expect(avatar.getAttribute('data-initials')).toBeNull();
   });
 
   it('filters out already-selected people from search results', () => {
@@ -350,6 +427,7 @@ describe('MockProvider.searchPeople', () => {
     expect(results).toHaveLength(1);
     expect(results[0].displayName).toBe('Adele Vance');
     expect(results[0].id).toBeTruthy();
+    expect(results[0].photoUrl).toMatch(/^data:image/);
   });
 
   it('matches by email fragment', async () => {

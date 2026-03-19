@@ -18,6 +18,7 @@ import {
 } from '@fluentui/react-components';
 import { SearchRegular } from '@fluentui/react-icons';
 import { usePeopleSearch } from '../../hooks/usePeopleSearch';
+import { usePersonData } from '../../hooks/usePersonData';
 import { getInitials } from '../../utils/graph';
 import { PeoplePickerPerson, PeoplePickerProps } from './PeoplePicker.types';
 
@@ -38,6 +39,26 @@ const getPersonLabel = (person: PeoplePickerPerson): string =>
  */
 const getPersonSecondary = (person: PeoplePickerPerson): string | undefined =>
   person.mail ?? person.userPrincipalName ?? undefined;
+
+const PeoplePickerAvatar: React.FC<{ person: PeoplePickerPerson; size: 16 | 32 }> = ({
+  person,
+  size,
+}) => {
+  const { photoUrl: loadedPhotoUrl } = usePersonData({
+    userId: person.photoUrl ? undefined : person.id,
+    fetchPhoto: !person.photoUrl,
+  });
+  const photoUrl = person.photoUrl ?? loadedPhotoUrl;
+
+  return (
+    <Avatar
+      name={person.displayName ?? undefined}
+      image={photoUrl ? { src: photoUrl } : undefined}
+      initials={photoUrl ? undefined : getInitials(person.displayName ?? undefined)}
+      size={size}
+    />
+  );
+};
 
 /**
  * PeoplePicker — a tag-picker backed by Microsoft Graph people search.
@@ -156,11 +177,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
               <InteractionTagPrimary
                 hasSecondaryAction
                 media={
-                  <Avatar
-                    name={person.displayName ?? undefined}
-                    initials={getInitials(person.displayName ?? undefined)}
-                    size={16}
-                  />
+                  <PeoplePickerAvatar person={person} size={16} />
                 }
               >
                 {getPersonLabel(person)}
@@ -191,11 +208,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
             key={person.id}
             value={person.id}
             media={
-              <Avatar
-                name={person.displayName ?? undefined}
-                initials={getInitials(person.displayName ?? undefined)}
-                size={32}
-              />
+              <PeoplePickerAvatar person={person} size={32} />
             }
             secondaryContent={getPersonSecondary(person)}
           >

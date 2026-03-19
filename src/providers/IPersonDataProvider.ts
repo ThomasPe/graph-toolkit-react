@@ -103,6 +103,11 @@ export interface PeopleSearchResult {
    * The department the person belongs to
    */
   department?: string | null;
+  /**
+   * Optional profile photo URL for the person.
+   * When provided, UI components can render the avatar image without fetching it separately.
+   */
+  photoUrl?: string | null;
 }
 
 /**

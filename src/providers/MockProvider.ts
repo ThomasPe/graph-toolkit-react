@@ -97,7 +97,10 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
     jobTitle: 'Marketing Manager',
     department: 'Marketing',
   },
-];
+].map((person) => ({
+  ...person,
+  photoUrl: MOCK_AVATAR_DATA_URL,
+}));
 
 export class MockProvider implements IProvider, IPersonDataProvider, IPeopleSearchProvider {
   private state: ProviderState = 'SignedOut';
