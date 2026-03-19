@@ -267,6 +267,15 @@ describe('PeoplePicker', () => {
 
     const option = screen.getByTestId('tag-picker-option');
     expect(option.getAttribute('data-value')).toBe('1');
+
+    fireEvent.blur(input);
+
+    expect(mockedUsePeopleSearch).toHaveBeenLastCalledWith('', {
+      minChars: 1,
+      maxResults: 10,
+      loadInitialResults: false,
+    });
+    expect(screen.queryByTestId('tag-picker-option')).toBeNull();
   });
 
   it('requests extra results to compensate for excludeUserIds', () => {
@@ -446,6 +455,7 @@ describe('usePeopleSearch with MockProvider', () => {
   it('returns empty results for empty query', async () => {
     const provider = new MockProvider({ autoSignIn: true });
     const results = await provider.searchPeople('');
+    // Empty queries now return the initial suggestion set that appears on focus.
     expect(results).toHaveLength(10);
     expect(results[0].displayName).toBe('Adele Vance');
   });

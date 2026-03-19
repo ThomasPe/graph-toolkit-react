@@ -90,14 +90,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
     MAX_SEARCH_RESULTS_LIMIT
   );
 
-  const { results: searchResults, loading: searchLoading } = usePeopleSearch(
-    isInputFocused ? searchQuery : null,
-    {
+  const { results: searchResults, loading: searchLoading } = usePeopleSearch(searchQuery, {
     minChars: searchMinChars,
     maxResults: effectiveMaxResults,
-      loadInitialResults: isInputFocused,
-    }
-  );
+    loadInitialResults: isInputFocused,
+  });
 
   // Build a lookup map so we can resolve a person object from its ID
   const peopleLookup = useMemo(() => {

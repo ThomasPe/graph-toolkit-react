@@ -39,10 +39,20 @@ const PEOPLE_SEARCH_SELECT_FIELDS =
 const PEOPLE_SUGGESTIONS_SELECT_FIELDS =
   'id,displayName,scoredEmailAddresses,userPrincipalName,jobTitle,department';
 
+/**
+ * Suggestion item returned by the Microsoft Graph `/me/people` endpoint.
+ *
+ * Unlike the `/users` search response, the primary email is exposed through
+ * `scoredEmailAddresses` rather than a top-level `mail` field.
+ */
 interface GraphPeopleSuggestion {
   id?: string | null;
   displayName?: string | null;
   userPrincipalName?: string | null;
+  /**
+   * Ranked email addresses associated with the suggested person.
+   * The first address is used as the primary email in picker results.
+   */
   scoredEmailAddresses?: Array<{
     address?: string | null;
   }> | null;
@@ -50,11 +60,18 @@ interface GraphPeopleSuggestion {
   department?: string | null;
 }
 
+/**
+ * Convert a `/me/people` suggestion into the shared {@link PeopleSearchResult} shape.
+ *
+ * @param person - The raw suggestion returned by Microsoft Graph
+ * @returns A normalized picker result with a stable ID and primary email
+ */
 const mapGraphPeopleSuggestion = (person: GraphPeopleSuggestion): PeopleSearchResult => {
   const primaryEmail = person.scoredEmailAddresses?.[0]?.address ?? null;
+  const fallbackId = `person-suggestion:${person.displayName ?? 'unknown'}:${person.userPrincipalName ?? primaryEmail ?? person.jobTitle ?? 'no-identity'}`;
 
   return {
-    id: person.id ?? person.userPrincipalName ?? primaryEmail ?? person.displayName ?? 'unknown-person',
+    id: person.id ?? person.userPrincipalName ?? primaryEmail ?? person.displayName ?? fallbackId,
     displayName: person.displayName ?? null,
     mail: primaryEmail,
     userPrincipalName: person.userPrincipalName ?? null,
@@ -75,7 +92,7 @@ const mapGraphPeopleSuggestion = (person: GraphPeopleSuggestion): PeopleSearchRe
  * @returns An object with the search results and a loading flag
  */
 export const usePeopleSearch = (
-  query: string | null | undefined,
+  query: string,
   options?: UsePeopleSearchOptions
 ): UsePeopleSearchResult => {
   const graphClient = useGraphClient();
@@ -89,15 +106,13 @@ export const usePeopleSearch = (
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const normalizedQuery = query ?? '';
-
-    if (!normalizedQuery) {
+    if (!query) {
       if (!loadInitialResults) {
         setResults([]);
         setLoading(false);
         return;
       }
-    } else if (normalizedQuery.length < minChars) {
+    } else if (query.length < minChars) {
       setResults([]);
       setLoading(false);
       return;
@@ -107,35 +122,38 @@ export const usePeopleSearch = (
 
     const search = async () => {
       setLoading(true);
-      const sanitizedQuery = normalizedQuery.replace(/"/g, '');
+      const sanitizedQuery = query.replace(/"/g, '');
       try {
         if (isPeopleSearchProvider(provider)) {
-          const data = await provider.searchPeople(normalizedQuery, maxResults);
+          const data = await provider.searchPeople(query, maxResults);
           if (!cancelled) {
             setResults(data);
           }
         } else if (providerState === 'SignedIn' && graphClient) {
-          const response = sanitizedQuery
-            ? await graphClient
-                .api('/users')
-                .header('ConsistencyLevel', 'eventual')
-                .search(`"displayName:${sanitizedQuery}" OR "mail:${sanitizedQuery}" OR "userPrincipalName:${sanitizedQuery}"`)
-                .select(PEOPLE_SEARCH_SELECT_FIELDS)
-                .top(maxResults)
-                .get() as { value?: PeopleSearchResult[] }
-            : await graphClient
-                .api('/me/people')
-                .select(PEOPLE_SUGGESTIONS_SELECT_FIELDS)
-                .top(maxResults)
-                .get() as { value?: GraphPeopleSuggestion[] };
+          let nextResults: PeopleSearchResult[];
+
+          if (sanitizedQuery) {
+            const response = (await graphClient
+              .api('/users')
+              .header('ConsistencyLevel', 'eventual')
+              .search(`"displayName:${sanitizedQuery}" OR "mail:${sanitizedQuery}" OR "userPrincipalName:${sanitizedQuery}"`)
+              .select(PEOPLE_SEARCH_SELECT_FIELDS)
+              .top(maxResults)
+              .get()) as { value?: PeopleSearchResult[] };
+
+            nextResults = response.value ?? [];
+          } else {
+            const response = (await graphClient
+              .api('/me/people')
+              .select(PEOPLE_SUGGESTIONS_SELECT_FIELDS)
+              .top(maxResults)
+              .get()) as { value?: GraphPeopleSuggestion[] };
+
+            nextResults = (response.value ?? []).map(mapGraphPeopleSuggestion);
+          }
+
           if (!cancelled) {
-            setResults(
-              sanitizedQuery
-                ? (response.value as PeopleSearchResult[] | undefined) ?? []
-                : ((response.value as GraphPeopleSuggestion[] | undefined) ?? []).map(
-                    mapGraphPeopleSuggestion
-                  )
-            );
+            setResults(nextResults);
           }
         } else {
           if (!cancelled) {
