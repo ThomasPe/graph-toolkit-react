@@ -1,64 +1,62 @@
-import React from 'react';
-import { Person, useProvider } from '@devsym/graph-toolkit-react';
+import React, { useState } from 'react';
+import { useProvider } from '@devsym/graph-toolkit-react';
 import {
   Button,
+  Tab,
+  TabList,
   Title3,
-  Subtitle1,
-  Body1,
-  Card,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { SignOut24Regular, Person24Regular } from '@fluentui/react-icons';
+import { SignOut24Regular, Person24Regular, People24Regular } from '@fluentui/react-icons';
+import { PersonPage } from './PersonPage';
+import { PeoplePickerPage } from './PeoplePickerPage';
+
+type NavPage = 'person' | 'people-picker';
 
 const useStyles = makeStyles({
-  container: {
+  root: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
     minHeight: '100vh',
-    padding: '20px',
     backgroundColor: tokens.colorNeutralBackground3,
-  },
-  card: {
-    maxWidth: '600px',
-    width: '100%',
-    padding: '32px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
   },
   header: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
     alignItems: 'center',
-    textAlign: 'center',
+    justifyContent: 'space-between',
+    padding: '12px 24px',
+    backgroundColor: tokens.colorBrandBackground,
+    color: tokens.colorNeutralForegroundOnBrand,
+    boxShadow: tokens.shadow4,
   },
-  personContainer: {
+  headerTitle: {
+    color: tokens.colorNeutralForegroundOnBrand,
+  },
+  body: {
     display: 'flex',
-    justifyContent: 'center',
-    padding: '24px',
+    flex: '1',
+    minHeight: 0,
+  },
+  nav: {
+    width: '200px',
+    padding: '16px 8px',
     backgroundColor: tokens.colorNeutralBackground1,
-    borderRadius: tokens.borderRadiusMedium,
-  },
-  actions: {
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
     display: 'flex',
-    justifyContent: 'center',
-    gap: '12px',
+    flexDirection: 'column',
   },
-  info: {
-    padding: '16px',
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
-    borderLeft: `4px solid ${tokens.colorBrandBackground}`,
+  content: {
+    flex: '1',
+    padding: '32px 24px',
+    overflowY: 'auto',
   },
 });
 
 export const Dashboard: React.FC = () => {
   const styles = useStyles();
   const provider = useProvider();
+  const [activePage, setActivePage] = useState<NavPage>('person');
 
   const handleLogout = async () => {
     try {
@@ -69,37 +67,40 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <Card className={styles.card}>
-        <div className={styles.header}>
-          <Person24Regular style={{ fontSize: '48px', color: tokens.colorBrandBackground }} />
-          <Title3>Welcome to Graph Toolkit React</Title3>
-          <Subtitle1>MSAL Authentication Sample</Subtitle1>
-        </div>
+    <div className={styles.root}>
+      <header className={styles.header}>
+        <Title3 className={styles.headerTitle}>Graph Toolkit React</Title3>
+        <Button
+          appearance="subtle"
+          icon={<SignOut24Regular />}
+          onClick={() => void handleLogout()}
+          style={{ color: tokens.colorNeutralForegroundOnBrand }}
+        >
+          Sign Out
+        </Button>
+      </header>
 
-        <div className={styles.info}>
-          <Body1>
-            This sample demonstrates how to use the Person component with native MSAL browser
-            authentication. The Person component below displays your user information fetched from
-            Microsoft Graph using the &quot;me&quot; query.
-          </Body1>
-        </div>
+      <div className={styles.body}>
+        <nav className={styles.nav}>
+          <TabList
+            vertical
+            selectedValue={activePage}
+            onTabSelect={(_, data) => setActivePage(data.value as NavPage)}
+          >
+            <Tab value="person" icon={<Person24Regular />}>
+              Person
+            </Tab>
+            <Tab value="people-picker" icon={<People24Regular />}>
+              People Picker
+            </Tab>
+          </TabList>
+        </nav>
 
-        <div className={styles.personContainer}>
-          <Person
-            userId="me"
-            view="threelines"
-            size="large"
-            showPresence={true}
-          />
-        </div>
-
-        <div className={styles.actions}>
-          <Button appearance="primary" icon={<SignOut24Regular />} onClick={handleLogout}>
-            Sign Out
-          </Button>
-        </div>
-      </Card>
+        <main className={styles.content}>
+          {activePage === 'person' && <PersonPage />}
+          {activePage === 'people-picker' && <PeoplePickerPage />}
+        </main>
+      </div>
     </div>
   );
 };
