@@ -82,7 +82,9 @@ const mapGraphPeopleSuggestion = (
   fallbackIndex = 0,
 ): PeoplePerson => {
   const primaryEmail = person.scoredEmailAddresses?.[0]?.address ?? null;
-  const fallbackId = `person-suggestion:${person.displayName ?? 'unknown'}:${person.userPrincipalName ?? primaryEmail ?? person.jobTitle ?? 'no-identity'}:${fallbackIndex}`;
+  const secondaryIdentifier =
+    person.userPrincipalName ?? primaryEmail ?? person.jobTitle ?? 'no-identity';
+  const fallbackId = `person-suggestion:${person.displayName ?? 'unknown'}:${secondaryIdentifier}:${fallbackIndex}`;
 
   return {
     id: person.id ?? person.userPrincipalName ?? primaryEmail ?? fallbackId,
@@ -131,6 +133,14 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
   const graphClient = useGraphClient();
   const provider = useProvider();
   const providerState = useProviderState();
+  const directPeopleKey = JSON.stringify(options?.people ?? null);
+  const directPeople = useMemo<PeoplePerson[] | undefined>(() => {
+    if (directPeopleKey === 'null') {
+      return undefined;
+    }
+
+    return JSON.parse(directPeopleKey) as PeoplePerson[];
+  }, [directPeopleKey]);
   const userIds = useMemo(() => uniqueNonEmpty(options?.userIds), [options?.userIds]);
   const groupId = useMemo(() => options?.groupId?.trim(), [options?.groupId]);
   const maxPeople = options?.maxPeople ?? DEFAULT_MAX_PEOPLE;
@@ -245,17 +255,16 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
     };
 
     const load = async () => {
-      await Promise.resolve();
       if (!cancelled) {
         setState(previous => ({ ...previous, loading: true, error: null }));
       }
 
-      if (options?.people) {
+      if (directPeople) {
         const shouldEnrichResolvedPeople =
-          showPresence || options.people.some(person => !person.photoUrl);
+          showPresence || directPeople.some(person => !person.photoUrl);
         const nextPeople = shouldEnrichResolvedPeople
-          ? await enrichResolvedPeople(options.people)
-          : options.people;
+          ? await enrichResolvedPeople(directPeople)
+          : directPeople;
         if (!cancelled) {
           setState({ people: nextPeople, loading: false, error: null });
         }
@@ -304,9 +313,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
             .select('id,displayName,scoredEmailAddresses,userPrincipalName,jobTitle,department')
             .top(maxPeople)
             .get()) as { value?: GraphPeopleSuggestion[] };
-          nextPeople = (response.value ?? []).map((person, index) =>
-            mapGraphPeopleSuggestion(person, index)
-          );
+          nextPeople = (response.value ?? []).map(mapGraphPeopleSuggestion);
         }
 
         if (showPresence || nextPeople.some(person => !person.photoUrl)) {
@@ -328,7 +335,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
     return () => {
       cancelled = true;
     };
-  }, [graphClient, groupId, maxPeople, options?.people, provider, providerState, showPresence, userIds]);
+  }, [directPeople, directPeopleKey, graphClient, groupId, maxPeople, provider, providerState, showPresence, userIds]);
 
   return state;
 };

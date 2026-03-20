@@ -6,6 +6,14 @@ import { useProvider, useProviderState } from '../providers/ProviderContext';
 import type { IProvider } from '../providers/IProvider';
 import type { IPersonDataProvider } from '../providers/IPersonDataProvider';
 
+type GraphPeopleSuggestionsResponse = {
+  value: Array<{
+    id: string;
+    displayName: string;
+    scoredEmailAddresses?: Array<{ address?: string | null }>;
+  }>;
+};
+
 vi.mock('../hooks/useGraphClient', () => ({
   useGraphClient: vi.fn(),
 }));
@@ -80,25 +88,11 @@ describe('usePeopleList', () => {
       }),
     } as IProvider & IPersonDataProvider as never);
 
-    let resolvePeople:
-      | ((value: {
-          value: Array<{
-            id: string;
-            displayName: string;
-            scoredEmailAddresses?: Array<{ address?: string | null }>;
-          }>;
-        }) => void)
-      | undefined;
+    let resolveGraphResponse: ((value: GraphPeopleSuggestionsResponse) => void) | undefined;
     const getMock = vi.fn().mockImplementation(
       () =>
-        new Promise<{
-          value: Array<{
-            id: string;
-            displayName: string;
-            scoredEmailAddresses?: Array<{ address?: string | null }>;
-          }>;
-        }>(resolve => {
-          resolvePeople = resolve;
+        new Promise<GraphPeopleSuggestionsResponse>(resolve => {
+          resolveGraphResponse = resolve;
         })
     );
     const topMock = vi.fn().mockReturnValue({ get: getMock });
@@ -121,12 +115,12 @@ describe('usePeopleList', () => {
     expect(result.current.loading).toBe(true);
     expect(apiMock).toHaveBeenCalledWith('/me/people');
 
-    resolvePeople?.({
+    resolveGraphResponse?.({
       value: [
         {
           id: 'user-1',
-          displayName: 'Unknown Person',
-          scoredEmailAddresses: [{ address: 'unknown@contoso.com' }],
+          displayName: 'Test User',
+          scoredEmailAddresses: [{ address: 'test.user@contoso.com' }],
         },
       ],
     });
