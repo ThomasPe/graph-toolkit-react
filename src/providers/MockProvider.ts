@@ -120,7 +120,8 @@ export class MockProvider implements IProvider, IPersonDataProvider, IPeopleSear
   }
 
   async getPersonData(request: ProviderPersonDataRequest): Promise<ProviderPersonDataResponse> {
-    const lookupIdentifier = request.identifier?.trim().toLowerCase();
+    const trimmedIdentifier = request.identifier?.trim();
+    const lookupIdentifier = trimmedIdentifier?.toLowerCase();
     const matchedPerson = lookupIdentifier && lookupIdentifier !== 'me'
       ? MOCK_PEOPLE.find((person) =>
         person.id.toLowerCase() === lookupIdentifier ||
@@ -131,9 +132,9 @@ export class MockProvider implements IProvider, IPersonDataProvider, IPeopleSear
       : MOCK_PEOPLE[0];
     const mockPerson = matchedPerson ?? MOCK_PEOPLE[0];
     const resolvedUserPrincipalName =
-      matchedPerson || !request.identifier || request.identifier === 'me'
+      matchedPerson || !trimmedIdentifier || trimmedIdentifier === 'me'
         ? mockPerson.userPrincipalName
-        : request.identifier;
+        : trimmedIdentifier;
 
     const mockUser: User = {
       id: mockPerson.id,

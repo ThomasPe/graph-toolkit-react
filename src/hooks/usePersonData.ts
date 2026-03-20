@@ -7,6 +7,7 @@ import { User, Presence } from '@microsoft/microsoft-graph-types';
 import { useGraphClient } from './useGraphClient';
 import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
+import { photoResponseToDataUrl } from '../utils/graph';
 import {
   getPersonCacheKey,
   isTimestampFresh,
@@ -40,34 +41,6 @@ const DEFAULT_USER_SELECT_FIELDS = [
   'officeLocation',
   'userPrincipalName',
 ];
-
-const photoResponseToDataUrl = async (photoResponse: unknown): Promise<string | null> => {
-  if (!photoResponse) {
-    return null;
-  }
-
-  if (typeof photoResponse === 'string') {
-    return photoResponse;
-  }
-
-  const blob =
-    photoResponse instanceof Blob
-      ? photoResponse
-      : photoResponse instanceof ArrayBuffer
-        ? new Blob([photoResponse])
-        : null;
-
-  if (!blob) {
-    return null;
-  }
-
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(typeof reader.result === 'string' ? reader.result : null);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
-};
 
 /**
  * Fetch person data from Microsoft Graph

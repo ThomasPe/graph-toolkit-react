@@ -122,6 +122,17 @@ describe('MockProvider.getPersonData', () => {
     expect(result.user?.userPrincipalName).toBe(customIdentifier);
   });
 
+  it('trims custom identifiers before using them as mock UPN fallbacks', async () => {
+    const provider = new MockProvider();
+    const result = await provider.getPersonData({
+      identifier: '  john@contoso.com  ',
+      fetchPresence: false,
+      fetchPhoto: false,
+    });
+
+    expect(result.user?.userPrincipalName).toBe('john@contoso.com');
+  });
+
   it('returns all data when all fetch options are true', async () => {
     const provider = new MockProvider();
     const result = await provider.getPersonData({
