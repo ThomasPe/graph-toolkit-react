@@ -6,6 +6,7 @@
 
 // Components
 export * from './components/Person';
+export * from './components/People';
 export * from './components/PeoplePicker';
 
 // Providers
@@ -19,4 +20,5 @@ export * from './providers/TeamsHostedProvider';
 // Hooks
 export * from './hooks/useGraphClient';
 export * from './hooks/usePersonData';
+export * from './hooks/usePeopleList';
 export * from './hooks/usePeopleSearch';

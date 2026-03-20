@@ -12,6 +12,7 @@ The **Priority Score** (Usefulness ÷ Effort) indicates the most cost-effective 
 | Component | MGT reference | Status |
 | --- | --- | --- |
 | `Person` | [`mgt-person`](https://learn.microsoft.com/graph/toolkit/components/person) | ✅ Shipped |
+| `People` | [`mgt-people`](https://learn.microsoft.com/graph/toolkit/components/people) | ✅ Shipped |
 | `PeoplePicker` | [`mgt-people-picker`](https://learn.microsoft.com/graph/toolkit/components/people-picker) | ✅ Shipped |
 
 ---

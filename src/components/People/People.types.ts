@@ -1,0 +1,61 @@
+/**
+ * People component types
+ */
+
+import type { AvatarGroupProps } from '@fluentui/react-components';
+import type { PeopleSearchResult } from '../../providers/IPersonDataProvider';
+
+/**
+ * A person entry rendered by the {@link People} component.
+ *
+ * This extends the base people search result shape with optional presence fields used
+ * for avatar badges when {@link PeopleProps.showPresence} is enabled.
+ */
+export interface PeoplePerson extends PeopleSearchResult {
+  /**
+   * Current presence activity when available.
+   */
+  presenceActivity?: string | null;
+  /**
+   * Current presence availability when available.
+   */
+  presenceAvailability?: string | null;
+}
+
+/**
+ * Props for the {@link People} component.
+ */
+export interface PeopleProps extends Omit<AvatarGroupProps, 'children'> {
+  /**
+   * A pre-resolved list of people to render.
+   *
+   * When provided, the component skips list discovery and renders these people directly.
+   */
+  people?: PeoplePerson[];
+
+  /**
+   * A list of user identifiers to resolve and render.
+   *
+   * Values can be Microsoft Graph user IDs, UPNs, email addresses, or `"me"`.
+   */
+  userIds?: string[];
+
+  /**
+   * The ID of a Microsoft Entra ID group whose direct user members should be rendered.
+   */
+  groupId?: string;
+
+  /**
+   * Maximum number of visible avatars before the remaining people are shown in overflow.
+   *
+   * Defaults to `3`, matching the MGT `mgt-people` control.
+   */
+  showMax?: number;
+
+  /**
+   * Whether presence badges should be shown on each avatar.
+   *
+   * Presence is loaded when the active provider and granted scopes support it.
+   */
+  showPresence?: boolean;
+}

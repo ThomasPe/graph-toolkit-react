@@ -129,6 +129,34 @@ For full manual override, use React render callbacks as the replacement for MGT 
 />
 ```
 
+### People Component
+Display a compact strip of people using Fluent UI `AvatarGroup`.
+
+```tsx
+import { People } from '@devsym/graph-toolkit-react';
+
+<People showMax={4} size={40} />
+```
+
+You can also provide people directly or resolve specific users:
+
+```tsx
+<People
+  userIds={['me', 'user@contoso.com']}
+  showMax={2}
+  showPresence
+/>
+```
+
+```tsx
+<People
+  people={[
+    { id: 'adele', displayName: 'Adele Vance', mail: 'adelev@contoso.com' },
+    { id: 'alex', displayName: 'Alex Wilber', mail: 'alexw@contoso.com' },
+  ]}
+/>
+```
+
 
 ## 🚀 Getting Started
 
@@ -274,6 +302,8 @@ Use explicit mode selection in your app:
 | ------- | ------------------------ | ----- |
 | Load current user profile (`userId="me"`) | `User.Read` | Required for basic person data (`displayName`, `mail`, etc.) |
 | Load another user by id/upn (`userId="{id}"`) | `User.ReadBasic.All` | May require admin consent depending on tenant policy |
+| Load `People` default suggestions | `People.Read` | Used for the default `/me/people` list when no explicit people source is provided |
+| Load `People` group members (`groupId`) | `GroupMember.Read.All` | Required only when resolving direct group membership |
 | Load PeoplePicker focus suggestions | `People.Read` | Required for the initial `/me/people` suggestions shown before typing |
 | Show presence (`showPresence`) | `Presence.Read` | If not granted, person still renders without presence |
 | Load profile photo (`fetchImage`) | `User.Read` | Falls back to initials if photo is unavailable |
@@ -342,10 +372,13 @@ npm run build-storybook
 ```
 src/
 ├── components/
-│   └── Person/
-│       ├── Person.tsx          # Component implementation
-│       ├── Person.types.ts     # TypeScript definitions
-│       └── __tests__/          # Component tests
+│   ├── Person/
+│   │   ├── Person.tsx          # Component implementation
+│   │   ├── Person.types.ts     # TypeScript definitions
+│   │   └── __tests__/          # Component tests
+│   └── People/
+│       ├── People.tsx          # Component implementation
+│       └── People.types.ts     # TypeScript definitions
 ├── providers/
 │   ├── IProvider.ts            # Provider interface
 │   ├── MockProvider.ts         # Development provider
@@ -353,11 +386,14 @@ src/
 ├── hooks/
 │   ├── useGraphClient.ts       # Graph client hook
 │   ├── usePersonData.ts        # Person data fetching
+│   ├── usePeopleList.ts        # People list fetching
 │   └── useProvider.ts          # Provider access
 └── index.ts                    # Public API
 
 stories/
-└── Person.stories.tsx          # Storybook stories (19 examples)
+├── Person.stories.tsx          # Person stories
+├── People.stories.tsx          # People stories
+└── PeoplePicker.stories.tsx    # PeoplePicker stories
 ```
 
 ## 🎯 Current Status
@@ -367,15 +403,17 @@ stories/
 - ✅ Repository restructured from monorepo to single package
 - ✅ Provider infrastructure with MockProvider for development
 - ✅ Person component using Fluent UI Persona
+- ✅ People component using Fluent UI AvatarGroup
+- ✅ PeoplePicker component using Fluent UI TagPicker
 - ✅ Full Persona configuration support (textAlignment, textPosition, sizing)
 - ✅ Build system (ESM + CJS + TypeScript declarations)
 - ✅ Storybook documentation and GitHub Pages deployment
 - ✅ CI/CD with GitHub Actions
 - ✅ Automatic Storybook deployment to GitHub Pages
-- ✅ Sample app with MSAL sign-in and `Person` (`userId="me"`) at `samples/react-msal-sample`
+- ✅ Sample app with MSAL sign-in and `Person`, `People`, and `PeoplePicker` demos at `samples/react-msal-sample`
 
 **Next Steps**:
-- Additional components (PeoplePicker, PersonCard, Login) — see [`docs/COMPONENT_ROADMAP.md`](./docs/COMPONENT_ROADMAP.md) for the full ranked list
+- Additional components (PersonCard, Login, Agenda) — see [`docs/COMPONENT_ROADMAP.md`](./docs/COMPONENT_ROADMAP.md) for the full ranked list
 - Expanded provider guidance and production auth examples
 - Comprehensive test coverage
 - First stable release (1.0.0)
