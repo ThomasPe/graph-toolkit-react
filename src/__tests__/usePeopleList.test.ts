@@ -6,11 +6,14 @@ import { useProvider, useProviderState } from '../providers/ProviderContext';
 import type { IProvider } from '../providers/IProvider';
 import type { IPersonDataProvider } from '../providers/IPersonDataProvider';
 
-type GraphPeopleSuggestionsResponse = {
+type GraphUsersResponse = {
   value: Array<{
     id: string;
     displayName: string;
-    scoredEmailAddresses?: Array<{ address?: string | null }>;
+    mail?: string | null;
+    userPrincipalName?: string | null;
+    jobTitle?: string | null;
+    department?: string | null;
   }>;
 };
 
@@ -88,10 +91,10 @@ describe('usePeopleList', () => {
       }),
     } as IProvider & IPersonDataProvider as never);
 
-    let resolveGraphResponse: ((value: GraphPeopleSuggestionsResponse) => void) | undefined;
+    let resolveGraphResponse: ((value: GraphUsersResponse) => void) | undefined;
     const getMock = vi.fn().mockImplementation(
       () =>
-        new Promise<GraphPeopleSuggestionsResponse>(resolve => {
+        new Promise<GraphUsersResponse>(resolve => {
           resolveGraphResponse = resolve;
         })
     );
@@ -113,14 +116,14 @@ describe('usePeopleList', () => {
     });
 
     expect(result.current.loading).toBe(true);
-    expect(apiMock).toHaveBeenCalledWith('/me/people');
+    expect(apiMock).toHaveBeenCalledWith('/users');
 
     resolveGraphResponse?.({
       value: [
         {
           id: 'user-1',
           displayName: 'Test User',
-          scoredEmailAddresses: [{ address: 'test.user@contoso.com' }],
+          mail: 'test.user@contoso.com',
         },
       ],
     });
@@ -214,7 +217,7 @@ describe('usePeopleList', () => {
     ]);
   });
 
-  it('assigns stable unique fallback ids to Graph suggestions without ids or emails', async () => {
+  it('loads default tenant users from Graph when no explicit source is provided', async () => {
     mockedUseProvider.mockReturnValue({
       getPersonData: vi.fn().mockResolvedValue({
         user: null,
@@ -226,10 +229,12 @@ describe('usePeopleList', () => {
     const getMock = vi.fn().mockResolvedValue({
       value: [
         {
+          id: 'user-1',
           displayName: 'Unknown Person',
-        },
-        {
-          displayName: 'Unknown Person',
+          mail: 'unknown.person@contoso.com',
+          userPrincipalName: 'unknown.person@contoso.com',
+          jobTitle: 'Designer',
+          department: 'Marketing',
         },
       ],
     });
@@ -245,8 +250,16 @@ describe('usePeopleList', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.people).toHaveLength(2);
-    expect(result.current.people[0]?.id).toBe('person-suggestion:Unknown Person:no-identity:0');
-    expect(result.current.people[1]?.id).toBe('person-suggestion:Unknown Person:no-identity:1');
+    expect(apiMock).toHaveBeenCalledWith('/users');
+    expect(result.current.people).toEqual([
+      {
+        id: 'user-1',
+        displayName: 'Unknown Person',
+        mail: 'unknown.person@contoso.com',
+        userPrincipalName: 'unknown.person@contoso.com',
+        jobTitle: 'Designer',
+        department: 'Marketing',
+      },
+    ]);
   });
 });

@@ -302,9 +302,9 @@ Use explicit mode selection in your app:
 | ------- | ------------------------ | ----- |
 | Load current user profile (`userId="me"`) | `User.Read` | Required for basic person data (`displayName`, `mail`, etc.) |
 | Load another user by id/upn (`userId="{id}"`) | `User.ReadBasic.All` | May require admin consent depending on tenant policy |
-| Load `People` default suggestions | `People.Read` | Used for the default `/me/people` list when no explicit people source is provided |
+| Load `People` default suggestions | `User.ReadBasic.All` | Used for the default `/users` directory list when no explicit people source is provided |
 | Load `People` group members (`groupId`) | `GroupMember.Read.All` | Required only when resolving direct group membership |
-| Load PeoplePicker focus suggestions | `People.Read` | Required for the initial `/me/people` suggestions shown before typing |
+| Load PeoplePicker focus suggestions | `User.ReadBasic.All` | Uses the initial `/users` directory list shown before typing |
 | Show presence (`showPresence`) | `Presence.Read` | If not granted, person still renders without presence |
 | Load profile photo (`fetchImage`) | `User.Read` | Falls back to initials if photo is unavailable |
 

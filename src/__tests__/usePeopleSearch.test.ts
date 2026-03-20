@@ -31,13 +31,13 @@ describe('usePeopleSearch', () => {
     vi.useRealTimers();
   });
 
-  it('loads initial Graph suggestions immediately from /me/people and maps scored email addresses', async () => {
+  it('loads initial Graph suggestions immediately from /users', async () => {
     const getMock = vi.fn().mockResolvedValue({
       value: [
         {
           id: 'graph-person-1',
           displayName: 'Adele Vance',
-          scoredEmailAddresses: [{ address: 'adelev@contoso.com' }],
+          mail: 'adelev@contoso.com',
           userPrincipalName: 'adelev@contoso.com',
           jobTitle: 'Product Manager',
           department: 'Marketing',
@@ -47,7 +47,7 @@ describe('usePeopleSearch', () => {
     const topMock = vi.fn().mockReturnValue({ get: getMock });
     const selectMock = vi.fn().mockReturnValue({ top: topMock });
     const apiMock = vi.fn((path: string) => {
-      if (path === '/me/people') {
+      if (path === '/users') {
         return {
           select: selectMock,
         };
@@ -67,11 +67,9 @@ describe('usePeopleSearch', () => {
 
     const { result } = renderHook(() => usePeopleSearch('', { loadInitialResults: true, maxResults: 5 }));
 
-    expect(apiMock).toHaveBeenCalledWith('/me/people');
+    expect(apiMock).toHaveBeenCalledWith('/users');
     expect(setTimeoutSpy).not.toHaveBeenCalled();
-    expect(selectMock).toHaveBeenCalledWith(
-      'id,displayName,scoredEmailAddresses,userPrincipalName,jobTitle,department'
-    );
+    expect(selectMock).toHaveBeenCalledWith('id,displayName,mail,userPrincipalName,jobTitle,department');
     expect(topMock).toHaveBeenCalledWith(5);
 
     await waitFor(() => {
