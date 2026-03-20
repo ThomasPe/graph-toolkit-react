@@ -41,8 +41,8 @@ This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (M
 
 1. In your app registration, go to **API permissions**
 2. The `User.Read` permission should already be added by default
-3. Add `People.Read` (delegated) for the People component default suggestions and PeoplePicker initial suggestions
-4. Add `User.ReadBasic.All` (delegated) for loading other users by ID and PeoplePicker typed user search
+3. Add `User.ReadBasic.All` (delegated) for the People component default suggestions, PeoplePicker initial suggestions, and loading other users by ID
+4. The same `User.ReadBasic.All` permission also covers PeoplePicker typed user search
 5. Click **Grant admin consent** if you're an admin (optional but recommended)
 
 For additional optional scopes (for example presence), use the root documentation as the source of truth: [Scopes by feature](../../readme.md#scopes-by-feature).

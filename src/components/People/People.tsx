@@ -60,7 +60,7 @@ const renderAvatarGroupItem = (person: PeoplePerson) => {
  * `People` renders a compact avatar strip similar to the MGT `mgt-people` control.
  *
  * The component can render a supplied list of people, resolve a list of `userIds`, load
- * group members, or default to current-user people suggestions from `/me/people`.
+ * group members, or default to tenant directory users from `/users`.
  *
  * @param props - Avatar group configuration and people-loading options
  * @returns A compact avatar group, a loading spinner, or `null` when no people are available

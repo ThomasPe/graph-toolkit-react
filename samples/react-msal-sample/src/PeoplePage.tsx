@@ -57,17 +57,17 @@ export const PeoplePage: React.FC = () => {
       <div className={styles.info}>
         <Body1>
           The People component displays a compact strip of people similar to the MGT{' '}
-          <code>mgt-people</code> control. By default it loads current-user people suggestions from{' '}
-          <code>/me/people</code> and shows additional entries in an overflow popover.
+          <code>mgt-people</code> control. By default it loads tenant directory users from{' '}
+          <code>/users</code> and shows additional entries in an overflow popover.
         </Body1>
       </div>
 
       <div className={styles.section}>
-        <Body1>Frequent contacts from Microsoft Graph</Body1>
+        <Body1>Tenant directory users</Body1>
         <People showMax={5} size={40} />
         <Caption1>
-          Requires the <code>People.Read</code> delegated scope. If your account has no recent people
-          suggestions, the list may be empty.
+          Requires the <code>User.ReadBasic.All</code> delegated scope to list people from your
+          tenant directory.
         </Caption1>
       </div>
 

@@ -70,9 +70,9 @@ export const PeoplePickerPage: React.FC = () => {
       <div className={styles.info}>
         <Body1>
           The PeoplePicker component lets users search for and select people from Microsoft Graph.
-          It uses the <code>/users</code> endpoint for typed searches and <code>/me/people</code>{' '}
-          for focus suggestions. Requires the <code>People.Read</code> scope for initial
-          suggestions.
+          It uses the <code>/users</code> endpoint for both typed searches and initial focus
+          suggestions. Requires the <code>User.ReadBasic.All</code> scope to search and list people
+          from your tenant.
         </Body1>
       </div>
 

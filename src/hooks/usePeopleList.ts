@@ -18,20 +18,6 @@ const GROUP_MEMBERS_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTi
 const DEFAULT_MAX_PEOPLE = 10;
 
 /**
- * Suggestion item returned by the Microsoft Graph `/me/people` endpoint.
- */
-interface GraphPeopleSuggestion {
-  id?: string | null;
-  displayName?: string | null;
-  userPrincipalName?: string | null;
-  scoredEmailAddresses?: Array<{
-    address?: string | null;
-  }> | null;
-  jobTitle?: string | null;
-  department?: string | null;
-}
-
-/**
  * Options for the {@link usePeopleList} hook.
  */
 export interface UsePeopleListOptions {
@@ -77,25 +63,6 @@ export interface UsePeopleListResult {
   error: Error | null;
 }
 
-const mapGraphPeopleSuggestion = (
-  person: GraphPeopleSuggestion,
-  fallbackIndex = 0,
-): PeoplePerson => {
-  const primaryEmail = person.scoredEmailAddresses?.[0]?.address ?? null;
-  const secondaryIdentifier =
-    person.userPrincipalName ?? primaryEmail ?? person.jobTitle ?? 'no-identity';
-  const fallbackId = `person-suggestion:${person.displayName ?? 'unknown'}:${secondaryIdentifier}:${fallbackIndex}`;
-
-  return {
-    id: person.id ?? person.userPrincipalName ?? primaryEmail ?? fallbackId,
-    displayName: person.displayName ?? null,
-    mail: primaryEmail,
-    userPrincipalName: person.userPrincipalName ?? null,
-    jobTitle: person.jobTitle ?? null,
-    department: person.department ?? null,
-  };
-};
-
 const mapGraphUser = (user: User): PeoplePerson => ({
   id: user.id ?? user.userPrincipalName ?? user.mail ?? 'unknown-user',
   displayName: user.displayName ?? null,
@@ -124,7 +91,7 @@ const uniqueNonEmpty = (values?: string[]): string[] =>
  * 1. `people` (render directly)
  * 2. `userIds` (resolve each identifier)
  * 3. `groupId` (load direct group members)
- * 4. default current-user people suggestions (`/me/people`)
+ * 4. default tenant directory users (`/users`)
  *
  * @param options - Configuration for how people should be resolved
  * @returns The resolved people, loading state, and any list-level error
@@ -309,11 +276,11 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
           }));
         } else if (graphClient && providerState === 'SignedIn') {
           const response = (await graphClient
-            .api('/me/people')
-            .select('id,displayName,scoredEmailAddresses,userPrincipalName,jobTitle,department')
+            .api('/users')
+            .select(PEOPLE_SELECT_FIELDS)
             .top(maxPeople)
-            .get()) as { value?: GraphPeopleSuggestion[] };
-          nextPeople = (response.value ?? []).map(mapGraphPeopleSuggestion);
+            .get()) as { value?: User[] };
+          nextPeople = (response.value ?? []).map(mapGraphUser);
         }
 
         if (showPresence || nextPeople.some(person => !person.photoUrl)) {
