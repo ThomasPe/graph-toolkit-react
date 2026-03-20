@@ -79,7 +79,7 @@ const mergePresence = (person: PeoplePerson, presence: Presence | null): PeopleP
 });
 
 const resolveIdentifier = (person: Pick<PeoplePerson, 'id' | 'userPrincipalName' | 'mail'>): string | undefined =>
-  person.id ?? person.userPrincipalName ?? person.mail ?? undefined;
+  person.userPrincipalName ?? person.mail ?? person.id ?? undefined;
 
 const uniqueNonEmpty = (values?: string[]): string[] =>
   Array.from(new Set((values ?? []).map(value => value.trim()).filter(Boolean)));
