@@ -113,12 +113,54 @@ describe('usePeopleList', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(getPersonData).toHaveBeenCalledWith({
+    expect(getPersonData).toHaveBeenCalledTimes(1);
+    expect(getPersonData).toHaveBeenNthCalledWith(1, {
       identifier: 'adelev@contoso.com',
       fetchPresence: false,
       fetchPhoto: true,
     });
     expect(result.current.people[0]?.photoUrl).toBe('data:image/png;base64,AAAA');
+  });
+
+  it('encodes graph path segments for user lookups', async () => {
+    const getMock = vi.fn()
+      .mockResolvedValue({
+        id: 'guest-user-id',
+        displayName: 'Guest User',
+        mail: 'guest@contoso.com',
+        userPrincipalName: 'guest_user#EXT#@contoso.com',
+      });
+    const selectMock = vi.fn().mockReturnValue({ get: getMock });
+    const apiMock = vi.fn().mockReturnValue({ select: selectMock });
+
+    mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
+
+    const { result } = renderHook(() =>
+      usePeopleList({ userIds: ['guest_user#EXT#@contoso.com'] })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(apiMock).toHaveBeenCalledWith('/users/guest_user%23EXT%23%40contoso.com');
+  });
+
+  it('encodes graph path segments for group lookups', async () => {
+    const getMock = vi.fn().mockResolvedValue({ value: [] });
+    const topMock = vi.fn().mockReturnValue({ get: getMock });
+    const selectMock = vi.fn().mockReturnValue({ top: topMock });
+    const apiMock = vi.fn().mockReturnValue({ select: selectMock });
+
+    mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
+
+    const { result } = renderHook(() => usePeopleList({ groupId: 'group#1' }));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(apiMock).toHaveBeenCalledWith('/groups/group%231/members/microsoft.graph.user');
   });
 
   it('returns loading=true when a new fetch starts after provider state changes', async () => {
