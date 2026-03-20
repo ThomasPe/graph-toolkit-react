@@ -71,3 +71,11 @@ export const photoResponseToDataUrl = async (photoResponse: unknown): Promise<st
     reader.readAsDataURL(blob);
   });
 };
+
+/**
+ * Encode a dynamic Microsoft Graph path segment for safe interpolation into request URLs.
+ *
+ * @param value - Raw path segment value such as a user identifier or group ID
+ * @returns The trimmed and URL-encoded path segment
+ */
+export const encodeGraphPathSegment = (value: string): string => encodeURIComponent(value.trim());

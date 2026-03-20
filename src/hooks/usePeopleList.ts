@@ -11,7 +11,7 @@ import {
   isPersonDataProvider,
 } from '../providers/IPersonDataProvider';
 import type { PeoplePerson } from '../components/People/People.types';
-import { photoResponseToDataUrl } from '../utils/graph';
+import { encodeGraphPathSegment, photoResponseToDataUrl } from '../utils/graph';
 
 const PEOPLE_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTitle,department';
 const GROUP_MEMBERS_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTitle,department';
@@ -78,11 +78,21 @@ const mergePresence = (person: PeoplePerson, presence: Presence | null): PeopleP
   presenceAvailability: presence?.availability ?? null,
 });
 
-const encodeGraphPathSegment = (value: string): string => encodeURIComponent(value.trim());
-
+/**
+ * Resolve the best identifier for Graph-backed people where a stable Graph `id` is preferred.
+ *
+ * @param person - Person data originating from Graph or already enriched with a Graph ID
+ * @returns A Graph identifier, preferring `id` over UPN/mail
+ */
 const resolveIdentifier = (person: Pick<PeoplePerson, 'id' | 'userPrincipalName' | 'mail'>): string | undefined =>
   person.id ?? person.userPrincipalName ?? person.mail ?? undefined;
 
+/**
+ * Resolve the best identifier for app-supplied direct people where `id` may be a local key.
+ *
+ * @param person - Directly supplied person data from application code
+ * @returns A Graph-resolvable identifier, preferring UPN/mail before a local `id`
+ */
 const resolveDirectPersonIdentifier = (
   person: Pick<PeoplePerson, 'id' | 'userPrincipalName' | 'mail'>
 ): string | undefined =>

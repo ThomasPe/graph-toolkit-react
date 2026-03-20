@@ -7,7 +7,7 @@ import { User, Presence } from '@microsoft/microsoft-graph-types';
 import { useGraphClient } from './useGraphClient';
 import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
-import { photoResponseToDataUrl } from '../utils/graph';
+import { encodeGraphPathSegment, photoResponseToDataUrl } from '../utils/graph';
 import {
   getPersonCacheKey,
   isTimestampFresh,
@@ -41,8 +41,6 @@ const DEFAULT_USER_SELECT_FIELDS = [
   'officeLocation',
   'userPrincipalName',
 ];
-
-const encodeGraphPathSegment = (value: string): string => encodeURIComponent(value.trim());
 
 /**
  * Fetch person data from Microsoft Graph
