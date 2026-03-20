@@ -181,6 +181,8 @@ function App() {
 }
 ```
 
+For a complete browser-hosted example app, see the [React MSAL sample](https://github.com/devsym/graph-toolkit-react/blob/main/samples/react-msal-sample/README.md), which wires `MsalBrowserProvider` into `GraphProvider` and demonstrates both `Person` and `PeoplePicker`.
+
 ### Authentication Providers
 
 The library uses a provider pattern for authentication:
