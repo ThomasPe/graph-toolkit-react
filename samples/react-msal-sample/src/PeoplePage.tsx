@@ -63,7 +63,7 @@ export const PeoplePage: React.FC = () => {
       </div>
 
       <div className={styles.section}>
-        <Body1>Frequent contacts from Microsoft Graph</Body1>
+        <Body1>Tenant directory users</Body1>
         <People showMax={5} size={40} />
         <Caption1>
           Requires the <code>User.ReadBasic.All</code> delegated scope to list people from your
