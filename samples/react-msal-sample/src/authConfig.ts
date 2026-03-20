@@ -9,7 +9,7 @@ import type { Configuration } from '@azure/msal-browser';
 export const authConfig = {
   clientId: '01b824cd-f033-4135-b087-88d4132fddc7', // Replace with your Azure AD app client ID
   authority: 'https://login.microsoftonline.com/common', // Or your tenant id
-  scopes: ['User.Read'],
+  scopes: ['User.Read', 'People.Read', 'User.ReadBasic.All'],
 };
 
 export const msalConfig: Configuration = {
