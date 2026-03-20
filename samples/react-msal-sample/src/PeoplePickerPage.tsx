@@ -78,6 +78,7 @@ export const PeoplePickerPage: React.FC = () => {
 
       <div className={styles.pickerContainer}>
         <PeoplePicker
+          selectedPeople={selectedPeople}
           onSelectionChange={setSelectedPeople}
           placeholder="Search for people..."
           maxPeople={5}
@@ -86,19 +87,28 @@ export const PeoplePickerPage: React.FC = () => {
         {selectedPeople.length > 0 && (
           <div className={styles.selectedList}>
             <Body2>Selected people ({selectedPeople.length}):</Body2>
-            {selectedPeople.map(person => (
-              <div key={person.id} className={styles.selectedItem}>
-                <Badge appearance="filled" color="brand" shape="circular">
-                  {person.displayName?.charAt(0) ?? '?'}
-                </Badge>
-                <div>
-                  <Body2>{person.displayName}</Body2>
-                  {person.mail && (
-                    <Body1 style={{ color: tokens.colorNeutralForeground3 }}>{person.mail}</Body1>
-                  )}
+            {selectedPeople.map(person => {
+              const label =
+                person.displayName ??
+                person.mail ??
+                person.userPrincipalName ??
+                person.id;
+              return (
+                <div key={person.id} className={styles.selectedItem}>
+                  <Badge appearance="filled" color="brand" shape="circular">
+                    {label.charAt(0).toUpperCase()}
+                  </Badge>
+                  <div>
+                    <Body2>{label}</Body2>
+                    {person.mail && person.mail !== label && (
+                      <Body1 style={{ color: tokens.colorNeutralForeground3 }}>
+                        {person.mail}
+                      </Body1>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
