@@ -11,6 +11,7 @@ This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (M
 - ✅ MSAL authentication with redirect flow
 - ✅ Navigation menu with one page per component
 - ✅ Person component displaying current user ("me" query)
+- ✅ People component for compact avatar groups and overflow
 - ✅ PeoplePicker component for searching and selecting people
 - ✅ Fluent UI design system
 - ✅ TypeScript support
@@ -40,8 +41,8 @@ This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (M
 
 1. In your app registration, go to **API permissions**
 2. The `User.Read` permission should already be added by default
-3. Add `People.Read` (delegated) for PeoplePicker initial suggestions
-4. Add `User.ReadBasic.All` (delegated) for PeoplePicker typed user search
+3. Add `People.Read` (delegated) for the People component default suggestions and PeoplePicker initial suggestions
+4. Add `User.ReadBasic.All` (delegated) for loading other users by ID and PeoplePicker typed user search
 5. Click **Grant admin consent** if you're an admin (optional but recommended)
 
 For additional optional scopes (for example presence), use the root documentation as the source of truth: [Scopes by feature](../../readme.md#scopes-by-feature).
@@ -96,6 +97,7 @@ This sample keeps app-specific wiring in local files and relies on the main pack
 - `src/authConfig.ts` contains tenant/client/scopes configuration
 - `src/Dashboard.tsx` renders the navigation layout with a sidebar and page router
 - `src/PersonPage.tsx` demonstrates the `Person` component with `userId="me"`
+- `src/PeoplePage.tsx` demonstrates the `People` component
 - `src/PeoplePickerPage.tsx` demonstrates the `PeoplePicker` component
 
 For current provider and component usage guidance, use [Graph Toolkit React Documentation](../../readme.md).
@@ -109,6 +111,7 @@ src/
 ├── Login.tsx              # Login screen
 ├── Dashboard.tsx          # Authenticated layout with sidebar navigation
 ├── PersonPage.tsx         # Person component demo page
+├── PeoplePage.tsx         # People component demo page
 ├── PeoplePickerPage.tsx   # PeoplePicker component demo page
 ├── main.tsx               # App entry point
 └── index.css              # Global styles

@@ -8,11 +8,17 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { SignOut24Regular, Person24Regular, People24Regular } from '@fluentui/react-icons';
+import {
+  SignOut24Regular,
+  Person24Regular,
+  People24Regular,
+  PeopleCommunity24Regular,
+} from '@fluentui/react-icons';
 import { PersonPage } from './PersonPage';
+import { PeoplePage } from './PeoplePage';
 import { PeoplePickerPage } from './PeoplePickerPage';
 
-type NavPage = 'person' | 'people-picker';
+type NavPage = 'person' | 'people' | 'people-picker';
 
 const useStyles = makeStyles({
   root: {
@@ -90,6 +96,9 @@ export const Dashboard: React.FC = () => {
             <Tab value="person" icon={<Person24Regular />}>
               Person
             </Tab>
+            <Tab value="people" icon={<PeopleCommunity24Regular />}>
+              People
+            </Tab>
             <Tab value="people-picker" icon={<People24Regular />}>
               People Picker
             </Tab>
@@ -98,6 +107,7 @@ export const Dashboard: React.FC = () => {
 
         <main className={styles.content}>
           {activePage === 'person' && <PersonPage />}
+          {activePage === 'people' && <PeoplePage />}
           {activePage === 'people-picker' && <PeoplePickerPage />}
         </main>
       </div>

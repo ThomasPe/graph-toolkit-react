@@ -120,20 +120,29 @@ export class MockProvider implements IProvider, IPersonDataProvider, IPeopleSear
   }
 
   async getPersonData(request: ProviderPersonDataRequest): Promise<ProviderPersonDataResponse> {
-    const mockDisplayName = 'Adele Vance';
-    const mockUserPrincipalName =
-      request.identifier && request.identifier !== 'me'
-        ? request.identifier
-        : 'adelev@contoso.com';
+    const lookupIdentifier = request.identifier?.trim().toLowerCase();
+    const matchedPerson = lookupIdentifier && lookupIdentifier !== 'me'
+      ? MOCK_PEOPLE.find((person) =>
+        person.id.toLowerCase() === lookupIdentifier ||
+        person.mail?.toLowerCase() === lookupIdentifier ||
+        person.userPrincipalName?.toLowerCase() === lookupIdentifier ||
+        person.displayName?.toLowerCase() === lookupIdentifier
+      )
+      : MOCK_PEOPLE[0];
+    const mockPerson = matchedPerson ?? MOCK_PEOPLE[0];
+    const resolvedUserPrincipalName =
+      matchedPerson || !request.identifier || request.identifier === 'me'
+        ? mockPerson.userPrincipalName
+        : request.identifier;
 
     const mockUser: User = {
-      id: '00000000-0000-0000-0000-000000000000',
-      displayName: mockDisplayName,
-      userPrincipalName: mockUserPrincipalName,
-      jobTitle: 'Product Manager',
-      department: 'Marketing',
+      id: mockPerson.id,
+      displayName: mockPerson.displayName,
+      userPrincipalName: resolvedUserPrincipalName,
+      jobTitle: mockPerson.jobTitle,
+      department: mockPerson.department,
       officeLocation: '19/3106',
-      mail: 'adelev@contoso.com',
+      mail: mockPerson.mail,
     } as User;
 
     const mockPresence: Presence = {
