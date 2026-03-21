@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0-next.11
+
+### Minor Changes
+
+- 333d6fb: Add a new `People` component for rendering compact avatar groups.
+  - Add `People` and `usePeopleList` for MGT-style people strips backed by direct data, `userIds`, group membership, or `/me/people`
+  - Export the new component and types from the package entrypoint
+  - Add Storybook coverage, unit tests, and a React MSAL sample page for the new control
+
+### Patch Changes
+
+- 3437cfa: Fix `People` direct-data enrichment to prefer `userPrincipalName` or `mail` before `id` when resolving a Graph user identifier, avoiding invalid `/users/{local-id}` lookups for app-supplied people.
+- 7ad88d2: Limit the default `People` list and `PeoplePicker` initial suggestions to tenant directory users.
+  - Load Graph-backed default `People` entries from `/users` instead of `/me/people`
+  - Load Graph-backed `PeoplePicker` initial suggestions from `/users` so they stay tenant-scoped
+  - Update related docs and sample guidance to use `User.ReadBasic.All` for these directory-backed defaults
+
+- c90c6df: Add a direct link to the deployed React MSAL sample app from the main README getting-started flow, and fix the sample documentation link to use the current repository path.
+
 ## 1.0.0-next.10
 
 ### Minor Changes
