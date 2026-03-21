@@ -258,6 +258,51 @@ describe('usePersonData caching', () => {
     expect(mockedWritePersonCache).not.toHaveBeenCalled();
     expect(apiMock).toHaveBeenCalledWith('/users/user-1');
   });
+
+  it('URL-encodes non-id identifiers when fetching a user from Graph', async () => {
+    mockedUsePersonCacheOptions.mockReturnValue({
+      enabled: false,
+      userTtlMs: 60 * 60 * 1000,
+      photoTtlMs: 60 * 60 * 1000,
+      presenceTtlMs: 5 * 60 * 1000,
+    });
+
+    const userGetMock = vi.fn().mockResolvedValue({
+      id: 'guest-user-id',
+      displayName: 'Guest User',
+      userPrincipalName: 'guest_user#EXT#@contoso.com',
+    });
+
+    const apiMock = vi.fn((path: string) => {
+      if (path === '/users/guest_user%23EXT%23%40contoso.com') {
+        return {
+          select: () => ({
+            get: userGetMock,
+          }),
+        };
+      }
+
+      return {
+        get: vi.fn().mockResolvedValue(null),
+      };
+    });
+
+    mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
+
+    const { result } = renderHook(() =>
+      usePersonData({
+        userPrincipalName: 'guest_user#EXT#@contoso.com',
+        fetchPresence: false,
+        fetchPhoto: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(apiMock).toHaveBeenCalledWith('/users/guest_user%23EXT%23%40contoso.com');
+  });
 });
 
 describe('usePersonData with IPersonDataProvider', () => {

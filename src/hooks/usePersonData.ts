@@ -7,7 +7,7 @@ import { User, Presence } from '@microsoft/microsoft-graph-types';
 import { useGraphClient } from './useGraphClient';
 import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
-import { photoResponseToDataUrl } from '../utils/graph';
+import { encodeGraphPathSegment, photoResponseToDataUrl } from '../utils/graph';
 import {
   getPersonCacheKey,
   isTimestampFresh,
@@ -181,7 +181,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
 
         if (!user) {
           user = (await graphClient
-            .api(isCurrentUserQuery ? '/me' : `/users/${identifier}`)
+            .api(isCurrentUserQuery ? '/me' : `/users/${encodeGraphPathSegment(identifier)}`)
             .select(resolvedSelectFields)
             .get()) as User;
           didFetchUser = true;
@@ -198,7 +198,11 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
           } else if (user?.id) {
             try {
               presence = await graphClient
-                .api(isCurrentUserQuery ? '/me/presence' : `/users/${user.id}/presence`)
+                .api(
+                  isCurrentUserQuery
+                    ? '/me/presence'
+                    : `/users/${encodeGraphPathSegment(user.id)}/presence`
+                )
                 .get();
             } catch (err) {
               console.warn('Failed to fetch presence:', err);
@@ -213,7 +217,11 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
           } else if (user?.id) {
             try {
               const photoResponse = await graphClient
-                .api(isCurrentUserQuery ? '/me/photo/$value' : `/users/${user.id}/photo/$value`)
+                .api(
+                  isCurrentUserQuery
+                    ? '/me/photo/$value'
+                    : `/users/${encodeGraphPathSegment(user.id)}/photo/$value`
+                )
                 .get();
               photoUrl = await photoResponseToDataUrl(photoResponse);
             } catch (err) {

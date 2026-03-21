@@ -11,7 +11,7 @@ import {
   isPersonDataProvider,
 } from '../providers/IPersonDataProvider';
 import type { PeoplePerson } from '../components/People/People.types';
-import { photoResponseToDataUrl } from '../utils/graph';
+import { encodeGraphPathSegment, photoResponseToDataUrl } from '../utils/graph';
 
 const PEOPLE_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTitle,department';
 const GROUP_MEMBERS_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTitle,department';
@@ -78,8 +78,25 @@ const mergePresence = (person: PeoplePerson, presence: Presence | null): PeopleP
   presenceAvailability: presence?.availability ?? null,
 });
 
+/**
+ * Resolve the best identifier for Graph-backed people where a stable Graph `id` is preferred.
+ *
+ * @param person - Person data originating from Graph or already enriched with a Graph ID
+ * @returns A Graph identifier, preferring `id` over UPN/mail
+ */
 const resolveIdentifier = (person: Pick<PeoplePerson, 'id' | 'userPrincipalName' | 'mail'>): string | undefined =>
   person.id ?? person.userPrincipalName ?? person.mail ?? undefined;
+
+/**
+ * Resolve the best identifier for app-supplied direct people where `id` may be a local key.
+ *
+ * @param person - Directly supplied person data from application code
+ * @returns A Graph-resolvable identifier, preferring UPN/mail before a local `id`
+ */
+const resolveDirectPersonIdentifier = (
+  person: Pick<PeoplePerson, 'id' | 'userPrincipalName' | 'mail'>
+): string | undefined =>
+  person.userPrincipalName ?? person.mail ?? person.id ?? undefined;
 
 const uniqueNonEmpty = (values?: string[]): string[] =>
   Array.from(new Set((values ?? []).map(value => value.trim()).filter(Boolean)));
@@ -148,7 +165,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
 
       const isCurrentUserQuery = identifier.toLowerCase() === 'me';
       const user = (await graphClient
-        .api(isCurrentUserQuery ? '/me' : `/users/${identifier}`)
+        .api(isCurrentUserQuery ? '/me' : `/users/${encodeGraphPathSegment(identifier)}`)
         .select(PEOPLE_SELECT_FIELDS)
         .get()) as User;
 
@@ -158,7 +175,11 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
       if (showPresence && user.id) {
         try {
           presence = (await graphClient
-            .api(isCurrentUserQuery ? '/me/presence' : `/users/${user.id}/presence`)
+            .api(
+              isCurrentUserQuery
+                ? '/me/presence'
+                : `/users/${encodeGraphPathSegment(user.id)}/presence`
+            )
             .get()) as Presence;
         } catch {
           presence = null;
@@ -168,7 +189,11 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
       if (user.id) {
         try {
           const photoResponse = await graphClient
-            .api(isCurrentUserQuery ? '/me/photo/$value' : `/users/${user.id}/photo/$value`)
+            .api(
+              isCurrentUserQuery
+                ? '/me/photo/$value'
+                : `/users/${encodeGraphPathSegment(user.id)}/photo/$value`
+            )
             .get();
           photoUrl = await photoResponseToDataUrl(photoResponse);
         } catch {
@@ -184,10 +209,13 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
       };
     };
 
-    const enrichResolvedPeople = async (people: PeoplePerson[]): Promise<PeoplePerson[]> => {
+    const enrichResolvedPeople = async (
+      people: PeoplePerson[],
+      resolvePersonIdentifier = resolveIdentifier
+    ): Promise<PeoplePerson[]> => {
       const enriched = await Promise.all(
         people.map(async person => {
-          const identifier = resolveIdentifier(person);
+          const identifier = resolvePersonIdentifier(person);
 
           if (!identifier) {
             return showPresence ? mergePresence(person, null) : person;
@@ -230,7 +258,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
         const shouldEnrichResolvedPeople =
           showPresence || directPeople.some(person => !person.photoUrl);
         const nextPeople = shouldEnrichResolvedPeople
-          ? await enrichResolvedPeople(directPeople)
+          ? await enrichResolvedPeople(directPeople, resolveDirectPersonIdentifier)
           : directPeople;
         if (!cancelled) {
           setState({ people: nextPeople, loading: false, error: null });
@@ -262,7 +290,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
         if (groupId) {
           if (graphClient && providerState === 'SignedIn') {
             const response = (await graphClient
-              .api(`/groups/${groupId}/members/microsoft.graph.user`)
+              .api(`/groups/${encodeGraphPathSegment(groupId)}/members/microsoft.graph.user`)
               .select(GROUP_MEMBERS_SELECT_FIELDS)
               .top(maxPeople)
               .get()) as { value?: User[] };

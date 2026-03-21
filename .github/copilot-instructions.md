@@ -26,3 +26,9 @@
 
 - Whenever a PR modifies UI, include at least one screenshot in the PR description.
 - Whenever a commit or progress update modifies UI, include a screenshot link for that change as part of the accompanying update.
+
+## Microsoft Graph identifiers
+
+- Prefer Microsoft Graph `id` values for `/users/{id}` and related Graph path-based calls whenever an ID is already available.
+- Use `userPrincipalName` or `mail` only as fallbacks when an app supplies direct person data without a Graph `id`.
+- URL-encode dynamic Graph path segments such as user identifiers and group IDs before building request paths.
