@@ -178,6 +178,23 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-initials')).toBeNull();
   });
 
+  it('prefers a Graph-resolvable identifier when loading selected interaction tag avatars', () => {
+    const selected = [
+      {
+        id: 'local-adele',
+        displayName: 'Adele Vance',
+        mail: 'adelev@contoso.com',
+      },
+    ];
+
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    expect(mockedUsePersonData).toHaveBeenCalledWith({
+      userId: 'adelev@contoso.com',
+      fetchPhoto: true,
+    });
+  });
+
   it('uses a preloaded photo for selected interaction tags without fetching person data', () => {
     const selected = [
       {

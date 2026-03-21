@@ -40,6 +40,9 @@ const getPersonLabel = (person: PeoplePickerPerson): string =>
 const getPersonSecondary = (person: PeoplePickerPerson): string | undefined =>
   person.mail ?? person.userPrincipalName ?? undefined;
 
+const getPersonGraphIdentifier = (person: PeoplePickerPerson): string =>
+  person.userPrincipalName ?? person.mail ?? person.id;
+
 const BasePeoplePickerAvatar: React.FC<{
   person: PeoplePickerPerson;
   size: 16 | 32;
@@ -62,7 +65,7 @@ const FetchedPeoplePickerAvatar: React.FC<{ person: PeoplePickerPerson; size: 16
   size,
 }) => {
   const { photoUrl: loadedPhotoUrl } = usePersonData({
-    userId: person.id,
+    userId: getPersonGraphIdentifier(person),
     fetchPhoto: true,
   });
 
