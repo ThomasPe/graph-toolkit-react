@@ -32,3 +32,10 @@
 - Prefer Microsoft Graph `id` values for `/users/{id}` and related Graph path-based calls whenever an ID is already available.
 - Use `userPrincipalName` or `mail` only as fallbacks when an app supplies direct person data without a Graph `id`.
 - URL-encode dynamic Graph path segments such as user identifiers and group IDs before building request paths.
+
+## Storybook documentation
+
+- Add `tags: ['autodocs']` to every component story `meta` so Storybook generates a component-level Docs page.
+- Use `parameters.docs.description.component` to summarize the component and let the Docs page list the feature stories together.
+- Document public story args with `argTypes` so the generated Docs page explains controls and props clearly.
+- Prefer a single component story file with representative feature stories instead of separate docs-only pages per feature.

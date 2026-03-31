@@ -427,7 +427,7 @@ This **community-driven project** provides React developers with components for 
 1. Follow the existing code style (TypeScript, ESLint, Prettier)
 2. Use Fluent UI components whenever possible
 3. Write tests for new components
-4. Add Storybook stories demonstrating all component features
+4. Add Storybook stories demonstrating all component features through a component-level autodocs page (`tags: ['autodocs']`)
 5. Update documentation
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
