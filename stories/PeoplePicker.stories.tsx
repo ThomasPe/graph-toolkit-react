@@ -11,6 +11,7 @@ const provider = new MockProvider({ autoSignIn: true });
 const meta: Meta<typeof PeoplePicker> = {
   title: 'Components/PeoplePicker',
   component: PeoplePicker,
+  tags: ['autodocs'],
   parameters: {
     layout: 'padded',
     docs: {

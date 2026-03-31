@@ -163,6 +163,12 @@ export class MyProvider implements IProvider {
 - Wrap components with `GraphProvider`; avoid direct token handling in UI components.
 - If uncertain, default to `MockProvider` for local iteration, then switch to real auth provider.
 
+## Storybook Development
+
+- Add `tags: ['autodocs']` to each component story `meta` so Storybook generates a component-level Docs page.
+- Use `parameters.docs.description.component` plus documented `argTypes` to make the Docs page explain the component and its feature stories.
+- Keep component examples in a single `*.stories.tsx` file with representative feature stories instead of separate docs-only pages per feature.
+
 ## Source of Truth
 
 - Primary docs: `README.md`
