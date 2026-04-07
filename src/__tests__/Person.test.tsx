@@ -44,8 +44,9 @@ describe('Person', () => {
                 availability: 'Available',
                 activity: 'Available',
             },
-            photoUrl: undefined,
+            photoUrl: null,
             loading: false,
+            error: null,
         });
     });
 
@@ -160,6 +161,31 @@ describe('Person', () => {
         expect(personaProps.primaryText).toBe('Adele');
         expect(personaProps.secondaryText).toBe('adelev@contoso.com');
         expect(personaProps.tertiaryText).toBe('Available');
+    });
+
+    it('keeps hidden lines suppressed when line properties target lines outside the selected view', () => {
+        render(
+            <Person
+                userId="user-1"
+                view="oneline"
+                line1Property="givenName"
+                line2Property="mail,userPrincipalName"
+                fetchImage={false}
+            />
+        );
+
+        expect(mockedUsePersonData).toHaveBeenCalledWith({
+            userId: 'user-1',
+            fetchPresence: false,
+            fetchPhoto: false,
+            selectFields: ['givenName'],
+        });
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.primaryText).toBe('Adele');
+        expect(personaProps.secondaryText).toBeUndefined();
+        expect(personaProps.tertiaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
     });
 
     it('renders custom line content through React line render callbacks', () => {
