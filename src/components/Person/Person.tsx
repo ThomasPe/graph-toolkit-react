@@ -220,10 +220,10 @@ export const Person: React.FC<PersonProps> = ({
     !isLineVisible(view, 1)
       ? undefined
       : resolvedLine1Property && resolvedLine1Text !== displayName
-      ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
-      : renderLine1
         ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
-        : personaProps.primaryText;
+        : renderLine1
+          ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
+          : personaProps.primaryText;
   const defaultSecondaryText = isLineVisible(view, 2)
     ? renderLine(2, personWithPresence, resolvedLine2Text, renderLine2)
     : undefined;
