@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.12
+
+### Patch Changes
+
+- 16ef483: Add Storybook autodocs coverage for `PeoplePicker` and document the component story pattern so new components use a single Docs page that summarizes their feature stories.
+
 ## 1.0.0-next.11
 
 ### Minor Changes
