@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Components Manifest</title>
+  <style>
+      :root {
+          --bg: #0b0c10;
+          --panel: #121318;
+          --muted: #9aa0a6;
+          --fg: #e8eaed;
+          --ok: #22c55e;
+          --info: #1e88e5;
+          --err: #c62828;
+          --ok-bg: #0c1a13;
+          --info-bg: #0c1624;
+          --err-bg: #1a0e0e;
+          --chip: #1f2330;
+          --border: #2b2f3a;
+          --link: #8ab4f8;
+          --active-ring: 1px; /* 1px active ring for pills and toggles */
+      }
+
+      * {
+          box-sizing: border-box;
+      }
+
+      html,
+      body {
+          margin: 0;
+          background: var(--bg);
+          color: var(--fg);
+          font: 14px/1.5 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          'Helvetica Neue',
+          Arial,
+          'Noto Sans';
+      }
+
+      .wrap {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 16px 20px;
+      }
+
+      header {
+          position: sticky;
+          top: 0;
+          backdrop-filter: blur(6px);
+          background: color-mix(in srgb, var(--bg) 84%, transparent);
+          border-bottom: 1px solid var(--border);
+          z-index: 10;
+      }
+
+      h1 {
+          font-size: 20px;
+          margin: 0 0 6px;
+      }
+
+      .summary {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          align-items: center;
+      }
+
+      /* Top filter pills */
+      .filter-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          background: var(--panel);
+          text-decoration: none;
+          cursor: pointer;
+          user-select: none;
+          color: var(--fg);
+      }
+
+      .filter-pill.ok {
+          color: #b9f6ca;
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+          background: color-mix(in srgb, var(--ok) 18%, #000);
+      }
+
+      .filter-pill.info {
+          color: #b3d9ff;
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+          background: var(--info-bg);
+      }
+
+      .filter-pill.err {
+          color: #ff9aa0;
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+          background: var(--err-bg);
+      }
+
+      .filter-pill.all {
+          color: #d7dbe0;
+          border-color: var(--border);
+          background: var(--panel);
+      }
+
+      .filter-pill[aria-disabled='true'] {
+          cursor: default;
+          text-decoration: none;
+      }
+
+      .filter-pill:focus,
+      .filter-pill:active {
+          outline: none;
+          box-shadow: none;
+      }
+
+      /* Selected top pill ring via :target */
+      #filter-all:target ~ header .filter-pill[data-k='all'],
+      #filter-errors:target ~ header .filter-pill[data-k='errors'],
+      #filter-infos:target ~ header .filter-pill[data-k='infos'],
+      #filter-story-errors:target ~ header .filter-pill[data-k='story-errors'],
+      #filter-doc-errors:target ~ header .filter-pill[data-k='docs'],
+      #filter-docs:target ~ header .filter-pill[data-k='docs'] {
+          box-shadow: 0 0 0 var(--active-ring) currentColor;
+          border-color: currentColor;
+      }
+
+      /* Hidden targets for filtering */
+      #filter-all,
+      #filter-errors,
+      #filter-infos,
+      #filter-story-errors,
+      #filter-doc-errors,
+      #filter-docs {
+          display: none;
+      }
+
+      main {
+          padding: 36px 0 40px;
+      }
+
+      .grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 18px;
+      }
+
+      /* one card per row */
+
+      .card {
+          border: 1px solid var(--border);
+          background: var(--panel);
+          border-radius: 14px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+      }
+
+      .head {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
+
+      .title {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+      }
+
+      .title h2 {
+          font-size: 16px;
+          margin: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+      }
+
+      .meta {
+          font-size: 12px;
+          color: var(--muted);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+      }
+
+      .kv {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+      }
+
+      .chip {
+          font-size: 12px;
+          padding: 4px 8px;
+          border-radius: 999px;
+          background: var(--chip);
+          border: 1px solid var(--border);
+      }
+
+      .hint {
+          color: var(--muted);
+          font-size: 12px;
+      }
+
+      .badges {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+      }
+
+      /* Per-card badges: labels become toggles when clickable */
+      .badge {
+          font-size: 12px;
+          padding: 3px 8px;
+          border-radius: 999px;
+          border: 1px solid var(--border);
+          background: var(--chip);
+          color: #d7dbe0;
+      }
+
+      .badge.ok {
+          color: #b9f6ca;
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+      }
+
+      .badge.info {
+          color: #b3d9ff;
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+      }
+
+      .badge.err {
+          color: #ff9aa0;
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+      }
+
+      .as-toggle {
+          cursor: pointer;
+      }
+
+      /* 1px ring on active toggle */
+      .tg-err:checked + label.as-toggle,
+      .tg-info:checked + label.as-toggle,
+      .tg-stories:checked + label.as-toggle,
+      .tg-docs:checked + label.as-toggle,
+      .tg-content:checked + label.as-toggle,
+      .tg-props:checked + label.as-toggle {
+          box-shadow: 0 0 0 var(--active-ring) currentColor;
+          border-color: currentColor;
+      }
+
+      /* Panels: hidden by default, shown when respective toggle checked */
+      .panels {
+          display: grid;
+          gap: 10px;
+      }
+
+      .panel {
+          display: none;
+      }
+
+      .tg-err:checked ~ .panels .panel-err {
+          display: grid;
+      }
+
+      .tg-info:checked ~ .panels .panel-info {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-stories:checked ~ .panels .panel-stories {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-docs:checked ~ .panels .panel-docs {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-content:checked ~ .panels .panel-content {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-props:checked ~ .panels .panel-props {
+          display: grid;
+      }
+
+      /* Colored notes for prop type error + info */
+      .note {
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+      }
+
+      .note.err {
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+          background: var(--err-bg);
+          color: #ffd1d4;
+      }
+
+      .note.info {
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+          background: var(--info-bg);
+          color: #d6e8ff;
+      }
+
+      .note.ok {
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+          background: var(--ok-bg);
+          color: var(--fg);
+      }
+
+      .note-title {
+          font-weight: 600;
+          margin-bottom: 6px;
+      }
+
+      .note-body {
+          white-space: normal;
+      }
+
+      /* Story error cards */
+      .ex {
+          padding: 10px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          background: #0f131b;
+      }
+
+      .ex.err {
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+      }
+
+      .row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+      }
+
+      .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+      }
+
+      .dot-ok {
+          background: var(--ok);
+      }
+
+      .dot-err {
+          background: var(--err);
+      }
+
+      .ex-name {
+          font-weight: 600;
+      }
+
+      /* Error groups (visible in errors filter) */
+      .error-groups {
+          display: none;
+          margin-bottom: 16px;
+      }
+
+      .group {
+          border: 1px solid var(--border);
+          background: var(--panel);
+          border-radius: 14px;
+          overflow: hidden;
+      }
+
+      .group + .group {
+          margin-top: 12px;
+      }
+
+      .group-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 14px;
+          cursor: pointer;
+          border-bottom: 1px solid var(--border);
+      }
+
+      .group-header:hover {
+          background: #141722;
+      }
+
+      .group-title {
+          font-weight: 600;
+          flex: 1;
+      }
+
+      .group-count {
+          font-size: 12px;
+          color: var(--muted);
+      }
+
+      .group-cards {
+          display: none;
+          padding: 12px;
+      }
+
+      .group .card {
+          margin: 12px 0;
+      }
+
+      .group .card:first-child {
+          margin-top: 0;
+      }
+
+      .group .card:last-child {
+          margin-bottom: 0;
+      }
+
+      /* caret rotation */
+      .group-tg:checked + label .caret {
+          transform: rotate(90deg);
+      }
+
+      .caret {
+          transition: transform 0.15s ease;
+      }
+
+      /* toggle body */
+      .group-tg:checked ~ .group-cards {
+          display: block;
+      }
+
+      /* CSS-only filtering of cards via top pills */
+      #filter-errors:target ~ main .card:not(.has-error):not(.has-story-error) {
+          display: none;
+      }
+
+      #filter-infos:target ~ main .card:not(.has-info) {
+          display: none;
+      }
+
+      #filter-story-errors:target ~ main .card:not(.has-story-error) {
+          display: none;
+      }
+
+      #filter-doc-errors:target ~ main .card:not(.has-doc-error) {
+          display: none;
+      }
+
+      #filter-docs:target ~ main .card:has(> .tg-docs),
+      #filter-docs:target ~ main .card.is-doc {
+          display: block;
+      }
+
+      #filter-docs:target ~ main .card:not(:has(> .tg-docs)):not(.is-doc) {
+          display: none;
+      }
+
+      #filter-all:target ~ main .card {
+          display: block;
+      }
+
+      /* In errors view, hide standalone component-error cards in the regular grid (they will appear in groups) */
+      #filter-errors:target ~ main .grid .card.has-error {
+          display: none;
+      }
+
+      /* Show grouped section only in errors view */
+      #filter-errors:target ~ main .error-groups {
+          display: block;
+      }
+
+      /* Section titles */
+      .section-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--muted);
+          margin: 24px 0 12px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--border);
+      }
+      .section-title:first-child {
+          margin-top: 0;
+      }
+
+      /* When a toggle is checked, show the corresponding panel */
+      .card > .tg-err:checked ~ .panels .panel-err {
+          display: grid;
+      }
+      
+      .card > .tg-info:checked ~ .panels .panel-info {
+          display: grid;
+      }
+      
+      .card > .tg-stories:checked ~ .panels .panel-stories {
+          display: grid;
+      }
+
+      .card > .tg-docs:checked ~ .panels .panel-docs {
+          display: grid;
+      }
+
+      .card > .tg-content:checked ~ .panels .panel-content {
+          display: grid;
+      }
+
+      /* Add vertical spacing around panels only when any panel is visible */
+      .card > .tg-err:checked ~ .panels,
+      .card > .tg-info:checked ~ .panels,
+      .card > .tg-stories:checked ~ .panels,
+      .card > .tg-docs:checked ~ .panels,
+      .card > .tg-content:checked ~ .panels,
+      .card > .tg-props:checked ~ .panels {
+          margin: 10px 0;
+      }
+
+      /* Optional: a subtle 1px ring on the active badge, using :has() if available */
+      @supports selector(.card:has(.tg-err:checked)) {
+          .card:has(.tg-err:checked) label[for$='-err'],
+          .card:has(.tg-info:checked) label[for$='-info'],
+          .card:has(.tg-stories:checked) label[for$='-stories'],
+          .card:has(.tg-docs:checked) label[for$='-docs'],
+          .card:has(.tg-content:checked) label[for$='-content'],
+          .card:has(.tg-props:checked) label[for$='-props'] {
+              box-shadow: 0 0 0 1px currentColor;
+              border-color: currentColor;
+          }
+      }
+
+      /* Wrap long lines in code blocks at ~120 characters */
+      pre, code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+      pre {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          overflow-x: auto; /* fallback for extremely long tokens */
+          margin: 8px 0 0;
+      }
+      pre > code {
+          display: block;
+          white-space: inherit;
+          overflow-wrap: inherit;
+          word-break: inherit;
+          inline-size: min(100%, 120ch);
+      }
+
+      /* MDX content container for docs */
+      .mdx-content {
+          background: #0f131b;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 12px;
+          max-height: 400px;
+          overflow-y: auto;
+          margin-top: 8px;
+      }
+  </style>
+</head>
+<body>
+<!-- Hidden targets for the top-level filters -->
+<span id="filter-all"></span>
+<span id="filter-errors"></span>
+<span id="filter-infos"></span>
+<span id="filter-story-errors"></span>
+<span id="filter-doc-errors"></span>
+<span id="filter-docs"></span>
+<header>
+  <div class="wrap">
+    <h1>Manifest Debugger</h1>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">3 components ok</span><span class="filter-pill ok" aria-disabled="true">26 stories ok</span></div>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div class="note info" style="margin-bottom: 16px;">
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <pre><code>typescript: {
+  reactDocgen: 'react-docgen-typescript',
+}</code></pre>
+            Note: <code>react-docgen-typescript</code> can be slower. If performance is acceptable for your project, it generally produces better results.
+            <a href="https://storybook.js.org/docs/api/main-config/main-config-typescript#reactdocgen" target="_blank">Learn more</a>
+          </div>
+    <h2 class="section-title">Components</h2>
+    <div class="grid" role="list">
+      
+<article
+  class="card 
+  no-error 
+  no-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="People">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> People</h2>
+      <div class="badges">
+        <label for="c-0-components-people-props" class="badge ok as-toggle">7 prop types</label>
+        
+        <label for="c-0-components-people-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./stories/People.stories.tsx">components-people · ./stories/People.stories.tsx</div>
+    
+    <div class="hint">`People` renders a compact avatar strip similar to the MGT `mgt-people` control. The component can render a supplied list of people, resolve a list of `userIds`, load group members, or default to tenant directory users from `/users`.</div>
+    <div class="kv"><span class="chip">param: props - Avatar group configuration and people-loading options</span><span class="chip">returns: A compact avatar group, a loading spinner, or `null` when no people are available</span></div>
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  
+  <input id="c-0-components-people-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-0-components-people-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">7 prop types</span>
+            </div>
+            <pre><code>Component: src/components/People/People.tsx::People</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>/**
+ * The ID of a Microsoft Entra ID group whose direct user members should be rendered.
+ */
+groupId?: string
+
+layout?: any = &#39;stack&#39;
+
+/**
+ * A pre-resolved list of people to render.
+ * 
+ * When provided, the component skips list discovery and renders these people directly.
+ */
+people?: PeoplePerson[]
+
+/**
+ * Maximum number of visible avatars before the remaining people are shown in overflow.
+ * 
+ * Defaults to `3`, matching the MGT `mgt-people` control.
+ */
+showMax?: number = 3
+
+/**
+ * Whether presence badges should be shown on each avatar.
+ * 
+ * Presence is loaded when the active provider and granted scopes support it.
+ */
+showPresence?: boolean = false
+
+size?: any = 32
+
+/**
+ * A list of user identifiers to resolve and render.
+ * 
+ * Values can be Microsoft Graph user IDs, UPNs, email addresses, or `&quot;me&quot;`.
+ */
+userIds?: string[]</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { FluentProvider, Text } from "@fluentui/react-components";
+import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = () =&gt; &lt;People showMax={3} layout=&quot;stack&quot; size={32} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Presence</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithPresence = () =&gt; &lt;People showMax={4} layout=&quot;stack&quot; size={40} showPresence /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">From User Ids</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const FromUserIds = () =&gt; &lt;People
+    userIds={[
+      &#39;00000000-0000-0000-0000-000000000001&#39;,
+      &#39;00000000-0000-0000-0000-000000000002&#39;,
+      &#39;00000000-0000-0000-0000-000000000003&#39;,
+      &#39;00000000-0000-0000-0000-000000000010&#39;,
+    ]}
+    showMax={3}
+    layout=&quot;stack&quot;
+    size={32} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Direct People</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const DirectPeople = () =&gt; &lt;&gt;
+    &lt;People
+        showMax={2}
+        layout=&quot;stack&quot;
+        size={32}
+        people={[
+          {
+            id: &#39;adele&#39;,
+            displayName: &#39;Adele Vance&#39;,
+            mail: &#39;adelev@contoso.com&#39;,
+            jobTitle: &#39;Product Manager&#39;,
+          },
+          {
+            id: &#39;alex&#39;,
+            displayName: &#39;Alex Wilber&#39;,
+            mail: &#39;alexw@contoso.com&#39;,
+            jobTitle: &#39;Marketing Assistant&#39;,
+          },
+          {
+            id: &#39;megan&#39;,
+            displayName: &#39;Megan Bowen&#39;,
+            mail: &#39;meganb@contoso.com&#39;,
+            jobTitle: &#39;Marketing Manager&#39;,
+          },
+          {
+            id: &#39;lee&#39;,
+            displayName: &#39;Lee Gu&#39;,
+            mail: &#39;leeg@contoso.com&#39;,
+            jobTitle: &#39;Director&#39;,
+          },
+        ]} /&gt;
+    &lt;Text size={200}&gt;Rendering supplied people skips list discovery and still uses overflow.&lt;/Text&gt;
+&lt;/&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  no-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="PeoplePicker">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> PeoplePicker</h2>
+      <div class="badges">
+        <label for="c-1-components-peoplepicker-props" class="badge ok as-toggle">8 prop types</label>
+        
+        <label for="c-1-components-peoplepicker-stories" class="badge ok as-toggle">10 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./stories/PeoplePicker.stories.tsx">components-peoplepicker · ./stories/PeoplePicker.stories.tsx</div>
+    
+    <div class="hint">PeoplePicker — a tag-picker backed by Microsoft Graph people search. In controlled mode supply `selectedPeople` + `onSelectionChange`. In uncontrolled mode supply `defaultSelectedPeople` or leave both props unset. The component automatically uses {@link MockProvider} mock data when no real Graph provider is available, making it easy to prototype UIs without auth.</div>
+    <div class="kv"><span class="chip">example:  ```tsx &lt;PeoplePicker placeholder=&quot;Search for people...&quot; onSelectionChange={(people) =&gt; console.log(people)} /&gt; ```</span></div>
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  
+  <input id="c-1-components-peoplepicker-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-1-components-peoplepicker-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">8 prop types</span>
+            </div>
+            <pre><code>Component: src/components/PeoplePicker/PeoplePicker.tsx::PeoplePicker</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>/**
+ * Initial selected people (uncontrolled mode).
+ * Ignored when {@link selectedPeople} is provided.
+ */
+defaultSelectedPeople?: PeoplePickerPerson[]
+
+/**
+ * User IDs to exclude from search results.
+ * When provided, these IDs will be filtered out of the dropdown suggestions.
+ * The search will fetch extra results to compensate so that the dropdown still
+ * shows up to {@link maxSearchResults} items after exclusion.
+ */
+excludeUserIds?: string[] = []
+
+/**
+ * Maximum number of people that can be selected.
+ * When reached the search input is hidden.
+ */
+maxPeople?: number
+
+/**
+ * Maximum number of search results to show in the dropdown (default: 10)
+ */
+maxSearchResults?: number = 10
+
+/**
+ * Called when the selection changes.
+ * @param people - The new array of selected people
+ */
+onSelectionChange?: (people: PeoplePickerPerson[]) =&gt; void
+
+/**
+ * Placeholder text shown in the search input when nothing is typed
+ */
+placeholder?: string = &#39;Search for people...&#39;
+
+/**
+ * Minimum number of characters required before a search is triggered (default: 1)
+ */
+searchMinChars?: number = 1
+
+/**
+ * Currently selected people (controlled mode).
+ * When provided, the component operates in controlled mode and does not manage its own selection state.
+ */
+selectedPeople?: PeoplePickerPerson[]</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { FluentProvider, Text } from "@fluentui/react-components";
+import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Default uncontrolled usage — start typing to search for people. Try &quot;adele&quot;, &quot;megan&quot;, or &quot;alex&quot; to see results.</div>
+              <pre><code>const Default = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for people...&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Default Selected</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Shows how to pre-select people in uncontrolled mode.</div>
+              <pre><code>const WithDefaultSelected = () =&gt; &lt;PeoplePicker
+    placeholder=&quot;Search for people...&quot;
+    defaultSelectedPeople={[
+      {
+        id: &#39;00000000-0000-0000-0000-000000000001&#39;,
+        displayName: &#39;Adele Vance&#39;,
+        mail: &#39;adelev@contoso.com&#39;,
+        userPrincipalName: &#39;adelev@contoso.com&#39;,
+        jobTitle: &#39;Product Manager&#39;,
+      },
+    ]} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Controlled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Controlled PeoplePicker that logs selection changes.</div>
+              <pre><code>const Controlled = () =&gt; {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [selected, setSelected] = useState&lt;PeoplePickerPerson[]&gt;([
+      {
+        id: &#39;00000000-0000-0000-0000-000000000010&#39;,
+        displayName: &#39;Megan Bowen&#39;,
+        mail: &#39;meganb@contoso.com&#39;,
+        userPrincipalName: &#39;meganb@contoso.com&#39;,
+        jobTitle: &#39;Marketing Manager&#39;,
+      },
+    ]);
+
+    return (
+        &lt;div style={{ display: &#39;flex&#39;, flexDirection: &#39;column&#39;, gap: 12 }}&gt;
+            &lt;PeoplePicker
+                placeholder=&quot;Search for people...&quot;
+                selectedPeople={selected}
+                onSelectionChange={setSelected} /&gt;
+            &lt;Text size={200}&gt;Selected: {selected.map((p) =&gt; p.displayName).join(&#39;, &#39;) || &#39;(none)&#39;}
+            &lt;/Text&gt;
+        &lt;/div&gt;
+    );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Max 3 People</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Limits selection to a maximum of 3 people. The input field hides once the limit is reached.</div>
+              <pre><code>const MaxThreePeople = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for up to 3 people...&quot; maxPeople={3} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Min 2 Characters</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Requires at least 2 characters before searching.</div>
+              <pre><code>const MinTwoChars = () =&gt; &lt;PeoplePicker placeholder=&quot;Type 2+ characters to search...&quot; searchMinChars={2} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Size: Small</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Compact small size variant.</div>
+              <pre><code>const SmallSize = () =&gt; &lt;PeoplePicker placeholder=&quot;Search...&quot; size=&quot;small&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Size: Large</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Large size variant.</div>
+              <pre><code>const LargeSize = () =&gt; &lt;PeoplePicker placeholder=&quot;Search...&quot; size=&quot;large&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Disabled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Disabled state — the picker cannot be interacted with.</div>
+              <pre><code>const Disabled = () =&gt; &lt;PeoplePicker
+    placeholder=&quot;Search for people...&quot;
+    disabled
+    defaultSelectedPeople={[
+      {
+        id: &#39;00000000-0000-0000-0000-000000000001&#39;,
+        displayName: &#39;Adele Vance&#39;,
+        mail: &#39;adelev@contoso.com&#39;,
+      },
+    ]} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Appearance: Underline</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Underline appearance variant.</div>
+              <pre><code>const UnderlineAppearance = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for people...&quot; appearance=&quot;underline&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Appearance: Filled Darker</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Filled appearance with a darker background.</div>
+              <pre><code>const FilledDarkerAppearance = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for people...&quot; appearance=&quot;filled-darker&quot; /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  no-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Person">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Person</h2>
+      <div class="badges">
+        <label for="c-2-components-person-props" class="badge ok as-toggle">15 prop types</label>
+        
+        <label for="c-2-components-person-stories" class="badge ok as-toggle">12 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./stories/Person.stories.tsx">components-person · ./stories/Person.stories.tsx</div>
+    
+    <div class="hint">Person stories are organized to mirror Fluent UI Persona story groups: - Default - Lines - Size - Text Alignment - Text Position - Presence Graph-specific differences are captured in dedicated stories: - Graph: Direct Data (personDetails) - Graph: Image Fallback (fetchImage=false) - Graph: Loading State</div>
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  
+  <input id="c-2-components-person-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-2-components-person-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">15 prop types</span>
+            </div>
+            <pre><code>Component: src/components/Person/Person.tsx::Person</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>email?: string
+
+fetchImage?: boolean = true
+
+/**
+ * Mapping for the first text line.
+ * 
+ * This is the name of a field on {@link PersonDetails} (for example, `&quot;displayName&quot;`), or a
+ * comma-separated list of field names to use as fallbacks in order (for example,
+ * `&quot;displayName,mail,email&quot;`).
+ * 
+ * Implementations may also support pseudo-fields for derived values such as presence in
+ * addition to literal `PersonDetails` keys.
+ */
+line1Property?: string
+
+/**
+ * Mapping for the second text line.
+ * 
+ * Accepts a single {@link PersonDetails} field name or a comma-separated list of field names
+ * to be used as fallbacks, in the same way as {@link PersonProps.line1Property}.
+ */
+line2Property?: string
+
+/**
+ * Mapping for the third text line.
+ * 
+ * Accepts a single {@link PersonDetails} field name or a comma-separated list of field names
+ * to be used as fallbacks, in the same way as {@link PersonProps.line1Property}.
+ */
+line3Property?: string
+
+/**
+ * Mapping for the fourth text line.
+ * 
+ * Accepts a single {@link PersonDetails} field name or a comma-separated list of field names
+ * to be used as fallbacks, in the same way as {@link PersonProps.line1Property}.
+ */
+line4Property?: string
+
+personDetails?: PersonDetails
+
+/**
+ * Custom renderer for the first text line.
+ * 
+ * When provided, this overrides the default rendering for line 1 and is called with a
+ * {@link PersonLineRenderContext}. The `text` property in the context contains the value that
+ * would have been shown based on `line1Property`, if any.
+ */
+renderLine1?: (context: PersonLineRenderContext) =&gt; ReactElement | string | null
+
+/**
+ * Custom renderer for the second text line.
+ * 
+ * When provided, this overrides the default rendering for line 2 and is called with a
+ * {@link PersonLineRenderContext}. The `text` property in the context contains the value that
+ * would have been shown based on `line2Property`, if any.
+ */
+renderLine2?: (context: PersonLineRenderContext) =&gt; ReactElement | string | null
+
+/**
+ * Custom renderer for the third text line.
+ * 
+ * When provided, this overrides the default rendering for line 3 and is called with a
+ * {@link PersonLineRenderContext}. The `text` property in the context contains the value that
+ * would have been shown based on `line3Property`, if any.
+ */
+renderLine3?: (context: PersonLineRenderContext) =&gt; ReactElement | string | null
+
+/**
+ * Custom renderer for the fourth text line.
+ * 
+ * When provided, this overrides the default rendering for line 4 and is called with a
+ * {@link PersonLineRenderContext}. The `text` property in the context contains the value that
+ * would have been shown based on `line4Property`, if any.
+ */
+renderLine4?: (context: PersonLineRenderContext) =&gt; ReactElement | string | null
+
+showPresence?: boolean = false
+
+userId?: string
+
+userPrincipalName?: string
+
+view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelines&#39; | &#39;fourlines&#39; = &#39;oneline&#39;</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { GraphProvider, Person } from "@devsym/graph-toolkit-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Default</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Default = () =&gt; &lt;Person
+    userId=&quot;test-user&quot;
+    view=&quot;oneline&quot;
+    showPresence={false}
+    size=&quot;medium&quot;
+    fetchImage /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Avatar Only</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const AvatarOnly = () =&gt; &lt;Person
+    personDetails={{
+      displayName: &#39;Adele Vance&#39;,
+      jobTitle: &#39;Program Manager&#39;,
+      department: &#39;Product&#39;,
+    }}
+    view=&quot;avatar&quot;
+    size=&quot;large&quot;
+    fetchImage={false}
+    showPresence={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Lines</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Lines = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
+    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;avatar&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;oneline&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;twolines&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;threelines&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;fourlines&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Size</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Size = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;extra-small&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;small&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;medium&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;large&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;extra-large&quot; /&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;huge&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Text Alignment</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const TextAlignment = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
+    &lt;Person
+        userId=&quot;test-user&quot;
+        view=&quot;threelines&quot;
+        showPresence
+        size=&quot;large&quot;
+        textAlignment=&quot;start&quot; /&gt;
+    &lt;Person
+        userId=&quot;test-user&quot;
+        view=&quot;threelines&quot;
+        showPresence
+        size=&quot;large&quot;
+        textAlignment=&quot;center&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Text Position</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const TextPosition = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
+    &lt;Person
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;medium&quot;
+        textPosition=&quot;after&quot; /&gt;
+    &lt;Person
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;medium&quot;
+        textPosition=&quot;before&quot; /&gt;
+    &lt;Person
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;medium&quot;
+        textPosition=&quot;below&quot;
+        textAlignment=&quot;center&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Presence</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Presence = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;large&quot; showPresence /&gt;
+    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;large&quot; showPresence presenceOnly /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Graph: Direct Data</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const GraphDirectData = () =&gt; &lt;Person
+    personDetails={{
+      displayName: &#39;John Doe&#39;,
+      jobTitle: &#39;Software Engineer&#39;,
+      department: &#39;Engineering&#39;,
+      officeLocation: &#39;Redmond&#39;,
+      mail: &#39;john.doe@contoso.com&#39;,
+    }}
+    view=&quot;fourlines&quot;
+    size=&quot;medium&quot;
+    showPresence={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Graph: Line Properties</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const GraphLineProperties = () =&gt; &lt;Person
+    userId=&quot;test-user&quot;
+    view=&quot;threelines&quot;
+    line1Property=&quot;displayName&quot;
+    line2Property=&quot;mail,userPrincipalName&quot;
+    line3Property=&quot;presenceAvailability&quot;
+    size=&quot;medium&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Graph: Rendered Lines</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const GraphRenderedLines = () =&gt; &lt;Person
+    personDetails={{
+      displayName: &#39;Megan Bowen&#39;,
+      jobTitle: &#39;CEO&#39;,
+      department: &#39;Leadership&#39;,
+      officeLocation: &#39;Seattle&#39;,
+    }}
+    view=&quot;fourlines&quot;
+    renderLine1={({ text }) =&gt; &lt;span&gt;Name: {text}&lt;/span&gt;}
+    renderLine2={({ text }) =&gt; &lt;span&gt;Role: {text}&lt;/span&gt;}
+    renderLine3={({ text }) =&gt; &lt;span&gt;Org: {text}&lt;/span&gt;}
+    renderLine4={({ text }) =&gt; &lt;span&gt;Location: {text}&lt;/span&gt;}
+    size=&quot;medium&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Graph: Image Fallback</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const GraphImageFallback = () =&gt; &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;medium&quot; fetchImage={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Graph: Loading State</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const GraphLoadingState = () =&gt; &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;medium&quot; /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+    </div>
+    
+    
+    
+  </div>
+</main>
+</body>
+</html>  
