@@ -59,7 +59,7 @@ describe('Person', () => {
         return call[0] as Record<string, unknown>;
     };
 
-    it('passes through advanced Fluent Persona props', () => {
+    it('passes through non-text Persona props and suppresses text slots in avatar view', () => {
         render(
             <Person
                 personDetails={{
@@ -80,6 +80,48 @@ describe('Person', () => {
         expect(personaProps.primaryText).toBeUndefined();
         expect(personaProps.quaternaryText).toBeUndefined();
     });
+
+    it('suppresses name and text slots in avatar view while loading', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(
+            <Person
+                userId="user-1"
+                view="avatar"
+                primaryText="Should not render"
+                secondaryText="Should not render"
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBeUndefined();
+        expect(personaProps.primaryText).toBeUndefined();
+        expect(personaProps.secondaryText).toBeUndefined();
+        expect(personaProps.tertiaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
+    });
+
+    it('shows Loading... name while loading in non-avatar view', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(<Person userId="user-1" view="oneline" />);
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBe('Loading...');
+    });
+
 
     it('suppresses all text slots in avatar view', () => {
         render(

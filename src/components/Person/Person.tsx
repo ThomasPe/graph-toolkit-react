@@ -192,7 +192,11 @@ export const Person: React.FC<PersonProps> = ({
     return (
       <Persona
         {...personaProps}
-        name={personaProps.name ?? 'Loading...'}
+        name={isAvatarOnlyView ? undefined : personaProps.name ?? 'Loading...'}
+        primaryText={isAvatarOnlyView ? undefined : personaProps.primaryText}
+        secondaryText={isAvatarOnlyView ? undefined : personaProps.secondaryText}
+        tertiaryText={isAvatarOnlyView ? undefined : personaProps.tertiaryText}
+        quaternaryText={isAvatarOnlyView ? undefined : personaProps.quaternaryText}
       />
     );
   }
