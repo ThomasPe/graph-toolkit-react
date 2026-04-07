@@ -89,8 +89,16 @@ export const People: React.FC<PeopleProps> = ({
       return;
     }
 
+    let trigger: 'peopleChanged' | 'peopleLoaded' | 'peopleLoadFailed' = 'peopleLoaded';
+
+    if (error) {
+      trigger = 'peopleLoadFailed';
+    } else if (people) {
+      trigger = 'peopleChanged';
+    }
+
     onUpdated({
-      trigger: error ? 'peopleLoadFailed' : people ? 'peopleChanged' : 'peopleLoaded',
+      trigger,
       people: resolvedPeople,
       loading: false,
       error,

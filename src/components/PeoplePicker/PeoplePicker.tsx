@@ -196,7 +196,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   }, []);
 
   const isAtMax = maxPeople !== undefined && effectiveSelected.length >= maxPeople;
-  const hasSkippedInitialEmptyUpdate = useRef(false);
+  const isFirstSearchUpdate = useRef(true);
 
   useEffect(() => {
     if (!onUpdated || searchLoading) {
@@ -204,10 +204,10 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
     }
 
     const shouldSkipInitialEmptyUpdate =
-      !hasSkippedInitialEmptyUpdate.current &&
+      isFirstSearchUpdate.current &&
       searchQuery.length === 0 &&
       filteredResults.length === 0;
-    hasSkippedInitialEmptyUpdate.current = true;
+    isFirstSearchUpdate.current = false;
 
     if (shouldSkipInitialEmptyUpdate) {
       return;
