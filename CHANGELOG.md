@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-next.13
+
+### Patch Changes
+
+- a3c2622: Fix `Person` so `view="avatar"` renders only the avatar without any text lines.
+  - suppress Persona text slots for avatar-only view
+  - add regression coverage for avatar-only rendering
+  - add an explicit Storybook story for the avatar-only variant
+
 ## 1.0.0-next.12
 
 ### Patch Changes
