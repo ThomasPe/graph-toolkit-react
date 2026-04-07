@@ -14,6 +14,37 @@ import type { PeopleSearchResult } from '../../providers/IPersonDataProvider';
 export type PeoplePickerPerson = PeopleSearchResult;
 
 /**
+ * Triggers reported by the {@link PeoplePickerProps.onUpdated} callback.
+ */
+export type PeoplePickerUpdateTrigger = 'searchResultsUpdated' | 'selectionChanged';
+
+/**
+ * Event payload reported when the {@link PeoplePicker} component finishes a meaningful update.
+ */
+export interface PeoplePickerUpdatedEvent {
+  /**
+   * The reason the component reported the update.
+   */
+  trigger: PeoplePickerUpdateTrigger;
+  /**
+   * The current picker search query.
+   */
+  searchQuery: string;
+  /**
+   * The people currently selected in the picker.
+   */
+  selectedPeople: PeoplePickerPerson[];
+  /**
+   * The search results currently shown by the picker.
+   */
+  searchResults: PeoplePickerPerson[];
+  /**
+   * Whether the picker is still loading search results.
+   */
+  loading: boolean;
+}
+
+/**
  * Props for the {@link PeoplePicker} component.
  */
 export interface PeoplePickerProps
@@ -64,4 +95,11 @@ export interface PeoplePickerProps
    * shows up to {@link maxSearchResults} items after exclusion.
    */
   excludeUserIds?: string[];
+
+  /**
+   * Called after the picker updates its search results or selection state.
+   *
+   * @param event - Details about the update trigger and the picker state after the update.
+   */
+  onUpdated?: (event: PeoplePickerUpdatedEvent) => void;
 }

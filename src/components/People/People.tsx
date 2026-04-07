@@ -2,7 +2,7 @@
  * People component - Display a compact group of people as overlapping avatars
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   AvatarGroup,
   AvatarGroupItem,
@@ -73,15 +73,29 @@ export const People: React.FC<PeopleProps> = ({
   showPresence = false,
   layout = 'stack',
   size = 32,
+  onUpdated,
   ...avatarGroupProps
 }) => {
-  const { people: resolvedPeople, loading } = usePeopleList({
+  const { people: resolvedPeople, loading, error } = usePeopleList({
     people,
     userIds,
     groupId,
     maxPeople: Math.max(DEFAULT_FETCH_COUNT, showMax + 5),
     showPresence,
   });
+
+  useEffect(() => {
+    if (!onUpdated || loading) {
+      return;
+    }
+
+    onUpdated({
+      trigger: error ? 'peopleLoadFailed' : people ? 'peopleChanged' : 'peopleLoaded',
+      people: resolvedPeople,
+      loading: false,
+      error,
+    });
+  }, [error, loading, onUpdated, people, resolvedPeople]);
 
   if (loading) {
     return <Spinner size="tiny" />;

@@ -2,7 +2,7 @@
  * PeoplePicker component - Select one or more people using Microsoft Graph search
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   Avatar,
   InteractionTag,
@@ -106,6 +106,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   appearance,
   size,
   disabled,
+  onUpdated,
 }) => {
   const isControlled = selectedPeople !== undefined;
 
@@ -148,6 +149,16 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
 
   const selectedIds = useMemo(() => effectiveSelected.map((p) => p.id), [effectiveSelected]);
 
+  // Filter out already-selected options and explicitly excluded IDs from suggestions,
+  // then cap back to maxSearchResults
+  const filteredResults = useMemo(
+    () =>
+      searchResults
+        .filter((p) => !selectedIds.includes(p.id) && !excludeUserIds.includes(p.id))
+        .slice(0, maxSearchResults),
+    [searchResults, selectedIds, excludeUserIds, maxSearchResults]
+  );
+
   const handleOptionSelect = useCallback(
     (_e: React.SyntheticEvent | Event, data: TagPickerOnOptionSelectData) => {
       const newPeople = data.selectedOptions
@@ -159,10 +170,17 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
         setInternalSelectedPeople(newPeople);
       }
       onSelectionChange?.(newPeople);
+      onUpdated?.({
+        trigger: 'selectionChanged',
+        searchQuery: '',
+        selectedPeople: newPeople,
+        searchResults: filteredResults,
+        loading: false,
+      });
       // Clear the search query after selection
       setSearchQuery('');
     },
-    [isControlled, onSelectionChange, peopleLookup]
+    [filteredResults, isControlled, onSelectionChange, onUpdated, peopleLookup]
   );
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,16 +196,31 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   }, []);
 
   const isAtMax = maxPeople !== undefined && effectiveSelected.length >= maxPeople;
+  const hasSkippedInitialEmptyUpdate = useRef(false);
 
-  // Filter out already-selected options and explicitly excluded IDs from suggestions,
-  // then cap back to maxSearchResults
-  const filteredResults = useMemo(
-    () =>
-      searchResults
-        .filter((p) => !selectedIds.includes(p.id) && !excludeUserIds.includes(p.id))
-        .slice(0, maxSearchResults),
-    [searchResults, selectedIds, excludeUserIds, maxSearchResults]
-  );
+  useEffect(() => {
+    if (!onUpdated || searchLoading) {
+      return;
+    }
+
+    if (
+      !hasSkippedInitialEmptyUpdate.current &&
+      searchQuery.length === 0 &&
+      filteredResults.length === 0
+    ) {
+      hasSkippedInitialEmptyUpdate.current = true;
+      return;
+    }
+
+    hasSkippedInitialEmptyUpdate.current = true;
+    onUpdated({
+      trigger: 'searchResultsUpdated',
+      searchQuery,
+      selectedPeople: effectiveSelected,
+      searchResults: filteredResults,
+      loading: false,
+    });
+  }, [effectiveSelected, filteredResults, onUpdated, searchLoading, searchQuery]);
 
   return (
     <TagPicker

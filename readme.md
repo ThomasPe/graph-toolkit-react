@@ -99,6 +99,8 @@ import { Person } from '@devsym/graph-toolkit-react';
 
 `Person` supports Fluent UI Persona props directly.
 
+`Person`, `People`, and `PeoplePicker` also expose an `onUpdated` callback so apps can react to direct data changes, resolved content loads, and picker state updates with trigger metadata.
+
 MGT-style line customization is also supported:
 
 ```tsx

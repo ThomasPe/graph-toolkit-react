@@ -3,4 +3,4 @@
  */
 
 export { People } from './People';
-export type { PeoplePerson, PeopleProps } from './People.types';
+export type { PeoplePerson, PeopleProps, PeopleUpdatedEvent, PeopleUpdateTrigger } from './People.types';

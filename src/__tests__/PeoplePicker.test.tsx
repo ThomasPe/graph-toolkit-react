@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { PeoplePicker } from '../components/PeoplePicker';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
 import { usePersonData } from '../hooks/usePersonData';
@@ -8,25 +8,31 @@ import { MockProvider } from '../providers/MockProvider';
 import { isPeopleSearchProvider } from '../providers/IPersonDataProvider';
 
 // Mock Fluent UI TagPicker components to simplify testing
+const tagPickerMock = vi.fn();
+
 vi.mock('@fluentui/react-components', async () => {
   const actual = await vi.importActual<typeof import('@fluentui/react-components')>(
     '@fluentui/react-components'
   );
   return {
     ...actual,
-    TagPicker: ({ children, onOptionSelect, selectedOptions }: {
+    TagPicker: (props: {
       children: React.ReactNode;
       onOptionSelect?: (e: Event, data: { value: string; selectedOptions: string[] }) => void;
       selectedOptions?: string[];
-    }) => (
-      <div
-        data-testid="tag-picker"
-        data-selected={selectedOptions?.join(',')}
-        data-on-option-select={onOptionSelect ? 'true' : 'false'}
-      >
-        {children}
-      </div>
-    ),
+    }) => {
+      tagPickerMock(props);
+      const { children, onOptionSelect, selectedOptions } = props;
+      return (
+        <div
+          data-testid="tag-picker"
+          data-selected={selectedOptions?.join(',')}
+          data-on-option-select={onOptionSelect ? 'true' : 'false'}
+        >
+          {children}
+        </div>
+      );
+    },
     TagPickerControl: ({ children }: { children: React.ReactNode }) => (
       <div data-testid="tag-picker-control">{children}</div>
     ),
@@ -492,6 +498,60 @@ describe('PeoplePicker', () => {
     expect(removeButtons).toHaveLength(2);
     expect(removeButtons[0].getAttribute('aria-label')).toBe('Remove Adele Vance');
     expect(removeButtons[1].getAttribute('aria-label')).toBe('Remove Alex Wilber');
+  });
+
+  it('calls onUpdated when search results change', () => {
+    const onUpdated = vi.fn();
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
+
+    render(<PeoplePicker onUpdated={onUpdated} />);
+
+    expect(onUpdated).toHaveBeenCalledWith({
+      trigger: 'searchResultsUpdated',
+      searchQuery: '',
+      selectedPeople: [],
+      searchResults: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
+  });
+
+  it('calls onUpdated when the selection changes', () => {
+    const onUpdated = vi.fn();
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
+
+    render(<PeoplePicker onUpdated={onUpdated} />);
+
+    const tagPickerProps = tagPickerMock.mock.calls.at(-1)?.[0] as {
+      onOptionSelect?: (event: Event, data: { value: string; selectedOptions: string[] }) => void;
+    };
+
+    act(() => {
+      tagPickerProps.onOptionSelect?.(new Event('change'), { value: '1', selectedOptions: ['1'] });
+    });
+
+    expect(onUpdated).toHaveBeenCalledWith({
+      trigger: 'selectionChanged',
+      searchQuery: '',
+      selectedPeople: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+      ],
+      searchResults: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+      ],
+      loading: false,
+    });
   });
 });
 

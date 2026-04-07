@@ -129,4 +129,32 @@ describe('People', () => {
 
     expect(container.innerHTML).toBe('');
   });
+
+  it('calls onUpdated with the resolved people and trigger metadata', () => {
+    const onUpdated = vi.fn();
+    mockedUsePeopleList.mockReturnValue({
+      people: [
+        {
+          id: '1',
+          displayName: 'Adele Vance',
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    render(<People onUpdated={onUpdated} />);
+
+    expect(onUpdated).toHaveBeenCalledWith({
+      trigger: 'peopleLoaded',
+      people: [
+        {
+          id: '1',
+          displayName: 'Adele Vance',
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+  });
 });
