@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.14
+
+### Minor Changes
+
+- 173d75e: Add `onUpdated` callbacks to `Person`, `People`, and `PeoplePicker` so apps can react to loaded content and picker state changes with trigger metadata.
+
 ## 1.0.0-next.13
 
 ### Patch Changes
