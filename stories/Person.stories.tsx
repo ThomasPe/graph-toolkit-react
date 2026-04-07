@@ -166,6 +166,21 @@ export const Default: Story = {
   },
 };
 
+export const AvatarOnly: Story = {
+  name: 'Avatar Only',
+  args: {
+    personDetails: {
+      displayName: 'Adele Vance',
+      jobTitle: 'Program Manager',
+      department: 'Product',
+    },
+    view: 'avatar',
+    size: 'large',
+    fetchImage: false,
+    showPresence: false,
+  },
+};
+
 export const Lines: Story = {
   name: 'Lines',
   render: (args) => (

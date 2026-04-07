@@ -76,8 +76,36 @@ describe('Person', () => {
         const personaProps = getLastPersonaProps();
         expect(personaProps.size).toBe('huge');
         expect(personaProps.presenceOnly).toBe(true);
-        expect(personaProps.primaryText).toBe('Primary');
-        expect(personaProps.quaternaryText).toBe('Quaternary');
+        expect(personaProps.primaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
+    });
+
+    it('suppresses all text slots in avatar view', () => {
+        render(
+            <Person
+                personDetails={{
+                    displayName: 'Adele Vance',
+                    jobTitle: 'Program Manager',
+                    department: 'Product',
+                }}
+                view="avatar"
+                primaryText="Should not render"
+                secondaryText="Should not render"
+                tertiaryText="Should not render"
+                quaternaryText="Should not render"
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBeUndefined();
+        expect(personaProps.primaryText).toBeUndefined();
+        expect(personaProps.secondaryText).toBeUndefined();
+        expect(personaProps.tertiaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
+
+        const avatar = personaProps.avatar as { initials?: string; name?: string };
+        expect(avatar.initials).toBeTruthy();
+        expect(avatar.name).toBe('Adele Vance');
     });
 
     it('passes through Persona onClick handler directly', () => {

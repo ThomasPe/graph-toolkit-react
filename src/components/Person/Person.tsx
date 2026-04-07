@@ -142,6 +142,7 @@ export const Person: React.FC<PersonProps> = ({
   fetchImage = true,
   ...personaProps
 }) => {
+  const isAvatarOnlyView = view === 'avatar';
   const resolvedLine1Property = view === 'avatar' ? undefined : getLineProperty(view, 1, line1Property);
   const resolvedLine2Property = view === 'avatar' ? undefined : getLineProperty(view, 2, line2Property);
   const resolvedLine3Property = view === 'threelines' || view === 'fourlines'
@@ -221,17 +222,20 @@ export const Person: React.FC<PersonProps> = ({
   const resolvedAvatar = personaProps.avatar ?? {
     image: photoUrl ? { src: photoUrl } : undefined,
     initials: photoUrl ? undefined : initials,
+    name: displayName,
   };
 
-  const resolvedName = personaProps.name ?? displayName;
-  const resolvedPrimaryText = personaProps.primaryText ?? defaultPrimaryText;
+  const resolvedName = isAvatarOnlyView ? undefined : personaProps.name ?? displayName;
+  const resolvedPrimaryText = isAvatarOnlyView
+    ? undefined
+    : personaProps.primaryText ?? defaultPrimaryText;
 
   const resolvedSecondaryText =
-    personaProps.secondaryText ?? defaultSecondaryText;
+    isAvatarOnlyView ? undefined : personaProps.secondaryText ?? defaultSecondaryText;
   const resolvedTertiaryText =
-    personaProps.tertiaryText ?? defaultTertiaryText;
+    isAvatarOnlyView ? undefined : personaProps.tertiaryText ?? defaultTertiaryText;
   const resolvedQuaternaryText =
-    personaProps.quaternaryText ?? defaultQuaternaryText;
+    isAvatarOnlyView ? undefined : personaProps.quaternaryText ?? defaultQuaternaryText;
 
   return (
     <Persona
