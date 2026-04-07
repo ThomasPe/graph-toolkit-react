@@ -120,6 +120,25 @@ const renderLine = (
 const getLineProperty = (view: PersonView, line: 1 | 2 | 3 | 4, override?: string): string | undefined =>
   override ?? DEFAULT_LINE_PROPERTIES[view][line - 1];
 
+const getVisibleLineCount = (view: PersonView): 0 | 1 | 2 | 3 | 4 => {
+  switch (view) {
+    case 'avatar':
+      return 0;
+    case 'oneline':
+      return 1;
+    case 'twolines':
+      return 2;
+    case 'threelines':
+      return 3;
+    case 'fourlines':
+    default:
+      return 4;
+  }
+};
+
+const isLineVisible = (view: PersonView, line: 1 | 2 | 3 | 4): boolean =>
+  line <= getVisibleLineCount(view);
+
 const getSelectFields = (properties: Array<string | undefined>): string[] =>
   [...new Set(properties.flatMap(property => parsePropertyList(property)))]
     .filter(property => !USER_SELECT_EXCLUSIONS.has(property));
@@ -142,14 +161,11 @@ export const Person: React.FC<PersonProps> = ({
   fetchImage = true,
   ...personaProps
 }) => {
-  const resolvedLine1Property = view === 'avatar' ? undefined : getLineProperty(view, 1, line1Property);
-  const resolvedLine2Property = view === 'avatar' ? undefined : getLineProperty(view, 2, line2Property);
-  const resolvedLine3Property = view === 'threelines' || view === 'fourlines'
-    ? getLineProperty(view, 3, line3Property)
-    : undefined;
-  const resolvedLine4Property = view === 'fourlines'
-    ? getLineProperty(view, 4, line4Property)
-    : undefined;
+  const isAvatarOnlyView = view === 'avatar';
+  const resolvedLine1Property = isLineVisible(view, 1) ? getLineProperty(view, 1, line1Property) : undefined;
+  const resolvedLine2Property = isLineVisible(view, 2) ? getLineProperty(view, 2, line2Property) : undefined;
+  const resolvedLine3Property = isLineVisible(view, 3) ? getLineProperty(view, 3, line3Property) : undefined;
+  const resolvedLine4Property = isLineVisible(view, 4) ? getLineProperty(view, 4, line4Property) : undefined;
 
   const usesPresenceLine = [resolvedLine1Property, resolvedLine2Property, resolvedLine3Property, resolvedLine4Property]
     .some(property => parsePropertyList(property).some(item => PRESENCE_PROPERTIES.has(item)));
@@ -176,7 +192,11 @@ export const Person: React.FC<PersonProps> = ({
     return (
       <Persona
         {...personaProps}
-        name={personaProps.name ?? 'Loading...'}
+        name={isAvatarOnlyView ? undefined : personaProps.name ?? 'Loading...'}
+        primaryText={isAvatarOnlyView ? undefined : personaProps.primaryText}
+        secondaryText={isAvatarOnlyView ? undefined : personaProps.secondaryText}
+        tertiaryText={isAvatarOnlyView ? undefined : personaProps.tertiaryText}
+        quaternaryText={isAvatarOnlyView ? undefined : personaProps.quaternaryText}
       />
     );
   }
@@ -201,14 +221,22 @@ export const Person: React.FC<PersonProps> = ({
   const resolvedLine4Text = getTextFromProperty(personWithPresence, resolvedLine4Property);
 
   const defaultPrimaryText =
-    resolvedLine1Property && resolvedLine1Text !== displayName
-      ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
-      : renderLine1
+    !isLineVisible(view, 1)
+      ? undefined
+      : resolvedLine1Property && resolvedLine1Text !== displayName
         ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
-        : personaProps.primaryText;
-  const defaultSecondaryText = renderLine(2, personWithPresence, resolvedLine2Text, renderLine2);
-  const defaultTertiaryText = renderLine(3, personWithPresence, resolvedLine3Text, renderLine3);
-  const defaultQuaternaryText = renderLine(4, personWithPresence, resolvedLine4Text, renderLine4);
+        : renderLine1
+          ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
+          : personaProps.primaryText;
+  const defaultSecondaryText = isLineVisible(view, 2)
+    ? renderLine(2, personWithPresence, resolvedLine2Text, renderLine2)
+    : undefined;
+  const defaultTertiaryText = isLineVisible(view, 3)
+    ? renderLine(3, personWithPresence, resolvedLine3Text, renderLine3)
+    : undefined;
+  const defaultQuaternaryText = isLineVisible(view, 4)
+    ? renderLine(4, personWithPresence, resolvedLine4Text, renderLine4)
+    : undefined;
 
   const defaultPresence = showPresence && graphPresence
     ? {
@@ -221,17 +249,20 @@ export const Person: React.FC<PersonProps> = ({
   const resolvedAvatar = personaProps.avatar ?? {
     image: photoUrl ? { src: photoUrl } : undefined,
     initials: photoUrl ? undefined : initials,
+    name: displayName,
   };
 
-  const resolvedName = personaProps.name ?? displayName;
-  const resolvedPrimaryText = personaProps.primaryText ?? defaultPrimaryText;
+  const resolvedName = isAvatarOnlyView ? undefined : personaProps.name ?? displayName;
+  const resolvedPrimaryText = isAvatarOnlyView
+    ? undefined
+    : personaProps.primaryText ?? defaultPrimaryText;
 
   const resolvedSecondaryText =
-    personaProps.secondaryText ?? defaultSecondaryText;
+    isAvatarOnlyView ? undefined : personaProps.secondaryText ?? defaultSecondaryText;
   const resolvedTertiaryText =
-    personaProps.tertiaryText ?? defaultTertiaryText;
+    isAvatarOnlyView ? undefined : personaProps.tertiaryText ?? defaultTertiaryText;
   const resolvedQuaternaryText =
-    personaProps.quaternaryText ?? defaultQuaternaryText;
+    isAvatarOnlyView ? undefined : personaProps.quaternaryText ?? defaultQuaternaryText;
 
   return (
     <Persona

@@ -44,8 +44,9 @@ describe('Person', () => {
                 availability: 'Available',
                 activity: 'Available',
             },
-            photoUrl: undefined,
+            photoUrl: null,
             loading: false,
+            error: null,
         });
     });
 
@@ -58,7 +59,7 @@ describe('Person', () => {
         return call[0] as Record<string, unknown>;
     };
 
-    it('passes through advanced Fluent Persona props', () => {
+    it('passes through non-text Persona props and suppresses text slots in avatar view', () => {
         render(
             <Person
                 personDetails={{
@@ -76,8 +77,78 @@ describe('Person', () => {
         const personaProps = getLastPersonaProps();
         expect(personaProps.size).toBe('huge');
         expect(personaProps.presenceOnly).toBe(true);
-        expect(personaProps.primaryText).toBe('Primary');
-        expect(personaProps.quaternaryText).toBe('Quaternary');
+        expect(personaProps.primaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
+    });
+
+    it('suppresses name and text slots in avatar view while loading', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(
+            <Person
+                userId="user-1"
+                view="avatar"
+                primaryText="Should not render"
+                secondaryText="Should not render"
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBeUndefined();
+        expect(personaProps.primaryText).toBeUndefined();
+        expect(personaProps.secondaryText).toBeUndefined();
+        expect(personaProps.tertiaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
+    });
+
+    it('shows Loading... name while loading in non-avatar view', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(<Person userId="user-1" view="oneline" />);
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBe('Loading...');
+    });
+
+
+    it('suppresses all text slots in avatar view', () => {
+        render(
+            <Person
+                personDetails={{
+                    displayName: 'Adele Vance',
+                    jobTitle: 'Program Manager',
+                    department: 'Product',
+                }}
+                view="avatar"
+                primaryText="Should not render"
+                secondaryText="Should not render"
+                tertiaryText="Should not render"
+                quaternaryText="Should not render"
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBeUndefined();
+        expect(personaProps.primaryText).toBeUndefined();
+        expect(personaProps.secondaryText).toBeUndefined();
+        expect(personaProps.tertiaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
+
+        const avatar = personaProps.avatar as { initials?: string; name?: string };
+        expect(avatar.initials).toBeTruthy();
+        expect(avatar.name).toBe('Adele Vance');
     });
 
     it('passes through Persona onClick handler directly', () => {
@@ -132,6 +203,31 @@ describe('Person', () => {
         expect(personaProps.primaryText).toBe('Adele');
         expect(personaProps.secondaryText).toBe('adelev@contoso.com');
         expect(personaProps.tertiaryText).toBe('Available');
+    });
+
+    it('keeps hidden lines suppressed when line properties target lines outside the selected view', () => {
+        render(
+            <Person
+                userId="user-1"
+                view="oneline"
+                line1Property="givenName"
+                line2Property="mail,userPrincipalName"
+                fetchImage={false}
+            />
+        );
+
+        expect(mockedUsePersonData).toHaveBeenCalledWith({
+            userId: 'user-1',
+            fetchPresence: false,
+            fetchPhoto: false,
+            selectFields: ['givenName'],
+        });
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.primaryText).toBe('Adele');
+        expect(personaProps.secondaryText).toBeUndefined();
+        expect(personaProps.tertiaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
     });
 
     it('renders custom line content through React line render callbacks', () => {
