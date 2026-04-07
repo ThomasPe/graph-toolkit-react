@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import React from 'react';
 import { Person } from '../src/components/Person';
 import { GraphProvider } from '../src/providers/ProviderContext';
@@ -37,6 +38,9 @@ Story organization follows Fluent Persona docs, while Graph-specific stories foc
     },
   },
   tags: ['autodocs'],
+  args: {
+    onUpdated: fn(),
+  },
   decorators: [
     (Story) => {
       const mockProvider = new MockProvider({ autoSignIn: true });

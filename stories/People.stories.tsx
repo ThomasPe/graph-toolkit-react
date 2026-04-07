@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import React from 'react';
 import { FluentProvider, Text, webLightTheme } from '@fluentui/react-components';
 import { People } from '../src/components/People';
@@ -24,6 +25,9 @@ The component can render a supplied list of people, resolve specific \
     },
   },
   tags: ['autodocs'],
+  args: {
+    onUpdated: fn(),
+  },
   decorators: [
     Story => (
       <FluentProvider theme={webLightTheme}>

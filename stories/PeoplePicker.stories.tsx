@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import React, { useState } from 'react';
 import { FluentProvider, webLightTheme, Text } from '@fluentui/react-components';
 import { PeoplePicker } from '../src/components/PeoplePicker';
@@ -23,6 +24,10 @@ The \`PeoplePicker\` supports both **controlled** and **uncontrolled** usage pat
 When wrapping with a \`MockProvider\` (with \`autoSignIn: true\`), it uses built-in mock data so you can prototype without any auth configuration.`,
       },
     },
+  },
+  args: {
+    onSelectionChange: fn(),
+    onUpdated: fn(),
   },
   decorators: [
     (Story) => (
