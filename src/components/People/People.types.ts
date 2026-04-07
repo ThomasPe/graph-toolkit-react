@@ -6,6 +6,11 @@ import type { AvatarGroupProps } from '@fluentui/react-components';
 import type { PeopleSearchResult } from '../../providers/IPersonDataProvider';
 
 /**
+ * Triggers reported by the {@link PeopleProps.onUpdated} callback.
+ */
+export type PeopleUpdateTrigger = 'peopleChanged' | 'peopleLoaded' | 'peopleLoadFailed';
+
+/**
  * A person entry rendered by the {@link People} component.
  *
  * This extends the base people search result shape with optional presence fields used
@@ -20,6 +25,28 @@ export interface PeoplePerson extends PeopleSearchResult {
    * Current presence availability when available.
    */
   presenceAvailability?: string | null;
+}
+
+/**
+ * Event payload reported when the {@link People} component finishes a meaningful update.
+ */
+export interface PeopleUpdatedEvent {
+  /**
+   * The reason the component reported the update.
+   */
+  trigger: PeopleUpdateTrigger;
+  /**
+   * The resolved people currently rendered by the component.
+   */
+  people: PeoplePerson[];
+  /**
+   * Whether the component is still loading data.
+   */
+  loading: boolean;
+  /**
+   * The most recent list-loading error, if any.
+   */
+  error: Error | null;
 }
 
 /**
@@ -58,4 +85,13 @@ export interface PeopleProps extends Omit<AvatarGroupProps, 'children'> {
    * Presence is loaded when the active provider and granted scopes support it.
    */
   showPresence?: boolean;
+
+  /**
+   * Called after the component updates its resolved people collection.
+   *
+   * Use this to react to direct `people` changes, successful list loads, or failed loads.
+   *
+   * @param event - Details about the update trigger and the current resolved people state.
+   */
+  onUpdated?: (event: PeopleUpdatedEvent) => void;
 }

@@ -8,6 +8,11 @@ import type { ReactElement } from 'react';
 export type PersonView = 'avatar' | 'oneline' | 'twolines' | 'threelines' | 'fourlines';
 
 /**
+ * Triggers reported by the {@link PersonProps.onUpdated} callback.
+ */
+export type PersonUpdateTrigger = 'personDetailsChanged' | 'personLoaded' | 'personLoadFailed';
+
+/**
  * Normalized details about a person used by the {@link Person} component.
  *
  * This interface typically comes from Microsoft Graph or an application-specific user store
@@ -92,6 +97,28 @@ export interface PersonLineRenderContext {
  */
 export type PersonLineRenderer = (context: PersonLineRenderContext) => ReactElement | string | null;
 
+/**
+ * Event payload reported when the {@link Person} component finishes a meaningful update.
+ */
+export interface PersonUpdatedEvent {
+  /**
+   * The reason the component reported the update.
+   */
+  trigger: PersonUpdateTrigger;
+  /**
+   * The resolved person details currently rendered by the component, when available.
+   */
+  person: PersonDetails | null;
+  /**
+   * Whether the component is still loading data.
+   */
+  loading: boolean;
+  /**
+   * The most recent load error, if any.
+   */
+  error: Error | null;
+}
+
 export interface PersonProps extends PersonaProps {
   // Identity (provide one)
   userId?: string;
@@ -170,6 +197,15 @@ export interface PersonProps extends PersonaProps {
    * would have been shown based on `line4Property`, if any.
    */
   renderLine4?: PersonLineRenderer;
+
+  /**
+   * Called after the component updates its resolved person state.
+   *
+   * Use this to react to direct `personDetails` changes, successful data loads, or failed loads.
+   *
+   * @param event - Details about the update trigger and the current resolved person state.
+   */
+  onUpdated?: (event: PersonUpdatedEvent) => void;
 
   // Fetching options
   fetchImage?: boolean;

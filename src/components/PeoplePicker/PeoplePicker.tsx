@@ -2,7 +2,7 @@
  * PeoplePicker component - Select one or more people using Microsoft Graph search
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   Avatar,
   InteractionTag,
@@ -27,6 +27,16 @@ const NO_RESULTS_OPTION_VALUE = '__no_results__';
 
 /** Hard upper bound for search results requested from the provider */
 const MAX_SEARCH_RESULTS_LIMIT = 50;
+
+const getFilteredResults = (
+  results: PeoplePickerPerson[],
+  selectedIds: string[],
+  excludedUserIds: string[],
+  maxResults: number
+): PeoplePickerPerson[] =>
+  results
+    .filter((person) => !selectedIds.includes(person.id) && !excludedUserIds.includes(person.id))
+    .slice(0, maxResults);
 
 /**
  * Resolve the display label for a person
@@ -106,6 +116,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   appearance,
   size,
   disabled,
+  onUpdated,
 }) => {
   const isControlled = selectedPeople !== undefined;
 
@@ -148,21 +159,51 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
 
   const selectedIds = useMemo(() => effectiveSelected.map((p) => p.id), [effectiveSelected]);
 
+  // Filter out already-selected options and explicitly excluded IDs from suggestions,
+  // then cap back to maxSearchResults
+  const filteredResults = useMemo(
+    () => getFilteredResults(searchResults, selectedIds, uniqueExcludeUserIds, maxSearchResults),
+    [searchResults, selectedIds, uniqueExcludeUserIds, maxSearchResults]
+  );
+
   const handleOptionSelect = useCallback(
     (_e: React.SyntheticEvent | Event, data: TagPickerOnOptionSelectData) => {
       const newPeople = data.selectedOptions
         .filter((id) => id !== NO_RESULTS_OPTION_VALUE)
         .map((id) => peopleLookup.get(id))
         .filter((p): p is PeoplePickerPerson => p !== undefined);
+      const nextSelectedIds = newPeople.map((person) => person.id);
+      const nextFilteredResults = getFilteredResults(
+        searchResults,
+        nextSelectedIds,
+        uniqueExcludeUserIds,
+        maxSearchResults
+      );
 
       if (!isControlled) {
         setInternalSelectedPeople(newPeople);
       }
       onSelectionChange?.(newPeople);
+      onUpdated?.({
+        trigger: 'selectionChanged',
+        searchQuery: '',
+        selectedPeople: newPeople,
+        searchResults: nextFilteredResults,
+        loading: searchLoading,
+      });
       // Clear the search query after selection
       setSearchQuery('');
     },
-    [isControlled, onSelectionChange, peopleLookup]
+    [
+      isControlled,
+      maxSearchResults,
+      onSelectionChange,
+      onUpdated,
+      peopleLookup,
+      searchLoading,
+      searchResults,
+      uniqueExcludeUserIds,
+    ]
   );
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,16 +219,31 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   }, []);
 
   const isAtMax = maxPeople !== undefined && effectiveSelected.length >= maxPeople;
+  const isFirstSearchUpdate = useRef(true);
 
-  // Filter out already-selected options and explicitly excluded IDs from suggestions,
-  // then cap back to maxSearchResults
-  const filteredResults = useMemo(
-    () =>
-      searchResults
-        .filter((p) => !selectedIds.includes(p.id) && !excludeUserIds.includes(p.id))
-        .slice(0, maxSearchResults),
-    [searchResults, selectedIds, excludeUserIds, maxSearchResults]
-  );
+  useEffect(() => {
+    if (!onUpdated || searchLoading) {
+      return;
+    }
+
+    const shouldSkipInitialEmptyUpdate =
+      isFirstSearchUpdate.current &&
+      searchQuery.length === 0 &&
+      filteredResults.length === 0;
+    isFirstSearchUpdate.current = false;
+
+    if (shouldSkipInitialEmptyUpdate) {
+      return;
+    }
+
+    onUpdated({
+      trigger: 'searchResultsUpdated',
+      searchQuery,
+      selectedPeople: effectiveSelected,
+      searchResults: filteredResults,
+      loading: false,
+    });
+  }, [effectiveSelected, filteredResults, onUpdated, searchLoading, searchQuery]);
 
   return (
     <TagPicker

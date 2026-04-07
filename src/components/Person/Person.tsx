@@ -2,7 +2,7 @@
  * Person component - Display a person using Fluent UI Persona
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Persona, PresenceBadgeStatus } from '@fluentui/react-components';
 import { usePersonData } from '../../hooks/usePersonData';
 import { getInitials } from '../../utils/graph';
@@ -159,6 +159,7 @@ export const Person: React.FC<PersonProps> = ({
   renderLine3,
   renderLine4,
   fetchImage = true,
+  onUpdated,
   ...personaProps
 }) => {
   const isAvatarOnlyView = view === 'avatar';
@@ -171,7 +172,7 @@ export const Person: React.FC<PersonProps> = ({
     .some(property => parsePropertyList(property).some(item => PRESENCE_PROPERTIES.has(item)));
 
   // Fetch data if not provided directly
-  const { user, presence: graphPresence, photoUrl, loading } = usePersonData({
+  const { user, presence: graphPresence, photoUrl, loading, error } = usePersonData({
     userId: personDetails
       ? undefined
       : userId || userPrincipalName || email,
@@ -187,6 +188,53 @@ export const Person: React.FC<PersonProps> = ({
 
   // Use provided details or fetched user
   const person = personDetails || user;
+  const personRecord = person ? person as PersonDetails : null;
+  const personWithPresence = useMemo<PersonDetails | null>(
+    () => personRecord
+      ? {
+        ...personRecord,
+        email: email ?? toDisplayText(personRecord.email),
+        presenceActivity: graphPresence?.activity ?? toDisplayText(personRecord.presenceActivity),
+        presenceAvailability: graphPresence?.availability ?? toDisplayText(personRecord.presenceAvailability),
+      }
+      : null,
+    [email, graphPresence?.activity, graphPresence?.availability, personRecord]
+  );
+
+  useEffect(() => {
+    if (!onUpdated || loading) {
+      return;
+    }
+
+    if (personDetails && personWithPresence) {
+      onUpdated({
+        trigger: 'personDetailsChanged',
+        person: personWithPresence,
+        loading: false,
+        error,
+      });
+      return;
+    }
+
+    if (error) {
+      onUpdated({
+        trigger: 'personLoadFailed',
+        person: null,
+        loading: false,
+        error,
+      });
+      return;
+    }
+
+    if (personWithPresence) {
+      onUpdated({
+        trigger: 'personLoaded',
+        person: personWithPresence,
+        loading: false,
+        error: null,
+      });
+    }
+  }, [error, loading, onUpdated, personDetails, personWithPresence]);
 
   if (loading) {
     return (
@@ -205,37 +253,31 @@ export const Person: React.FC<PersonProps> = ({
     return null;
   }
 
+  const resolvedPerson: PersonDetails = personWithPresence ?? personRecord!;
   const displayName = person.displayName || 'Unknown User';
   const initials = getInitials(displayName);
-  const personRecord = person as PersonDetails;
-  const personWithPresence: PersonDetails = {
-    ...personRecord,
-    email: email ?? toDisplayText(personRecord.email),
-    presenceActivity: graphPresence?.activity ?? toDisplayText(personRecord.presenceActivity),
-    presenceAvailability: graphPresence?.availability ?? toDisplayText(personRecord.presenceAvailability),
-  };
 
-  const resolvedLine1Text = getTextFromProperty(personWithPresence, resolvedLine1Property);
-  const resolvedLine2Text = getTextFromProperty(personWithPresence, resolvedLine2Property);
-  const resolvedLine3Text = getTextFromProperty(personWithPresence, resolvedLine3Property);
-  const resolvedLine4Text = getTextFromProperty(personWithPresence, resolvedLine4Property);
+  const resolvedLine1Text = getTextFromProperty(resolvedPerson, resolvedLine1Property);
+  const resolvedLine2Text = getTextFromProperty(resolvedPerson, resolvedLine2Property);
+  const resolvedLine3Text = getTextFromProperty(resolvedPerson, resolvedLine3Property);
+  const resolvedLine4Text = getTextFromProperty(resolvedPerson, resolvedLine4Property);
 
   const defaultPrimaryText =
     !isLineVisible(view, 1)
       ? undefined
       : resolvedLine1Property && resolvedLine1Text !== displayName
-        ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
+        ? renderLine(1, resolvedPerson, resolvedLine1Text, renderLine1)
         : renderLine1
-          ? renderLine(1, personWithPresence, resolvedLine1Text, renderLine1)
+          ? renderLine(1, resolvedPerson, resolvedLine1Text, renderLine1)
           : personaProps.primaryText;
   const defaultSecondaryText = isLineVisible(view, 2)
-    ? renderLine(2, personWithPresence, resolvedLine2Text, renderLine2)
+    ? renderLine(2, resolvedPerson, resolvedLine2Text, renderLine2)
     : undefined;
   const defaultTertiaryText = isLineVisible(view, 3)
-    ? renderLine(3, personWithPresence, resolvedLine3Text, renderLine3)
+    ? renderLine(3, resolvedPerson, resolvedLine3Text, renderLine3)
     : undefined;
   const defaultQuaternaryText = isLineVisible(view, 4)
-    ? renderLine(4, personWithPresence, resolvedLine4Text, renderLine4)
+    ? renderLine(4, resolvedPerson, resolvedLine4Text, renderLine4)
     : undefined;
 
   const defaultPresence = showPresence && graphPresence

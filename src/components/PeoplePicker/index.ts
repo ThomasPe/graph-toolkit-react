@@ -3,4 +3,9 @@
  */
 
 export { PeoplePicker } from './PeoplePicker';
-export type { PeoplePickerProps, PeoplePickerPerson } from './PeoplePicker.types';
+export type {
+  PeoplePickerProps,
+  PeoplePickerPerson,
+  PeoplePickerUpdatedEvent,
+  PeoplePickerUpdateTrigger,
+} from './PeoplePicker.types';

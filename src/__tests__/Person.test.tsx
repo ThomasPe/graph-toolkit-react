@@ -166,6 +166,23 @@ describe('Person', () => {
         expect(onClick).toHaveBeenCalledWith(event);
     });
 
+    it('calls onUpdated after person data loads', () => {
+        const onUpdated = vi.fn();
+
+        render(<Person userId="user-1" onUpdated={onUpdated} />);
+
+        expect(onUpdated).toHaveBeenCalledWith({
+            trigger: 'personLoaded',
+            person: expect.objectContaining({
+                id: 'user-1',
+                displayName: 'Adele Vance',
+                presenceAvailability: 'Available',
+            }),
+            loading: false,
+            error: null,
+        });
+    });
+
     it('maps fourlines view and Graph presence by default', () => {
         render(<Person userId="user-1" view="fourlines" showPresence fetchImage={false} />);
 
