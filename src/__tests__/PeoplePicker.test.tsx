@@ -547,10 +547,38 @@ describe('PeoplePicker', () => {
       selectedPeople: [
         { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
       ],
-      searchResults: [
+      searchResults: [],
+      loading: false,
+    });
+  });
+
+  it('reports the current search loading state for selectionChanged updates', () => {
+    const onUpdated = vi.fn();
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
         { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
       ],
-      loading: false,
+      loading: true,
+    });
+
+    render(<PeoplePicker onUpdated={onUpdated} />);
+
+    const tagPickerProps = tagPickerMock.mock.calls.at(-1)?.[0] as {
+      onOptionSelect?: (event: Event, data: { value: string; selectedOptions: string[] }) => void;
+    };
+
+    act(() => {
+      tagPickerProps.onOptionSelect?.(new Event('change'), { value: '1', selectedOptions: ['1'] });
+    });
+
+    expect(onUpdated).toHaveBeenCalledWith({
+      trigger: 'selectionChanged',
+      searchQuery: '',
+      selectedPeople: [
+        { id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com', userPrincipalName: 'adelev@contoso.com', jobTitle: null, department: null },
+      ],
+      searchResults: [],
+      loading: true,
     });
   });
 });

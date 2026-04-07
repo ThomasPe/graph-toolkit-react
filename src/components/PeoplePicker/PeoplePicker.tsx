@@ -28,6 +28,16 @@ const NO_RESULTS_OPTION_VALUE = '__no_results__';
 /** Hard upper bound for search results requested from the provider */
 const MAX_SEARCH_RESULTS_LIMIT = 50;
 
+const getFilteredResults = (
+  results: PeoplePickerPerson[],
+  selectedIds: string[],
+  excludedUserIds: string[],
+  maxResults: number
+): PeoplePickerPerson[] =>
+  results
+    .filter((person) => !selectedIds.includes(person.id) && !excludedUserIds.includes(person.id))
+    .slice(0, maxResults);
+
 /**
  * Resolve the display label for a person
  */
@@ -152,11 +162,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   // Filter out already-selected options and explicitly excluded IDs from suggestions,
   // then cap back to maxSearchResults
   const filteredResults = useMemo(
-    () =>
-      searchResults
-        .filter((p) => !selectedIds.includes(p.id) && !excludeUserIds.includes(p.id))
-        .slice(0, maxSearchResults),
-    [searchResults, selectedIds, excludeUserIds, maxSearchResults]
+    () => getFilteredResults(searchResults, selectedIds, uniqueExcludeUserIds, maxSearchResults),
+    [searchResults, selectedIds, uniqueExcludeUserIds, maxSearchResults]
   );
 
   const handleOptionSelect = useCallback(
@@ -165,6 +172,13 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
         .filter((id) => id !== NO_RESULTS_OPTION_VALUE)
         .map((id) => peopleLookup.get(id))
         .filter((p): p is PeoplePickerPerson => p !== undefined);
+      const nextSelectedIds = newPeople.map((person) => person.id);
+      const nextFilteredResults = getFilteredResults(
+        searchResults,
+        nextSelectedIds,
+        uniqueExcludeUserIds,
+        maxSearchResults
+      );
 
       if (!isControlled) {
         setInternalSelectedPeople(newPeople);
@@ -174,13 +188,22 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
         trigger: 'selectionChanged',
         searchQuery: '',
         selectedPeople: newPeople,
-        searchResults: filteredResults,
-        loading: false,
+        searchResults: nextFilteredResults,
+        loading: searchLoading,
       });
       // Clear the search query after selection
       setSearchQuery('');
     },
-    [filteredResults, isControlled, onSelectionChange, onUpdated, peopleLookup]
+    [
+      isControlled,
+      maxSearchResults,
+      onSelectionChange,
+      onUpdated,
+      peopleLookup,
+      searchLoading,
+      searchResults,
+      uniqueExcludeUserIds,
+    ]
   );
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
