@@ -604,7 +604,7 @@
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> People</h2>
       <div class="badges">
-        <label for="c-0-components-people-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-0-components-people-props" class="badge ok as-toggle">8 prop types</label>
         
         <label for="c-0-components-people-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -631,7 +631,7 @@
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
+              <span class="badge ok">8 prop types</span>
             </div>
             <pre><code>Component: src/components/People/People.tsx::People</code></pre>
             <pre><code>Props:</code></pre>
@@ -641,6 +641,15 @@
 groupId?: string
 
 layout?: any = &#39;stack&#39;
+
+/**
+ * Called after the component updates its resolved people collection.
+ * 
+ * Use this to react to direct `people` changes, successful list loads, or failed loads.
+ * 
+ * @param event - Details about the update trigger and the current resolved people state.
+ */
+onUpdated?: (event: PeopleUpdatedEvent) =&gt; void
 
 /**
  * A pre-resolved list of people to render.
@@ -780,7 +789,7 @@ import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> PeoplePicker</h2>
       <div class="badges">
-        <label for="c-1-components-peoplepicker-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-1-components-peoplepicker-props" class="badge ok as-toggle">9 prop types</label>
         
         <label for="c-1-components-peoplepicker-stories" class="badge ok as-toggle">10 stories</label>
         
@@ -807,7 +816,7 @@ import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">8 prop types</span>
+              <span class="badge ok">9 prop types</span>
             </div>
             <pre><code>Component: src/components/PeoplePicker/PeoplePicker.tsx::PeoplePicker</code></pre>
             <pre><code>Props:</code></pre>
@@ -841,6 +850,13 @@ maxSearchResults?: number = 10
  * @param people - The new array of selected people
  */
 onSelectionChange?: (people: PeoplePickerPerson[]) =&gt; void
+
+/**
+ * Called after the picker updates its search results or selection state.
+ * 
+ * @param event - Details about the update trigger and the picker state after the update.
+ */
+onUpdated?: (event: PeoplePickerUpdatedEvent) =&gt; void
 
 /**
  * Placeholder text shown in the search input when nothing is typed
@@ -1020,7 +1036,7 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Person</h2>
       <div class="badges">
-        <label for="c-2-components-person-props" class="badge ok as-toggle">15 prop types</label>
+        <label for="c-2-components-person-props" class="badge ok as-toggle">16 prop types</label>
         
         <label for="c-2-components-person-stories" class="badge ok as-toggle">12 stories</label>
         
@@ -1047,7 +1063,7 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">15 prop types</span>
+              <span class="badge ok">16 prop types</span>
             </div>
             <pre><code>Component: src/components/Person/Person.tsx::Person</code></pre>
             <pre><code>Props:</code></pre>
@@ -1090,6 +1106,15 @@ line3Property?: string
  * to be used as fallbacks, in the same way as {@link PersonProps.line1Property}.
  */
 line4Property?: string
+
+/**
+ * Called after the component updates its resolved person state.
+ * 
+ * Use this to react to direct `personDetails` changes, successful data loads, or failed loads.
+ * 
+ * @param event - Details about the update trigger and the current resolved person state.
+ */
+onUpdated?: (event: PersonUpdatedEvent) =&gt; void
 
 personDetails?: PersonDetails
 
