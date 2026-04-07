@@ -2,7 +2,7 @@
  * Person component - Display a person using Fluent UI Persona
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Persona, PresenceBadgeStatus } from '@fluentui/react-components';
 import { usePersonData } from '../../hooks/usePersonData';
 import { getInitials } from '../../utils/graph';
@@ -189,14 +189,17 @@ export const Person: React.FC<PersonProps> = ({
   // Use provided details or fetched user
   const person = personDetails || user;
   const personRecord = person ? person as PersonDetails : null;
-  const personWithPresence: PersonDetails | null = personRecord
-    ? {
-      ...personRecord,
-      email: email ?? toDisplayText(personRecord.email),
-      presenceActivity: graphPresence?.activity ?? toDisplayText(personRecord.presenceActivity),
-      presenceAvailability: graphPresence?.availability ?? toDisplayText(personRecord.presenceAvailability),
-    }
-    : null;
+  const personWithPresence = useMemo<PersonDetails | null>(
+    () => personRecord
+      ? {
+        ...personRecord,
+        email: email ?? toDisplayText(personRecord.email),
+        presenceActivity: graphPresence?.activity ?? toDisplayText(personRecord.presenceActivity),
+        presenceAvailability: graphPresence?.availability ?? toDisplayText(personRecord.presenceAvailability),
+      }
+      : null,
+    [email, graphPresence?.activity, graphPresence?.availability, personRecord]
+  );
 
   useEffect(() => {
     if (!onUpdated || loading) {
@@ -250,7 +253,7 @@ export const Person: React.FC<PersonProps> = ({
     return null;
   }
 
-  const resolvedPerson = personWithPresence ?? personRecord;
+  const resolvedPerson: PersonDetails = personWithPresence ?? personRecord!;
   const displayName = person.displayName || 'Unknown User';
   const initials = getInitials(displayName);
 

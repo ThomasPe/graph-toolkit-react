@@ -203,16 +203,16 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
       return;
     }
 
-    if (
+    const shouldSkipInitialEmptyUpdate =
       !hasSkippedInitialEmptyUpdate.current &&
       searchQuery.length === 0 &&
-      filteredResults.length === 0
-    ) {
-      hasSkippedInitialEmptyUpdate.current = true;
+      filteredResults.length === 0;
+    hasSkippedInitialEmptyUpdate.current = true;
+
+    if (shouldSkipInitialEmptyUpdate) {
       return;
     }
 
-    hasSkippedInitialEmptyUpdate.current = true;
     onUpdated({
       trigger: 'searchResultsUpdated',
       searchQuery,
