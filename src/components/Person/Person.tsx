@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Persona, PresenceBadgeStatus } from '@fluentui/react-components';
+import { Persona, PresenceBadgeStatus, Skeleton, SkeletonItem } from '@fluentui/react-components';
 import { usePersonData } from '../../hooks/usePersonData';
 import { getInitials } from '../../utils/graph';
 import { PersonDetails, PersonLineRenderContext, PersonLineRenderer, PersonProps, PersonView } from './Person.types';
@@ -40,6 +40,12 @@ const DEFAULT_LINE_PROPERTIES: Record<PersonView, [string | undefined, string | 
 
 const PRESENCE_PROPERTIES = new Set(['presenceActivity', 'presenceAvailability']);
 const USER_SELECT_EXCLUSIONS = new Set(['email', ...PRESENCE_PROPERTIES]);
+const LOADING_LINE_WIDTHS: Record<1 | 2 | 3 | 4, string> = {
+  1: '8rem',
+  2: '6rem',
+  3: '5rem',
+  4: '7rem',
+};
 
 const parsePropertyList = (value?: string): string[] =>
   value
@@ -116,6 +122,15 @@ const renderLine = (
 
   return renderer(buildLineContext(line, person, text));
 };
+
+const renderLoadingLine = (line: 1 | 2 | 3 | 4): React.ReactElement => (
+  <Skeleton>
+    <SkeletonItem
+      size={line === 1 ? 16 : 12}
+      style={{ width: LOADING_LINE_WIDTHS[line], maxWidth: '100%' }}
+    />
+  </Skeleton>
+);
 
 const getLineProperty = (view: PersonView, line: 1 | 2 | 3 | 4, override?: string): string | undefined =>
   override ?? DEFAULT_LINE_PROPERTIES[view][line - 1];
@@ -240,11 +255,27 @@ export const Person: React.FC<PersonProps> = ({
     return (
       <Persona
         {...personaProps}
-        name={isAvatarOnlyView ? undefined : personaProps.name ?? 'Loading...'}
-        primaryText={isAvatarOnlyView ? undefined : personaProps.primaryText}
-        secondaryText={isAvatarOnlyView ? undefined : personaProps.secondaryText}
-        tertiaryText={isAvatarOnlyView ? undefined : personaProps.tertiaryText}
-        quaternaryText={isAvatarOnlyView ? undefined : personaProps.quaternaryText}
+        name={undefined}
+        primaryText={
+          isAvatarOnlyView || !isLineVisible(view, 1)
+            ? undefined
+            : personaProps.primaryText ?? renderLoadingLine(1)
+        }
+        secondaryText={
+          isAvatarOnlyView || !isLineVisible(view, 2)
+            ? undefined
+            : personaProps.secondaryText ?? renderLoadingLine(2)
+        }
+        tertiaryText={
+          isAvatarOnlyView || !isLineVisible(view, 3)
+            ? undefined
+            : personaProps.tertiaryText ?? renderLoadingLine(3)
+        }
+        quaternaryText={
+          isAvatarOnlyView || !isLineVisible(view, 4)
+            ? undefined
+            : personaProps.quaternaryText ?? renderLoadingLine(4)
+        }
       />
     );
   }
