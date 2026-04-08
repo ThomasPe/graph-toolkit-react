@@ -40,6 +40,12 @@ const DEFAULT_LINE_PROPERTIES: Record<PersonView, [string | undefined, string | 
 
 const PRESENCE_PROPERTIES = new Set(['presenceActivity', 'presenceAvailability']);
 const USER_SELECT_EXCLUSIONS = new Set(['email', ...PRESENCE_PROPERTIES]);
+const PRIMARY_LOADING_LINE_SIZE = 16;
+const SECONDARY_LOADING_LINE_SIZE = 12;
+/**
+ * Widths are intentionally staggered to resemble typical person metadata lengths instead of
+ * rendering every placeholder line at the same width.
+ */
 const LOADING_LINE_WIDTHS: Record<1 | 2 | 3 | 4, string> = {
   1: '8rem',
   2: '6rem',
@@ -123,10 +129,16 @@ const renderLine = (
   return renderer(buildLineContext(line, person, text));
 };
 
+/**
+ * Render a single loading placeholder line for the Fluent UI Persona text slots.
+ *
+ * @param line - The logical Persona text line (1-4) being rendered.
+ * @returns A Fluent UI skeleton sized to match the line's visual prominence.
+ */
 const renderLoadingLine = (line: 1 | 2 | 3 | 4): React.ReactElement => (
   <Skeleton>
     <SkeletonItem
-      size={line === 1 ? 16 : 12}
+      size={line === 1 ? PRIMARY_LOADING_LINE_SIZE : SECONDARY_LOADING_LINE_SIZE}
       style={{ width: LOADING_LINE_WIDTHS[line], maxWidth: '100%' }}
     />
   </Skeleton>
