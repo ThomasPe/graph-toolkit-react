@@ -60,6 +60,11 @@ describe('Person', () => {
         return call[0] as Record<string, unknown>;
     };
 
+    /**
+     * Assert that a captured Persona text slot contains the loading Skeleton structure.
+     *
+     * @param slot - The Persona slot value captured from the mocked render call.
+     */
     const expectSkeletonSlot = (slot: unknown) => {
         expect(React.isValidElement(slot)).toBe(true);
 

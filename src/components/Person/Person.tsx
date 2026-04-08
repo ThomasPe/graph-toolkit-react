@@ -44,7 +44,8 @@ const PRIMARY_LOADING_LINE_SIZE = 16;
 const SECONDARY_LOADING_LINE_SIZE = 12;
 /**
  * Widths are intentionally staggered to resemble typical person metadata lengths instead of
- * rendering every placeholder line at the same width.
+ * rendering every placeholder line at the same width. The numeric keys map directly to the
+ * Persona text line numbers: 1 = primary, 2 = secondary, 3 = tertiary, 4 = quaternary.
  */
 const LOADING_LINE_WIDTHS: Record<1 | 2 | 3 | 4, string> = {
   1: '8rem',
