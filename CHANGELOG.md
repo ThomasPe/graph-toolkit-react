@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.15
+
+### Patch Changes
+
+- 8b8acbe: Add `usePeopleList` support for selecting additional user fields and sorting resolved people by `displayName`, `givenName`, or `surname`, expose the related name fields on public people types, and document the pattern in Storybook plus the React MSAL sample.
+
 ## 1.0.0-next.14
 
 ### Minor Changes
