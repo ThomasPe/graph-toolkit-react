@@ -5,13 +5,13 @@ import {
   Caption1,
   Card,
   FluentProvider,
-  Persona,
   Spinner,
   Text,
   tokens,
   webLightTheme,
 } from '@fluentui/react-components';
 import { PeoplePicker } from '../src/components/PeoplePicker';
+import { Person } from '../src/components/Person';
 import { GraphProvider } from '../src/providers/ProviderContext';
 import { MockProvider } from '../src/providers/MockProvider';
 import type { PeoplePickerPerson } from '../src/components/PeoplePicker';
@@ -20,9 +20,6 @@ import { usePeopleList } from '../src/hooks/usePeopleList';
 const provider = new MockProvider({ autoSignIn: true });
 
 type PeoplePickerStoryProps = React.ComponentProps<typeof PeoplePicker>;
-
-const getPersonLabel = (person: { displayName?: string | null; mail?: string | null; userPrincipalName?: string | null; id: string }) =>
-  person.displayName ?? person.mail ?? person.userPrincipalName ?? person.id;
 
 const SelectedUsersListDemo: React.FC<PeoplePickerStoryProps> = (args) => {
   const [selectedPeople, setSelectedPeople] = useState<PeoplePickerPerson[]>([]);
@@ -95,16 +92,11 @@ const SelectedUsersListDemo: React.FC<PeoplePickerStoryProps> = (args) => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {people.map(person => (
-              <Persona
+              <Person
                 key={person.id}
-                name={getPersonLabel(person)}
-                primaryText={getPersonLabel(person)}
-                secondaryText={person.jobTitle ?? person.mail ?? undefined}
-                tertiaryText={person.department ?? undefined}
-                avatar={{
-                  image: person.photoUrl ? { src: person.photoUrl } : undefined,
-                  name: getPersonLabel(person),
-                }}
+                personDetails={person}
+                view="threelines"
+                fetchImage={false}
               />
             ))}
           </div>
@@ -159,7 +151,7 @@ When wrapping with a \`MockProvider\` (with \`autoSignIn: true\`), it uses built
     },
     size: {
       control: 'select',
-      options: ['small', 'medium', 'large'],
+      options: ['medium', 'large'],
     },
     disabled: { control: 'boolean' },
   },
@@ -276,11 +268,11 @@ export const MinTwoChars: Story = {
 /**
  * Compact small size variant.
  */
-export const SmallSize: Story = {
-  name: 'Size: Small',
+export const MediumSize: Story = {
+  name: 'Size: Medium',
   args: {
     placeholder: 'Search...',
-    size: 'small',
+    size: 'medium',
   },
 };
 

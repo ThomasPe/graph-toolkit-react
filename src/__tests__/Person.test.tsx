@@ -166,6 +166,33 @@ describe('Person', () => {
         expect(onClick).toHaveBeenCalledWith(event);
     });
 
+    it('uses a pre-resolved photoUrl from personDetails without requiring a fetch result', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <Person
+                personDetails={{
+                    id: 'user-1',
+                    displayName: 'Adele Vance',
+                    photoUrl: 'https://contoso.example/avatar.png',
+                }}
+                view="oneline"
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        const avatar = personaProps.avatar as { image?: { src?: string }; initials?: string };
+
+        expect(avatar.image?.src).toBe('https://contoso.example/avatar.png');
+        expect(avatar.initials).toBeUndefined();
+    });
+
     it('calls onUpdated after person data loads', () => {
         const onUpdated = vi.fn();
 

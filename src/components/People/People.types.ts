@@ -4,6 +4,7 @@
 
 import type { AvatarGroupProps } from '@fluentui/react-components';
 import type { PeopleSearchResult } from '../../providers/IPersonDataProvider';
+import type { PersonDetails } from '../Person/Person.types';
 
 /**
  * Supported built-in sort fields for resolved people collections.
@@ -26,7 +27,11 @@ export type PeopleUpdateTrigger = 'peopleChanged' | 'peopleLoaded' | 'peopleLoad
  * This extends the base people search result shape with optional presence fields used
  * for avatar badges when {@link PeopleProps.showPresence} is enabled.
  */
-export interface PeoplePerson extends PeopleSearchResult {
+export type PeoplePerson = PersonDetails & PeopleSearchResult & {
+  /**
+   * Additional custom fields carried on resolved people data.
+   */
+  [key: string]: unknown;
   /**
    * Current presence activity when available.
    */
@@ -35,7 +40,7 @@ export interface PeoplePerson extends PeopleSearchResult {
    * Current presence availability when available.
    */
   presenceAvailability?: string | null;
-}
+};
 
 /**
  * Event payload reported when the {@link People} component finishes a meaningful update.
