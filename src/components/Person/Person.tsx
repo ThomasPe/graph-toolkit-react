@@ -268,26 +268,34 @@ export const Person: React.FC<PersonProps> = ({
     return (
       <Persona
         {...personaProps}
-        name={undefined}
+        name={isAvatarOnlyView ? undefined : personaProps.name}
         primaryText={
           isAvatarOnlyView || !isLineVisible(view, 1)
             ? undefined
-            : personaProps.primaryText ?? renderLoadingLine(1)
+            : personaProps.primaryText === undefined
+              ? renderLoadingLine(1)
+              : personaProps.primaryText
         }
         secondaryText={
           isAvatarOnlyView || !isLineVisible(view, 2)
             ? undefined
-            : personaProps.secondaryText ?? renderLoadingLine(2)
+            : personaProps.secondaryText === undefined
+              ? renderLoadingLine(2)
+              : personaProps.secondaryText
         }
         tertiaryText={
           isAvatarOnlyView || !isLineVisible(view, 3)
             ? undefined
-            : personaProps.tertiaryText ?? renderLoadingLine(3)
+            : personaProps.tertiaryText === undefined
+              ? renderLoadingLine(3)
+              : personaProps.tertiaryText
         }
         quaternaryText={
           isAvatarOnlyView || !isLineVisible(view, 4)
             ? undefined
-            : personaProps.quaternaryText ?? renderLoadingLine(4)
+            : personaProps.quaternaryText === undefined
+              ? renderLoadingLine(4)
+              : personaProps.quaternaryText
         }
       />
     );

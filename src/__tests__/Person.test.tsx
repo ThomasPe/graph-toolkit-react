@@ -143,6 +143,49 @@ describe('Person', () => {
         expect(personaProps.quaternaryText).toBeUndefined();
     });
 
+    it('preserves an explicit Persona name while loading', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(<Person userId="user-1" view="oneline" name="Custom loading name" />);
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBe('Custom loading name');
+        expectSkeletonSlot(personaProps.primaryText);
+    });
+
+    it('preserves explicit null loading text slots instead of rendering skeletons', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(
+            <Person
+                userId="user-1"
+                view="fourlines"
+                primaryText={null}
+                secondaryText={null}
+                tertiaryText={null}
+                quaternaryText={null}
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.primaryText).toBeNull();
+        expect(personaProps.secondaryText).toBeNull();
+        expect(personaProps.tertiaryText).toBeNull();
+        expect(personaProps.quaternaryText).toBeNull();
+    });
+
 
     it('suppresses all text slots in avatar view', () => {
         render(
