@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.16
+
+### Minor Changes
+
+- d87fd75: Add `photoUrl` field to `PersonDetails` so callers can supply a pre-resolved profile photo URL. When provided, the `Person` component uses it directly for the avatar image without making an additional fetch.
+
 ## 1.0.0-next.15
 
 ### Patch Changes
