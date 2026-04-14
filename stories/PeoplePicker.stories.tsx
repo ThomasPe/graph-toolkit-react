@@ -266,7 +266,7 @@ export const MinTwoChars: Story = {
 };
 
 /**
- * Compact small size variant.
+ * Medium size variant.
  */
 export const MediumSize: Story = {
   name: 'Size: Medium',
