@@ -26,21 +26,9 @@ export type PeopleUpdateTrigger = 'peopleChanged' | 'peopleLoaded' | 'peopleLoad
  *
  * This extends the base people search result shape with optional presence fields used
  * for avatar badges when {@link PeopleProps.showPresence} is enabled.
+ * Presence fields and additional custom fields are inherited from {@link PersonDetails}.
  */
-export type PeoplePerson = PersonDetails & PeopleSearchResult & {
-  /**
-   * Additional custom fields carried on resolved people data.
-   */
-  [key: string]: unknown;
-  /**
-   * Current presence activity when available.
-   */
-  presenceActivity?: string | null;
-  /**
-   * Current presence availability when available.
-   */
-  presenceAvailability?: string | null;
-};
+export type PeoplePerson = PersonDetails & PeopleSearchResult;
 
 /**
  * Event payload reported when the {@link People} component finishes a meaningful update.
