@@ -118,6 +118,10 @@ describe('People', () => {
     expect(firstCallAvatarProps?.badge).toEqual({ status: 'available' });
     expect(firstCallAvatarProps?.image).toEqual({ src: 'photo-1' });
 
+    const overflowCallAvatar = (avatarGroupItemMock.mock.calls[2]?.[0] as {
+      name?: string;
+    });
+    expect(overflowCallAvatar.name).toBe('Alex Wilber');
     expect(avatarGroupPopoverMock).toHaveBeenCalledWith({ count: 1 });
   });
 
