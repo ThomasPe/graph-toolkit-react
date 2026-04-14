@@ -110,10 +110,13 @@ describe('People', () => {
     expect(screen.getByTestId('avatar-group-popover-count').textContent).toBe('+1');
 
     const firstCallAvatar = (avatarGroupItemMock.mock.calls[0]?.[0] as {
+      name?: string;
       avatar?: { badge?: { status?: string }; image?: { src?: string } };
-    }).avatar;
-    expect(firstCallAvatar?.badge).toEqual({ status: 'available' });
-    expect(firstCallAvatar?.image).toEqual({ src: 'photo-1' });
+    });
+    expect(firstCallAvatar.name).toBe('Adele Vance');
+    const firstCallAvatarProps = firstCallAvatar.avatar;
+    expect(firstCallAvatarProps?.badge).toEqual({ status: 'available' });
+    expect(firstCallAvatarProps?.image).toEqual({ src: 'photo-1' });
 
     expect(avatarGroupPopoverMock).toHaveBeenCalledWith({ count: 1 });
   });
