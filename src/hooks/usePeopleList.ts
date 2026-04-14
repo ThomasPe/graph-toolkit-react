@@ -10,12 +10,25 @@ import {
   isPeopleSearchProvider,
   isPersonDataProvider,
 } from '../providers/IPersonDataProvider';
-import type { PeoplePerson } from '../components/People/People.types';
+import type {
+  PeoplePerson,
+  PeopleSortDirection,
+  PeopleSortField,
+} from '../components/People/People.types';
 import { encodeGraphPathSegment, photoResponseToDataUrl } from '../utils/graph';
 
-const PEOPLE_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTitle,department';
-const GROUP_MEMBERS_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTitle,department';
+const DEFAULT_PEOPLE_SELECT_FIELDS = [
+  'id',
+  'displayName',
+  'mail',
+  'userPrincipalName',
+  'jobTitle',
+  'department',
+] as const;
+const DEFAULT_PEOPLE_SELECT_FIELD_SET = new Set<string>(DEFAULT_PEOPLE_SELECT_FIELDS);
 const DEFAULT_MAX_PEOPLE = 10;
+const VALID_SELECT_FIELD_PATTERN = /^[a-zA-Z0-9_./]+$/;
+const DEFAULT_SORT_DIRECTION: PeopleSortDirection = 'asc';
 
 /**
  * Options for the {@link usePeopleList} hook.
@@ -29,6 +42,18 @@ export interface UsePeopleListOptions {
    * User identifiers to resolve into person entries.
    */
   userIds?: string[];
+  /**
+   * Additional Graph user fields to request while resolving people.
+   */
+  selectFields?: string[];
+  /**
+   * Field used to sort the resolved people collection.
+   */
+  sortBy?: PeopleSortField;
+  /**
+   * Direction used when {@link sortBy} is provided.
+   */
+  sortDirection?: PeopleSortDirection;
   /**
    * Group ID whose direct members should be loaded.
    */
@@ -65,6 +90,8 @@ export interface UsePeopleListResult {
 
 const mapGraphUser = (user: User): PeoplePerson => ({
   id: user.id ?? user.userPrincipalName ?? user.mail ?? 'unknown-user',
+  givenName: user.givenName ?? null,
+  surname: user.surname ?? null,
   displayName: user.displayName ?? null,
   mail: user.mail ?? null,
   userPrincipalName: user.userPrincipalName ?? null,
@@ -101,6 +128,70 @@ const resolveDirectPersonIdentifier = (
 const uniqueNonEmpty = (values?: string[]): string[] =>
   Array.from(new Set((values ?? []).map(value => value.trim()).filter(Boolean)));
 
+const toSelectableFields = (fields?: string[]): string[] =>
+  Array.from(
+    new Set(
+      (fields ?? [])
+        .map(field => field.trim())
+        .filter(field => field.length > 0 && VALID_SELECT_FIELD_PATTERN.test(field))
+    )
+  );
+
+const buildSelectFields = (selectFields?: string[], sortBy?: PeopleSortField): string[] => {
+  const resolvedFields = [...DEFAULT_PEOPLE_SELECT_FIELDS, ...toSelectableFields(selectFields)];
+
+  if (sortBy === 'givenName' || sortBy === 'surname') {
+    resolvedFields.push(sortBy);
+  }
+
+  return Array.from(new Set(resolvedFields));
+};
+
+const getProviderSelectFields = (selectFields: string[]): string[] | undefined => {
+  const customFields = selectFields.filter(field => !DEFAULT_PEOPLE_SELECT_FIELD_SET.has(field));
+
+  return customFields.length > 0 ? customFields : undefined;
+};
+
+const getSortValue = (person: PeoplePerson, sortBy: PeopleSortField): string => {
+  const primary = person[sortBy];
+
+  if (typeof primary === 'string' && primary.trim().length > 0) {
+    return primary;
+  }
+
+  return person.displayName ?? person.mail ?? person.userPrincipalName ?? person.id;
+};
+
+const sortPeople = (
+  people: PeoplePerson[],
+  sortBy?: PeopleSortField,
+  sortDirection: PeopleSortDirection = DEFAULT_SORT_DIRECTION,
+): PeoplePerson[] => {
+  if (!sortBy) {
+    return people;
+  }
+
+  const collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
+  const direction = sortDirection === 'desc' ? -1 : 1;
+
+  return people
+    .map((person, index) => ({ person, index }))
+    .sort((left, right) => {
+      const comparison = collator.compare(
+        getSortValue(left.person, sortBy),
+        getSortValue(right.person, sortBy)
+      );
+
+      if (comparison !== 0) {
+        return comparison * direction;
+      }
+
+      return left.index - right.index;
+    })
+    .map(entry => entry.person);
+};
+
 /**
  * Hook to load a compact people list for the {@link People} component.
  *
@@ -118,6 +209,10 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
   const provider = useProvider();
   const providerState = useProviderState();
   const directPeopleKey = JSON.stringify(options?.people ?? null);
+  const userIdsKey = JSON.stringify(uniqueNonEmpty(options?.userIds));
+  const customSelectFieldsKey = JSON.stringify(
+    toSelectableFields(options?.selectFields).filter(f => !DEFAULT_PEOPLE_SELECT_FIELD_SET.has(f))
+  );
   const directPeople = useMemo<PeoplePerson[] | undefined>(() => {
     if (directPeopleKey === 'null') {
       return undefined;
@@ -125,10 +220,21 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
 
     return JSON.parse(directPeopleKey) as PeoplePerson[];
   }, [directPeopleKey]);
-  const userIds = useMemo(() => uniqueNonEmpty(options?.userIds), [options?.userIds]);
+  const userIds = useMemo<string[]>(() => JSON.parse(userIdsKey) as string[], [userIdsKey]);
+  const customSelectFields = useMemo<string[]>(
+    () => JSON.parse(customSelectFieldsKey) as string[],
+    [customSelectFieldsKey]
+  );
+  const selectFields = useMemo(
+    () => buildSelectFields(customSelectFields, options?.sortBy),
+    [customSelectFields, options?.sortBy]
+  );
+  const providerSelectFields = useMemo(() => getProviderSelectFields(selectFields), [selectFields]);
   const groupId = useMemo(() => options?.groupId?.trim(), [options?.groupId]);
   const maxPeople = options?.maxPeople ?? DEFAULT_MAX_PEOPLE;
   const showPresence = options?.showPresence ?? false;
+  const sortBy = options?.sortBy;
+  const sortDirection = options?.sortDirection ?? DEFAULT_SORT_DIRECTION;
 
   const [state, setState] = useState<UsePeopleListResult>({
     people: [],
@@ -145,6 +251,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
           identifier,
           fetchPresence: showPresence,
           fetchPhoto: true,
+          selectFields: providerSelectFields,
         });
 
         if (!response.user) {
@@ -166,7 +273,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
       const isCurrentUserQuery = identifier.toLowerCase() === 'me';
       const user = (await graphClient
         .api(isCurrentUserQuery ? '/me' : `/users/${encodeGraphPathSegment(identifier)}`)
-        .select(PEOPLE_SELECT_FIELDS)
+        .select(selectFields.join(','))
         .get()) as User;
 
       let presence: Presence | null = null;
@@ -261,7 +368,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
           ? await enrichResolvedPeople(directPeople, resolveDirectPersonIdentifier)
           : directPeople;
         if (!cancelled) {
-          setState({ people: nextPeople, loading: false, error: null });
+          setState({ people: sortPeople(nextPeople, sortBy, sortDirection), loading: false, error: null });
         }
         return;
       }
@@ -272,7 +379,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
           .flatMap(result => (result.status === 'fulfilled' && result.value ? [result.value] : []));
 
         if (!cancelled) {
-          setState({ people: nextPeople, loading: false, error: null });
+          setState({ people: sortPeople(nextPeople, sortBy, sortDirection), loading: false, error: null });
         }
         return;
       }
@@ -291,7 +398,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
           if (graphClient && providerState === 'SignedIn') {
             const response = (await graphClient
               .api(`/groups/${encodeGraphPathSegment(groupId)}/members/microsoft.graph.user`)
-              .select(GROUP_MEMBERS_SELECT_FIELDS)
+              .select(selectFields.join(','))
               .top(maxPeople)
               .get()) as { value?: User[] };
             nextPeople = (response.value ?? []).map(mapGraphUser);
@@ -305,7 +412,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
         } else if (graphClient && providerState === 'SignedIn') {
           const response = (await graphClient
             .api('/users')
-            .select(PEOPLE_SELECT_FIELDS)
+            .select(selectFields.join(','))
             .top(maxPeople)
             .get()) as { value?: User[] };
           nextPeople = (response.value ?? []).map(mapGraphUser);
@@ -316,7 +423,7 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
         }
 
         if (!cancelled) {
-          setState({ people: nextPeople, loading: false, error: null });
+          setState({ people: sortPeople(nextPeople, sortBy, sortDirection), loading: false, error: null });
         }
       } catch (error) {
         if (!cancelled) {
@@ -330,7 +437,21 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
     return () => {
       cancelled = true;
     };
-  }, [directPeople, directPeopleKey, graphClient, groupId, maxPeople, provider, providerState, showPresence, userIds]);
+  }, [
+    directPeople,
+    directPeopleKey,
+    graphClient,
+    groupId,
+    maxPeople,
+    provider,
+    providerSelectFields,
+    providerState,
+    selectFields,
+    showPresence,
+    sortBy,
+    sortDirection,
+    userIds,
+  ]);
 
   return state;
 };

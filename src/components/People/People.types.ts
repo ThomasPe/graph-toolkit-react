@@ -6,6 +6,16 @@ import type { AvatarGroupProps } from '@fluentui/react-components';
 import type { PeopleSearchResult } from '../../providers/IPersonDataProvider';
 
 /**
+ * Supported built-in sort fields for resolved people collections.
+ */
+export type PeopleSortField = 'displayName' | 'givenName' | 'surname';
+
+/**
+ * Sort direction for resolved people collections.
+ */
+export type PeopleSortDirection = 'asc' | 'desc';
+
+/**
  * Triggers reported by the {@link PeopleProps.onUpdated} callback.
  */
 export type PeopleUpdateTrigger = 'peopleChanged' | 'peopleLoaded' | 'peopleLoadFailed';
@@ -66,6 +76,23 @@ export interface PeopleProps extends Omit<AvatarGroupProps, 'children'> {
    * Values can be Microsoft Graph user IDs, UPNs, email addresses, or `"me"`.
    */
   userIds?: string[];
+
+  /**
+   * Additional Graph user fields to request when the component resolves people.
+   */
+  selectFields?: string[];
+
+  /**
+   * Field used to sort the resolved people collection.
+   */
+  sortBy?: PeopleSortField;
+
+  /**
+   * Direction used when {@link PeopleProps.sortBy} is provided.
+   *
+   * Defaults to `asc`.
+   */
+  sortDirection?: PeopleSortDirection;
 
   /**
    * The ID of a Microsoft Entra ID group whose direct user members should be rendered.

@@ -84,6 +84,14 @@ export interface PeopleSearchResult {
    */
   id: string;
   /**
+   * The person's first name.
+   */
+  givenName?: string | null;
+  /**
+   * The person's last name.
+   */
+  surname?: string | null;
+  /**
    * The person's display name
    */
   displayName?: string | null;

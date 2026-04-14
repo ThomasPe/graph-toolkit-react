@@ -1,12 +1,118 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import React, { useState } from 'react';
-import { FluentProvider, webLightTheme, Text } from '@fluentui/react-components';
+import React, { useMemo, useState } from 'react';
+import { fn } from 'storybook/test';
+import {
+  Caption1,
+  Card,
+  FluentProvider,
+  Persona,
+  Spinner,
+  Text,
+  tokens,
+  webLightTheme,
+} from '@fluentui/react-components';
 import { PeoplePicker } from '../src/components/PeoplePicker';
 import { GraphProvider } from '../src/providers/ProviderContext';
 import { MockProvider } from '../src/providers/MockProvider';
 import type { PeoplePickerPerson } from '../src/components/PeoplePicker';
+import { usePeopleList } from '../src/hooks/usePeopleList';
 
 const provider = new MockProvider({ autoSignIn: true });
+
+type PeoplePickerStoryProps = React.ComponentProps<typeof PeoplePicker>;
+
+const getPersonLabel = (person: { displayName?: string | null; mail?: string | null; userPrincipalName?: string | null; id: string }) =>
+  person.displayName ?? person.mail ?? person.userPrincipalName ?? person.id;
+
+const SelectedUsersListDemo: React.FC<PeoplePickerStoryProps> = (args) => {
+  const [selectedPeople, setSelectedPeople] = useState<PeoplePickerPerson[]>([]);
+  const selectedUserIds = useMemo(() => selectedPeople.map(person => person.id), [selectedPeople]);
+  const peopleListOptions = useMemo(
+    () => (selectedUserIds.length > 0
+      ? {
+        userIds: selectedUserIds,
+        sortBy: 'surname' as const,
+        selectFields: ['givenName', 'surname'],
+      }
+      : {
+        people: [],
+        sortBy: 'surname' as const,
+        selectFields: ['givenName', 'surname'],
+      }),
+    [selectedUserIds]
+  );
+  const { people, loading } = usePeopleList(peopleListOptions);
+  const handleSelectionChange = (nextSelectedPeople: PeoplePickerPerson[]) => {
+    setSelectedPeople(nextSelectedPeople);
+    args.onSelectionChange?.(nextSelectedPeople);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <PeoplePicker
+        {...args}
+        selectedPeople={selectedPeople}
+        onSelectionChange={handleSelectionChange}
+      />
+
+      <Card
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: 16,
+          backgroundColor: tokens.colorNeutralBackground2,
+        }}
+      >
+        <Text weight="semibold">Stored object IDs</Text>
+        <Caption1>
+          This mirrors the common app pattern where the picker drives selection, but persistence only
+          stores Microsoft Entra object IDs.
+        </Caption1>
+        <code style={{ whiteSpace: 'pre-wrap' }}>
+          {selectedUserIds.length > 0 ? JSON.stringify(selectedUserIds, null, 2) : '[]'}
+        </code>
+      </Card>
+
+      <Card
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          padding: 16,
+        }}
+      >
+        <Text weight="semibold">Selected users sorted by surname</Text>
+        <Caption1>
+          The list is resolved with <code>usePeopleList</code> using the stored IDs, then sorted by
+          <code>surname</code>.
+        </Caption1>
+
+        {selectedUserIds.length === 0 ? (
+          <Text>Select a few people to populate the list.</Text>
+        ) : loading ? (
+          <Spinner label="Resolving selected users..." size="tiny" />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {people.map(person => (
+              <Persona
+                key={person.id}
+                name={getPersonLabel(person)}
+                primaryText={getPersonLabel(person)}
+                secondaryText={person.jobTitle ?? person.mail ?? undefined}
+                tertiaryText={person.department ?? undefined}
+                avatar={{
+                  image: person.photoUrl ? { src: person.photoUrl } : undefined,
+                  name: getPersonLabel(person),
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+};
 
 const meta: Meta<typeof PeoplePicker> = {
   title: 'Components/PeoplePicker',
@@ -19,6 +125,9 @@ const meta: Meta<typeof PeoplePicker> = {
         component: `Search and select one or more people from Microsoft Graph using the Fluent UI TagPicker.
 
 The \`PeoplePicker\` supports both **controlled** and **uncontrolled** usage patterns.
+
+See the **Selected Users List** story for the recommended consumer pattern when your app stores
+only object IDs from picker selections and later resolves a sorted list with \`usePeopleList\`.
 
 When wrapping with a \`MockProvider\` (with \`autoSignIn: true\`), it uses built-in mock data so you can prototype without any auth configuration.`,
       },
@@ -35,6 +144,10 @@ When wrapping with a \`MockProvider\` (with \`autoSignIn: true\`), it uses built
       </FluentProvider>
     ),
   ],
+  args: {
+    onSelectionChange: fn(),
+    onUpdated: fn(),
+  },
   argTypes: {
     placeholder: { control: 'text' },
     maxPeople: { control: { type: 'number', min: 1 } },
@@ -101,9 +214,18 @@ export const Controlled: Story = {
       },
     ]);
 
+    const handleSelectionChange = (nextSelectedPeople: PeoplePickerPerson[]) => {
+      setSelected(nextSelectedPeople);
+      args.onSelectionChange?.(nextSelectedPeople);
+    };
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <PeoplePicker {...args} selectedPeople={selected} onSelectionChange={setSelected} />
+        <PeoplePicker
+          {...args}
+          selectedPeople={selected}
+          onSelectionChange={handleSelectionChange}
+        />
         <Text size={200}>
           Selected: {selected.map((p) => p.displayName).join(', ') || '(none)'}
         </Text>
@@ -112,6 +234,19 @@ export const Controlled: Story = {
   },
   args: {
     placeholder: 'Search for people...',
+  },
+};
+
+/**
+ * Demonstrates the common pattern where the app stores only selected object IDs,
+ * then resolves a sorted user list with `usePeopleList`.
+ */
+export const SelectedUsersList: Story = {
+  name: 'Selected Users List',
+  render: (args) => <SelectedUsersListDemo {...args} />,
+  args: {
+    placeholder: 'Search and add people...',
+    maxPeople: 5,
   },
 };
 
