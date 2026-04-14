@@ -287,10 +287,14 @@ export const Person: React.FC<PersonProps> = ({
     : undefined;
 
   const resolvedPresence = personaProps.presence ?? defaultPresence;
+  const providedPhotoUrl = typeof resolvedPerson.photoUrl === 'string' && resolvedPerson.photoUrl.length > 0
+    ? resolvedPerson.photoUrl
+    : undefined;
+  const resolvedPhotoUrl = providedPhotoUrl ?? photoUrl ?? undefined;
 
   const resolvedAvatar = personaProps.avatar ?? {
-    image: photoUrl ? { src: photoUrl } : undefined,
-    initials: photoUrl ? undefined : initials,
+    image: resolvedPhotoUrl ? { src: resolvedPhotoUrl } : undefined,
+    initials: resolvedPhotoUrl ? undefined : initials,
     name: displayName,
   };
 

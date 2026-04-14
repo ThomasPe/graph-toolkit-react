@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  Person,
   PeoplePicker,
   usePeopleList,
 } from '@devsym/graph-toolkit-react';
@@ -9,7 +10,6 @@ import {
   Body2,
   Caption1,
   Card,
-  Persona,
   Spinner,
   Title3,
   makeStyles,
@@ -62,13 +62,6 @@ const useStyles = makeStyles({
     gap: '12px',
   },
 });
-
-const getPersonLabel = (person: {
-  displayName?: string | null;
-  mail?: string | null;
-  userPrincipalName?: string | null;
-  id: string;
-}) => person.displayName ?? person.mail ?? person.userPrincipalName ?? person.id;
 
 export const SelectedPeopleListPage: React.FC = () => {
   const styles = useStyles();
@@ -142,16 +135,11 @@ export const SelectedPeopleListPage: React.FC = () => {
         ) : (
           <div className={styles.peopleList}>
             {people.map(person => (
-              <Persona
+              <Person
                 key={person.id}
-                name={getPersonLabel(person)}
-                primaryText={getPersonLabel(person)}
-                secondaryText={person.jobTitle ?? person.mail ?? undefined}
-                tertiaryText={person.department ?? undefined}
-                avatar={{
-                  image: person.photoUrl ? { src: person.photoUrl } : undefined,
-                  name: getPersonLabel(person),
-                }}
+                personDetails={person}
+                view="threelines"
+                fetchImage={false}
               />
             ))}
           </div>

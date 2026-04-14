@@ -20,6 +20,13 @@ export type PersonUpdateTrigger = 'personDetailsChanged' | 'personLoaded' | 'per
  */
 export interface PersonDetails {
   /**
+   * A pre-resolved profile photo URL.
+   *
+   * When supplied, the {@link Person} component can render the avatar image without fetching it
+   * again.
+   */
+  photoUrl?: string | null;
+  /**
    * The person's first name.
    */
   givenName?: string | null;
