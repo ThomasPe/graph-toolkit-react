@@ -13,6 +13,7 @@ This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (M
 - ✅ Person component displaying current user ("me" query)
 - ✅ People component for compact avatar groups and overflow
 - ✅ PeoplePicker component for searching and selecting people
+- ✅ Selected user list demo that stores picker IDs and renders a sorted roster
 - ✅ Fluent UI design system
 - ✅ TypeScript support
 - ✅ Native `@azure/msal-browser` provider wired to `GraphProvider`
@@ -99,6 +100,7 @@ This sample keeps app-specific wiring in local files and relies on the main pack
 - `src/PersonPage.tsx` demonstrates the `Person` component with `userId="me"`
 - `src/PeoplePage.tsx` demonstrates the `People` component
 - `src/PeoplePickerPage.tsx` demonstrates the `PeoplePicker` component
+- `src/SelectedPeopleListPage.tsx` demonstrates storing picker IDs and resolving a sorted list with `usePeopleList`
 
 For current provider and component usage guidance, use [Graph Toolkit React Documentation](../../readme.md).
 
@@ -113,6 +115,7 @@ src/
 ├── PersonPage.tsx         # Person component demo page
 ├── PeoplePage.tsx         # People component demo page
 ├── PeoplePickerPage.tsx   # PeoplePicker component demo page
+├── SelectedPeopleListPage.tsx # Picker-driven user list demo page
 ├── main.tsx               # App entry point
 └── index.css              # Global styles
 ```

@@ -9,6 +9,8 @@ import type { IPersonDataProvider } from '../providers/IPersonDataProvider';
 type GraphUsersResponse = {
   value: Array<{
     id: string;
+    givenName?: string | null;
+    surname?: string | null;
     displayName: string;
     mail?: string | null;
     userPrincipalName?: string | null;
@@ -212,6 +214,82 @@ describe('usePeopleList', () => {
     expect(getPersonData).toHaveBeenCalledTimes(1);
   });
 
+  it('does not refetch when rerendered with equivalent selectFields values', async () => {
+    const getPersonData = vi.fn().mockResolvedValue({
+      user: {
+        id: 'user-1',
+        displayName: 'Adele Vance',
+        givenName: 'Adele',
+        surname: 'Vance',
+        mail: 'adelev@contoso.com',
+        userPrincipalName: 'adelev@contoso.com',
+      },
+      presence: null,
+      photoUrl: null,
+    });
+
+    mockedUseProvider.mockReturnValue({
+      getPersonData,
+    } as IProvider & IPersonDataProvider as never);
+
+    const { result, rerender } = renderHook(
+      ({ fields }) => usePeopleList({ userIds: ['user-1'], sortBy: 'surname', selectFields: fields }),
+      {
+        initialProps: { fields: ['givenName', 'surname'] },
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    rerender({ fields: ['givenName', 'surname'] });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(getPersonData).toHaveBeenCalledTimes(1);
+  });
+
+  it('sorts resolved userIds by surname and forwards normalized custom fields to the provider', async () => {
+    const directory = new Map([
+      ['user-3', { id: 'user-3', displayName: 'Charlie Adams', givenName: 'Charlie', surname: 'Adams' }],
+      ['user-1', { id: 'user-1', displayName: 'Adele Zane', givenName: 'Adele', surname: 'Zane' }],
+      ['user-2', { id: 'user-2', displayName: 'Ben Cooper', givenName: 'Ben', surname: 'Cooper' }],
+    ]);
+
+    const getPersonData = vi.fn().mockImplementation(async ({ identifier }) => ({
+      user: directory.get(identifier),
+      presence: null,
+      photoUrl: null,
+    }));
+
+    mockedUseProvider.mockReturnValue({
+      getPersonData,
+    } as IProvider & IPersonDataProvider as never);
+
+    const { result } = renderHook(() =>
+      usePeopleList({
+        userIds: ['user-3', 'user-1', 'user-2'],
+        sortBy: 'surname',
+        selectFields: ['  givenName  ', '', 'bad&field', 'surname'],
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.people.map(person => person.id)).toEqual(['user-3', 'user-2', 'user-1']);
+    expect(getPersonData).toHaveBeenNthCalledWith(1, {
+      identifier: 'user-3',
+      fetchPresence: false,
+      fetchPhoto: true,
+      selectFields: ['givenName', 'surname'],
+    });
+  });
+
   it('loads group members from Graph when groupId is provided', async () => {
     mockedUseProvider.mockReturnValue({
       getPersonData: vi.fn().mockResolvedValue({
@@ -250,6 +328,8 @@ describe('usePeopleList', () => {
     expect(result.current.people).toEqual([
       {
         id: 'user-1',
+        givenName: null,
+        surname: null,
         displayName: 'Adele Vance',
         mail: 'adelev@contoso.com',
         userPrincipalName: 'adelev@contoso.com',
@@ -257,6 +337,47 @@ describe('usePeopleList', () => {
         department: 'Marketing',
       },
     ]);
+  });
+
+  it('adds the requested sort field to Graph select queries and sorts the result', async () => {
+    mockedUseProvider.mockReturnValue({
+      getPersonData: vi.fn().mockResolvedValue({
+        user: null,
+        presence: null,
+        photoUrl: null,
+      }),
+    } as IProvider & IPersonDataProvider as never);
+
+    const getMock = vi.fn().mockResolvedValue({
+      value: [
+        {
+          id: 'user-2',
+          givenName: 'Zoe',
+          displayName: 'Zoe Hall',
+          mail: 'zoe.hall@contoso.com',
+        },
+        {
+          id: 'user-1',
+          givenName: 'Adele',
+          displayName: 'Adele Vance',
+          mail: 'adele.vance@contoso.com',
+        },
+      ],
+    });
+    const topMock = vi.fn().mockReturnValue({ get: getMock });
+    const selectMock = vi.fn().mockReturnValue({ top: topMock });
+    const apiMock = vi.fn().mockReturnValue({ select: selectMock });
+
+    mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
+
+    const { result } = renderHook(() => usePeopleList({ maxPeople: 2, sortBy: 'givenName' }));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(selectMock).toHaveBeenCalledWith('id,displayName,mail,userPrincipalName,jobTitle,department,givenName');
+    expect(result.current.people.map(person => person.id)).toEqual(['user-1', 'user-2']);
   });
 
   it('loads default tenant users from Graph when no explicit source is provided', async () => {
@@ -296,6 +417,8 @@ describe('usePeopleList', () => {
     expect(result.current.people).toEqual([
       {
         id: 'user-1',
+        givenName: null,
+        surname: null,
         displayName: 'Unknown Person',
         mail: 'unknown.person@contoso.com',
         userPrincipalName: 'unknown.person@contoso.com',

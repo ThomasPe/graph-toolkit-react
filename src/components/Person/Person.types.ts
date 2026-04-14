@@ -20,6 +20,14 @@ export type PersonUpdateTrigger = 'personDetailsChanged' | 'personLoaded' | 'per
  */
 export interface PersonDetails {
   /**
+   * The person's first name.
+   */
+  givenName?: string | null;
+  /**
+   * The person's last name.
+   */
+  surname?: string | null;
+  /**
    * The person's display name.
    */
   displayName?: string | null;

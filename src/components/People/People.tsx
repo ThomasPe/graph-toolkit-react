@@ -68,6 +68,9 @@ const renderAvatarGroupItem = (person: PeoplePerson) => {
 export const People: React.FC<PeopleProps> = ({
   people,
   userIds,
+  selectFields,
+  sortBy,
+  sortDirection,
   groupId,
   showMax = DEFAULT_SHOW_MAX,
   showPresence = false,
@@ -79,6 +82,9 @@ export const People: React.FC<PeopleProps> = ({
   const { people: resolvedPeople, loading, error } = usePeopleList({
     people,
     userIds,
+    selectFields,
+    sortBy,
+    sortDirection,
     groupId,
     maxPeople: Math.max(DEFAULT_FETCH_COUNT, showMax + 5),
     showPresence,

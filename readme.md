@@ -159,6 +159,35 @@ You can also provide people directly or resolve specific users:
 />
 ```
 
+If your app stores only object IDs and needs a sortable list, use `usePeopleList` to
+resolve the users first and then render your own list UI:
+
+```tsx
+import { Person, usePeopleList } from '@devsym/graph-toolkit-react';
+
+function TeamList({ objectIds }: { objectIds: string[] }) {
+  const { people, loading } = usePeopleList({
+    userIds: objectIds,
+    sortBy: 'surname',
+    selectFields: ['givenName', 'surname'],
+  });
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <ul>
+      {people.map(person => (
+        <li key={person.id}>
+          <Person userId={person.id} view="twolines" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
 
 ## 🚀 Getting Started
 

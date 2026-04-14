@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
+import { fn } from 'storybook/test';
 import { Person } from '../src/components/Person';
 import { GraphProvider } from '../src/providers/ProviderContext';
 import { MockProvider } from '../src/providers/MockProvider';
@@ -47,6 +48,9 @@ Story organization follows Fluent Persona docs, while Graph-specific stories foc
       );
     },
   ],
+  args: {
+    onUpdated: fn(),
+  },
   argTypes: {
     view: {
       control: 'select',

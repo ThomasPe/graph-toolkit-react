@@ -17,8 +17,9 @@ import {
 import { PersonPage } from './PersonPage';
 import { PeoplePage } from './PeoplePage';
 import { PeoplePickerPage } from './PeoplePickerPage';
+import { SelectedPeopleListPage } from './SelectedPeopleListPage';
 
-type NavPage = 'person' | 'people' | 'people-picker';
+type NavPage = 'person' | 'people' | 'people-picker' | 'selected-people-list';
 
 const useStyles = makeStyles({
   root: {
@@ -102,6 +103,9 @@ export const Dashboard: React.FC = () => {
             <Tab value="people-picker" icon={<People24Regular />}>
               People Picker
             </Tab>
+            <Tab value="selected-people-list" icon={<People24Regular />}>
+              Selected User List
+            </Tab>
           </TabList>
         </nav>
 
@@ -109,6 +113,7 @@ export const Dashboard: React.FC = () => {
           {activePage === 'person' && <PersonPage />}
           {activePage === 'people' && <PeoplePage />}
           {activePage === 'people-picker' && <PeoplePickerPage />}
+          {activePage === 'selected-people-list' && <SelectedPeopleListPage />}
         </main>
       </div>
     </div>

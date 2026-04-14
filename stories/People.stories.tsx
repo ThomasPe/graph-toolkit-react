@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
+import { fn } from 'storybook/test';
 import { FluentProvider, Text, webLightTheme } from '@fluentui/react-components';
 import { People } from '../src/components/People';
 import { GraphProvider } from '../src/providers/ProviderContext';
@@ -35,6 +36,9 @@ The component can render a supplied list of people, resolve specific \
       </FluentProvider>
     ),
   ],
+  args: {
+    onUpdated: fn(),
+  },
   argTypes: {
     showMax: {
       control: { type: 'number', min: 0, max: 10 },

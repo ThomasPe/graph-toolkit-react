@@ -19,6 +19,8 @@ type StateListener = () => void;
 const MOCK_PEOPLE: PeopleSearchResult[] = [
   {
     id: '00000000-0000-0000-0000-000000000001',
+    givenName: 'Adele',
+    surname: 'Vance',
     displayName: 'Adele Vance',
     mail: 'adelev@contoso.com',
     userPrincipalName: 'adelev@contoso.com',
@@ -27,6 +29,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000002',
+    givenName: 'Alex',
+    surname: 'Wilber',
     displayName: 'Alex Wilber',
     mail: 'alexw@contoso.com',
     userPrincipalName: 'alexw@contoso.com',
@@ -35,6 +39,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000003',
+    givenName: 'Diego',
+    surname: 'Siciliani',
     displayName: 'Diego Siciliani',
     mail: 'diegosi@contoso.com',
     userPrincipalName: 'diegosi@contoso.com',
@@ -43,6 +49,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000004',
+    givenName: 'Grady',
+    surname: 'Archie',
     displayName: 'Grady Archie',
     mail: 'gradya@contoso.com',
     userPrincipalName: 'gradya@contoso.com',
@@ -51,6 +59,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000005',
+    givenName: 'Henrietta',
+    surname: 'Mueller',
     displayName: 'Henrietta Mueller',
     mail: 'henriettam@contoso.com',
     userPrincipalName: 'henriettam@contoso.com',
@@ -59,6 +69,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000006',
+    givenName: 'Isaiah',
+    surname: 'Langer',
     displayName: 'Isaiah Langer',
     mail: 'isaiahl@contoso.com',
     userPrincipalName: 'isaiahl@contoso.com',
@@ -67,6 +79,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000007',
+    givenName: 'Johanna',
+    surname: 'Lorenz',
     displayName: 'Johanna Lorenz',
     mail: 'johannal@contoso.com',
     userPrincipalName: 'johannal@contoso.com',
@@ -75,6 +89,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000008',
+    givenName: 'Joni',
+    surname: 'Sherman',
     displayName: 'Joni Sherman',
     mail: 'jonis@contoso.com',
     userPrincipalName: 'jonis@contoso.com',
@@ -83,6 +99,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000009',
+    givenName: 'Lee',
+    surname: 'Gu',
     displayName: 'Lee Gu',
     mail: 'leeg@contoso.com',
     userPrincipalName: 'leeg@contoso.com',
@@ -91,6 +109,8 @@ const MOCK_PEOPLE: PeopleSearchResult[] = [
   },
   {
     id: '00000000-0000-0000-0000-000000000010',
+    givenName: 'Megan',
+    surname: 'Bowen',
     displayName: 'Megan Bowen',
     mail: 'meganb@contoso.com',
     userPrincipalName: 'meganb@contoso.com',
@@ -138,6 +158,8 @@ export class MockProvider implements IProvider, IPersonDataProvider, IPeopleSear
 
     const mockUser: User = {
       id: mockPerson.id,
+      givenName: mockPerson.givenName,
+      surname: mockPerson.surname,
       displayName: mockPerson.displayName,
       userPrincipalName: resolvedUserPrincipalName,
       jobTitle: mockPerson.jobTitle,
