@@ -252,6 +252,43 @@ describe('usePeopleList', () => {
     expect(getPersonData).toHaveBeenCalledTimes(1);
   });
 
+  it('does not refetch when selectFields contains only default fields', async () => {
+    const getPersonData = vi.fn().mockResolvedValue({
+      user: {
+        id: 'user-1',
+        displayName: 'Adele Vance',
+        givenName: 'Adele',
+        surname: 'Vance',
+        mail: 'adelev@contoso.com',
+        userPrincipalName: 'adelev@contoso.com',
+      },
+      presence: null,
+      photoUrl: null,
+    });
+
+    mockedUseProvider.mockReturnValue({
+      getPersonData,
+    } as IProvider & IPersonDataProvider as never);
+
+    const { result, rerender } = renderHook(
+      ({ fields }: { fields?: string[] }) => usePeopleList({ userIds: ['user-1'], selectFields: fields }),
+      { initialProps: { fields: undefined } }
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Re-render with default fields explicitly listed — should not trigger a new fetch
+    rerender({ fields: ['displayName', 'mail', 'id'] });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(getPersonData).toHaveBeenCalledTimes(1);
+  });
+
   it('sorts resolved userIds by surname and forwards normalized custom fields to the provider', async () => {
     const directory = new Map([
       ['user-3', { id: 'user-3', displayName: 'Charlie Adams', givenName: 'Charlie', surname: 'Adams' }],

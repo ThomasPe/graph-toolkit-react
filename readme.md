@@ -180,7 +180,7 @@ function TeamList({ objectIds }: { objectIds: string[] }) {
     <ul>
       {people.map(person => (
         <li key={person.id}>
-          <Person userId={person.id} view="twolines" />
+          <Person personDetails={person} view="twolines" />
         </li>
       ))}
     </ul>

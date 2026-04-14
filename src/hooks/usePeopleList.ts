@@ -210,7 +210,9 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
   const providerState = useProviderState();
   const directPeopleKey = JSON.stringify(options?.people ?? null);
   const userIdsKey = JSON.stringify(uniqueNonEmpty(options?.userIds));
-  const customSelectFieldsKey = JSON.stringify(toSelectableFields(options?.selectFields));
+  const customSelectFieldsKey = JSON.stringify(
+    toSelectableFields(options?.selectFields).filter(f => !DEFAULT_PEOPLE_SELECT_FIELD_SET.has(f))
+  );
   const directPeople = useMemo<PeoplePerson[] | undefined>(() => {
     if (directPeopleKey === 'null') {
       return undefined;

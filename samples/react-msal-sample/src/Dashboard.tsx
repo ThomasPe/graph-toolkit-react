@@ -104,7 +104,7 @@ export const Dashboard: React.FC = () => {
               People Picker
             </Tab>
             <Tab value="selected-people-list" icon={<People24Regular />}>
-              Selected User List
+              Selected People List
             </Tab>
           </TabList>
         </nav>
