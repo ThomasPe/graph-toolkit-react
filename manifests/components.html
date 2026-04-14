@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">3 components ok</span><span class="filter-pill ok" aria-disabled="true">26 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">3 components ok</span><span class="filter-pill ok" aria-disabled="true">27 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -604,7 +604,7 @@
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> People</h2>
       <div class="badges">
-        <label for="c-0-components-people-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-0-components-people-props" class="badge ok as-toggle">11 prop types</label>
         
         <label for="c-0-components-people-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -631,7 +631,7 @@
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">8 prop types</span>
+              <span class="badge ok">11 prop types</span>
             </div>
             <pre><code>Component: src/components/People/People.tsx::People</code></pre>
             <pre><code>Props:</code></pre>
@@ -659,6 +659,11 @@ onUpdated?: (event: PeopleUpdatedEvent) =&gt; void
 people?: PeoplePerson[]
 
 /**
+ * Additional Graph user fields to request when the component resolves people.
+ */
+selectFields?: string[]
+
+/**
  * Maximum number of visible avatars before the remaining people are shown in overflow.
  * 
  * Defaults to `3`, matching the MGT `mgt-people` control.
@@ -673,6 +678,18 @@ showMax?: number = 3
 showPresence?: boolean = false
 
 size?: any = 32
+
+/**
+ * Field used to sort the resolved people collection.
+ */
+sortBy?: &#39;displayName&#39; | &#39;givenName&#39; | &#39;surname&#39;
+
+/**
+ * Direction used when {@link PeopleProps.sortBy} is provided.
+ * 
+ * Defaults to `asc`.
+ */
+sortDirection?: &#39;asc&#39; | &#39;desc&#39;
 
 /**
  * A list of user identifiers to resolve and render.
@@ -703,7 +720,7 @@ import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;People showMax={3} layout=&quot;stack&quot; size={32} /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;People onUpdated={fn()} showMax={3} layout=&quot;stack&quot; size={32} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -712,7 +729,7 @@ import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre
               </div>
               
               
-              <pre><code>const WithPresence = () =&gt; &lt;People showMax={4} layout=&quot;stack&quot; size={40} showPresence /&gt;;</code></pre>
+              <pre><code>const WithPresence = () =&gt; &lt;People onUpdated={fn()} showMax={4} layout=&quot;stack&quot; size={40} showPresence /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -722,6 +739,7 @@ import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre
               
               
               <pre><code>const FromUserIds = () =&gt; &lt;People
+    onUpdated={fn()}
     userIds={[
       &#39;00000000-0000-0000-0000-000000000001&#39;,
       &#39;00000000-0000-0000-0000-000000000002&#39;,
@@ -741,6 +759,7 @@ import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre
               
               <pre><code>const DirectPeople = () =&gt; &lt;&gt;
     &lt;People
+        onUpdated={fn()}
         showMax={2}
         layout=&quot;stack&quot;
         size={32}
@@ -791,7 +810,7 @@ import { GraphProvider, People } from "@devsym/graph-toolkit-react";</code></pre
       <div class="badges">
         <label for="c-1-components-peoplepicker-props" class="badge ok as-toggle">9 prop types</label>
         
-        <label for="c-1-components-peoplepicker-stories" class="badge ok as-toggle">10 stories</label>
+        <label for="c-1-components-peoplepicker-stories" class="badge ok as-toggle">11 stories</label>
         
       </div>
     </div>
@@ -884,7 +903,7 @@ selectedPeople?: PeoplePickerPerson[]</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { FluentProvider, Text } from "@fluentui/react-components";
+                <pre><code>import { Caption1, Card, FluentProvider, Persona, Spinner, Text } from "@fluentui/react-components";
 import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code></pre>
               </div>
           
@@ -896,7 +915,10 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               </div>
               
               <div class="hint">Default uncontrolled usage — start typing to search for people. Try &quot;adele&quot;, &quot;megan&quot;, or &quot;alex&quot; to see results.</div>
-              <pre><code>const Default = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for people...&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Search for people...&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -906,6 +928,8 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               
               <div class="hint">Shows how to pre-select people in uncontrolled mode.</div>
               <pre><code>const WithDefaultSelected = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
     placeholder=&quot;Search for people...&quot;
     defaultSelectedPeople={[
       {
@@ -936,12 +960,18 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
       },
     ]);
 
+    const handleSelectionChange = (nextSelectedPeople: PeoplePickerPerson[]) =&gt; {
+      setSelected(nextSelectedPeople);
+      args.onSelectionChange?.(nextSelectedPeople);
+    };
+
     return (
         &lt;div style={{ display: &#39;flex&#39;, flexDirection: &#39;column&#39;, gap: 12 }}&gt;
             &lt;PeoplePicker
+                onUpdated={fn()}
                 placeholder=&quot;Search for people...&quot;
                 selectedPeople={selected}
-                onSelectionChange={setSelected} /&gt;
+                onSelectionChange={handleSelectionChange} /&gt;
             &lt;Text size={200}&gt;Selected: {selected.map((p) =&gt; p.displayName).join(&#39;, &#39;) || &#39;(none)&#39;}
             &lt;/Text&gt;
         &lt;/div&gt;
@@ -950,12 +980,29 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
             </div>
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">Selected Users List</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Demonstrates the common pattern where the app stores only selected object IDs, then resolves a sorted user list with `usePeopleList`.</div>
+              <pre><code>const SelectedUsersList = () =&gt; &lt;SelectedUsersListDemo
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Search and add people...&quot;
+    maxPeople={5} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">Max 3 People</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               <div class="hint">Limits selection to a maximum of 3 people. The input field hides once the limit is reached.</div>
-              <pre><code>const MaxThreePeople = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for up to 3 people...&quot; maxPeople={3} /&gt;;</code></pre>
+              <pre><code>const MaxThreePeople = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Search for up to 3 people...&quot;
+    maxPeople={3} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -964,7 +1011,11 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               </div>
               
               <div class="hint">Requires at least 2 characters before searching.</div>
-              <pre><code>const MinTwoChars = () =&gt; &lt;PeoplePicker placeholder=&quot;Type 2+ characters to search...&quot; searchMinChars={2} /&gt;;</code></pre>
+              <pre><code>const MinTwoChars = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Type 2+ characters to search...&quot;
+    searchMinChars={2} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -973,7 +1024,11 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               </div>
               
               <div class="hint">Compact small size variant.</div>
-              <pre><code>const SmallSize = () =&gt; &lt;PeoplePicker placeholder=&quot;Search...&quot; size=&quot;small&quot; /&gt;;</code></pre>
+              <pre><code>const SmallSize = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Search...&quot;
+    size=&quot;small&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -982,7 +1037,11 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               </div>
               
               <div class="hint">Large size variant.</div>
-              <pre><code>const LargeSize = () =&gt; &lt;PeoplePicker placeholder=&quot;Search...&quot; size=&quot;large&quot; /&gt;;</code></pre>
+              <pre><code>const LargeSize = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Search...&quot;
+    size=&quot;large&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -992,6 +1051,8 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               
               <div class="hint">Disabled state — the picker cannot be interacted with.</div>
               <pre><code>const Disabled = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
     placeholder=&quot;Search for people...&quot;
     disabled
     defaultSelectedPeople={[
@@ -1009,7 +1070,11 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               </div>
               
               <div class="hint">Underline appearance variant.</div>
-              <pre><code>const UnderlineAppearance = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for people...&quot; appearance=&quot;underline&quot; /&gt;;</code></pre>
+              <pre><code>const UnderlineAppearance = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Search for people...&quot;
+    appearance=&quot;underline&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1018,7 +1083,11 @@ import { GraphProvider, PeoplePicker } from "@devsym/graph-toolkit-react";</code
               </div>
               
               <div class="hint">Filled appearance with a darker background.</div>
-              <pre><code>const FilledDarkerAppearance = () =&gt; &lt;PeoplePicker placeholder=&quot;Search for people...&quot; appearance=&quot;filled-darker&quot; /&gt;;</code></pre>
+              <pre><code>const FilledDarkerAppearance = () =&gt; &lt;PeoplePicker
+    onSelectionChange={fn()}
+    onUpdated={fn()}
+    placeholder=&quot;Search for people...&quot;
+    appearance=&quot;filled-darker&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -1184,6 +1253,7 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const Default = () =&gt; &lt;Person
+    onUpdated={fn()}
     userId=&quot;test-user&quot;
     view=&quot;oneline&quot;
     showPresence={false}
@@ -1198,6 +1268,7 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const AvatarOnly = () =&gt; &lt;Person
+    onUpdated={fn()}
     personDetails={{
       displayName: &#39;Adele Vance&#39;,
       jobTitle: &#39;Program Manager&#39;,
@@ -1216,11 +1287,36 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const Lines = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
-    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;avatar&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;oneline&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;twolines&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;threelines&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; size=&quot;medium&quot; showPresence={false} view=&quot;fourlines&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        size=&quot;medium&quot;
+        showPresence={false}
+        view=&quot;avatar&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        size=&quot;medium&quot;
+        showPresence={false}
+        view=&quot;oneline&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        size=&quot;medium&quot;
+        showPresence={false}
+        view=&quot;twolines&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        size=&quot;medium&quot;
+        showPresence={false}
+        view=&quot;threelines&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        size=&quot;medium&quot;
+        showPresence={false}
+        view=&quot;fourlines&quot; /&gt;
 &lt;/div&gt;;</code></pre>
             </div>
             <div class="note ok">
@@ -1231,12 +1327,42 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const Size = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;extra-small&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;small&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;medium&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;large&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;extra-large&quot; /&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; showPresence size=&quot;huge&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;extra-small&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;small&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;medium&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;large&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;extra-large&quot; /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        showPresence
+        size=&quot;huge&quot; /&gt;
 &lt;/div&gt;;</code></pre>
             </div>
             <div class="note ok">
@@ -1248,12 +1374,14 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               <pre><code>const TextAlignment = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
     &lt;Person
+        onUpdated={fn()}
         userId=&quot;test-user&quot;
         view=&quot;threelines&quot;
         showPresence
         size=&quot;large&quot;
         textAlignment=&quot;start&quot; /&gt;
     &lt;Person
+        onUpdated={fn()}
         userId=&quot;test-user&quot;
         view=&quot;threelines&quot;
         showPresence
@@ -1270,18 +1398,21 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               <pre><code>const TextPosition = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
     &lt;Person
+        onUpdated={fn()}
         userId=&quot;test-user&quot;
         view=&quot;twolines&quot;
         showPresence
         size=&quot;medium&quot;
         textPosition=&quot;after&quot; /&gt;
     &lt;Person
+        onUpdated={fn()}
         userId=&quot;test-user&quot;
         view=&quot;twolines&quot;
         showPresence
         size=&quot;medium&quot;
         textPosition=&quot;before&quot; /&gt;
     &lt;Person
+        onUpdated={fn()}
         userId=&quot;test-user&quot;
         view=&quot;twolines&quot;
         showPresence
@@ -1298,8 +1429,19 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const Presence = () =&gt; &lt;div style={{ display: &#39;grid&#39;, gap: 12 }}&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;large&quot; showPresence /&gt;
-    &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;large&quot; showPresence presenceOnly /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        size=&quot;large&quot;
+        showPresence /&gt;
+    &lt;Person
+        onUpdated={fn()}
+        userId=&quot;test-user&quot;
+        view=&quot;twolines&quot;
+        size=&quot;large&quot;
+        showPresence
+        presenceOnly /&gt;
 &lt;/div&gt;;</code></pre>
             </div>
             <div class="note ok">
@@ -1310,6 +1452,7 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const GraphDirectData = () =&gt; &lt;Person
+    onUpdated={fn()}
     personDetails={{
       displayName: &#39;John Doe&#39;,
       jobTitle: &#39;Software Engineer&#39;,
@@ -1329,6 +1472,7 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const GraphLineProperties = () =&gt; &lt;Person
+    onUpdated={fn()}
     userId=&quot;test-user&quot;
     view=&quot;threelines&quot;
     line1Property=&quot;displayName&quot;
@@ -1344,6 +1488,7 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               
               
               <pre><code>const GraphRenderedLines = () =&gt; &lt;Person
+    onUpdated={fn()}
     personDetails={{
       displayName: &#39;Megan Bowen&#39;,
       jobTitle: &#39;CEO&#39;,
@@ -1364,7 +1509,12 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               </div>
               
               
-              <pre><code>const GraphImageFallback = () =&gt; &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;medium&quot; fetchImage={false} /&gt;;</code></pre>
+              <pre><code>const GraphImageFallback = () =&gt; &lt;Person
+    onUpdated={fn()}
+    userId=&quot;test-user&quot;
+    view=&quot;twolines&quot;
+    size=&quot;medium&quot;
+    fetchImage={false} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1373,7 +1523,7 @@ view?: &#39;avatar&#39; | &#39;oneline&#39; | &#39;twolines&#39; | &#39;threelin
               </div>
               
               
-              <pre><code>const GraphLoadingState = () =&gt; &lt;Person userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;medium&quot; /&gt;;</code></pre>
+              <pre><code>const GraphLoadingState = () =&gt; &lt;Person onUpdated={fn()} userId=&quot;test-user&quot; view=&quot;twolines&quot; size=&quot;medium&quot; /&gt;;</code></pre>
             </div>
         </div>
     
