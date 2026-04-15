@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.17
+
+### Patch Changes
+
+- b7d956f: Fix `People` overflow popovers to show each person's name alongside the avatar.
+
 ## 1.0.0-next.16
 
 ### Minor Changes
