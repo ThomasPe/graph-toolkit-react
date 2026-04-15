@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
+import { Skeleton, SkeletonItem } from '@fluentui/react-components';
 import { Person } from '../components/Person';
 import { usePersonData } from '../hooks/usePersonData';
 
@@ -59,6 +60,22 @@ describe('Person', () => {
         return call[0] as Record<string, unknown>;
     };
 
+    /**
+     * Assert that a captured Persona text slot contains the loading Skeleton structure.
+     *
+     * @param slot - The Persona slot value captured from the mocked render call.
+     */
+    const expectSkeletonSlot = (slot: unknown) => {
+        expect(React.isValidElement(slot)).toBe(true);
+
+        const skeleton = slot as React.ReactElement<{ children?: React.ReactNode }>;
+        expect(skeleton.type).toBe(Skeleton);
+        expect(React.isValidElement(skeleton.props.children)).toBe(true);
+
+        const skeletonItem = skeleton.props.children as React.ReactElement;
+        expect(skeletonItem.type).toBe(SkeletonItem);
+    };
+
     it('passes through non-text Persona props and suppresses text slots in avatar view', () => {
         render(
             <Person
@@ -107,7 +124,7 @@ describe('Person', () => {
         expect(personaProps.quaternaryText).toBeUndefined();
     });
 
-    it('shows Loading... name while loading in non-avatar view', () => {
+    it('shows skeleton text slots while loading in non-avatar views', () => {
         mockedUsePersonData.mockReturnValue({
             user: null,
             presence: null,
@@ -116,10 +133,57 @@ describe('Person', () => {
             error: null,
         });
 
-        render(<Person userId="user-1" view="oneline" />);
+        render(<Person userId="user-1" view="twolines" />);
 
         const personaProps = getLastPersonaProps();
-        expect(personaProps.name).toBe('Loading...');
+        expect(personaProps.name).toBeUndefined();
+        expectSkeletonSlot(personaProps.primaryText);
+        expectSkeletonSlot(personaProps.secondaryText);
+        expect(personaProps.tertiaryText).toBeUndefined();
+        expect(personaProps.quaternaryText).toBeUndefined();
+    });
+
+    it('preserves an explicit Persona name while loading', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(<Person userId="user-1" view="oneline" name="Custom loading name" />);
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.name).toBe('Custom loading name');
+        expectSkeletonSlot(personaProps.primaryText);
+    });
+
+    it('preserves explicit null loading text slots instead of rendering skeletons', () => {
+        mockedUsePersonData.mockReturnValue({
+            user: null,
+            presence: null,
+            photoUrl: null,
+            loading: true,
+            error: null,
+        });
+
+        render(
+            <Person
+                userId="user-1"
+                view="fourlines"
+                primaryText={null}
+                secondaryText={null}
+                tertiaryText={null}
+                quaternaryText={null}
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        expect(personaProps.primaryText).toBeNull();
+        expect(personaProps.secondaryText).toBeNull();
+        expect(personaProps.tertiaryText).toBeNull();
+        expect(personaProps.quaternaryText).toBeNull();
     });
 
 

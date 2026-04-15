@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Persona, PresenceBadgeStatus } from '@fluentui/react-components';
+import { Persona, PresenceBadgeStatus, Skeleton, SkeletonItem } from '@fluentui/react-components';
 import { usePersonData } from '../../hooks/usePersonData';
 import { getInitials } from '../../utils/graph';
 import { PersonDetails, PersonLineRenderContext, PersonLineRenderer, PersonProps, PersonView } from './Person.types';
@@ -40,6 +40,19 @@ const DEFAULT_LINE_PROPERTIES: Record<PersonView, [string | undefined, string | 
 
 const PRESENCE_PROPERTIES = new Set(['presenceActivity', 'presenceAvailability']);
 const USER_SELECT_EXCLUSIONS = new Set(['email', ...PRESENCE_PROPERTIES]);
+const PRIMARY_LOADING_LINE_SIZE = 16;
+const SECONDARY_LOADING_LINE_SIZE = 12;
+/**
+ * Widths are intentionally staggered to resemble typical person metadata lengths instead of
+ * rendering every placeholder line at the same width. The numeric keys map directly to the
+ * Persona text line numbers: 1 = primary, 2 = secondary, 3 = tertiary, 4 = quaternary.
+ */
+const LOADING_LINE_WIDTHS: Record<1 | 2 | 3 | 4, string> = {
+  1: '8rem',
+  2: '6rem',
+  3: '5rem',
+  4: '7rem',
+};
 
 const parsePropertyList = (value?: string): string[] =>
   value
@@ -116,6 +129,21 @@ const renderLine = (
 
   return renderer(buildLineContext(line, person, text));
 };
+
+/**
+ * Render a single loading placeholder line for the Fluent UI Persona text slots.
+ *
+ * @param line - The logical Persona text line (1-4) being rendered.
+ * @returns A Fluent UI skeleton sized to match the line's visual prominence.
+ */
+const renderLoadingLine = (line: 1 | 2 | 3 | 4): React.ReactElement => (
+  <Skeleton>
+    <SkeletonItem
+      size={line === 1 ? PRIMARY_LOADING_LINE_SIZE : SECONDARY_LOADING_LINE_SIZE}
+      style={{ width: LOADING_LINE_WIDTHS[line], maxWidth: '100%' }}
+    />
+  </Skeleton>
+);
 
 const getLineProperty = (view: PersonView, line: 1 | 2 | 3 | 4, override?: string): string | undefined =>
   override ?? DEFAULT_LINE_PROPERTIES[view][line - 1];
@@ -240,11 +268,35 @@ export const Person: React.FC<PersonProps> = ({
     return (
       <Persona
         {...personaProps}
-        name={isAvatarOnlyView ? undefined : personaProps.name ?? 'Loading...'}
-        primaryText={isAvatarOnlyView ? undefined : personaProps.primaryText}
-        secondaryText={isAvatarOnlyView ? undefined : personaProps.secondaryText}
-        tertiaryText={isAvatarOnlyView ? undefined : personaProps.tertiaryText}
-        quaternaryText={isAvatarOnlyView ? undefined : personaProps.quaternaryText}
+        name={isAvatarOnlyView ? undefined : personaProps.name}
+        primaryText={
+          isAvatarOnlyView || !isLineVisible(view, 1)
+            ? undefined
+            : personaProps.primaryText === undefined
+              ? renderLoadingLine(1)
+              : personaProps.primaryText
+        }
+        secondaryText={
+          isAvatarOnlyView || !isLineVisible(view, 2)
+            ? undefined
+            : personaProps.secondaryText === undefined
+              ? renderLoadingLine(2)
+              : personaProps.secondaryText
+        }
+        tertiaryText={
+          isAvatarOnlyView || !isLineVisible(view, 3)
+            ? undefined
+            : personaProps.tertiaryText === undefined
+              ? renderLoadingLine(3)
+              : personaProps.tertiaryText
+        }
+        quaternaryText={
+          isAvatarOnlyView || !isLineVisible(view, 4)
+            ? undefined
+            : personaProps.quaternaryText === undefined
+              ? renderLoadingLine(4)
+              : personaProps.quaternaryText
+        }
       />
     );
   }
