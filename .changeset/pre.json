@@ -1,37 +1,8 @@
 {
   "mode": "pre",
-  "tag": "next",
+  "tag": "beta",
   "initialVersions": {
-    "@devsym/graph-toolkit-react": "0.1.0-alpha.1"
+    "@devsym/graph-toolkit-react": "1.0.0"
   },
-  "changesets": [
-    "add-people-picker-component",
-    "bright-horses-end",
-    "component-roadmap-analysis",
-    "cuddly-moles-dance",
-    "curly-bears-tap",
-    "few-cobras-smell",
-    "few-wolves-sing",
-    "first-alpha-release",
-    "fix-people-picker-chip-border-radius",
-    "fix-readme-jump-links",
-    "fresh-owls-relax",
-    "funny-shrimps-happen",
-    "green-cups-teach",
-    "green-groups-argue",
-    "lovely-coats-clean",
-    "orange-emus-share",
-    "people-picker-exclude-user-ids",
-    "people-picker-search-expand-icon",
-    "person-photo-url-support",
-    "polite-rivers-share",
-    "quiet-buses-type",
-    "red-cycles-flow",
-    "shaggy-suits-fix",
-    "silent-icons-nod",
-    "small-suns-sort",
-    "swift-olives-joke",
-    "tasty-mice-look",
-    "tidy-llamas-ring"
-  ]
+  "changesets": []
 }

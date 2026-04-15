@@ -42,16 +42,16 @@ The release workflow in [.github/workflows/release.yml](.github/workflows/releas
 
 Current workflow publishes with:
 
-- `next` tag (alpha/beta channel)
+- `beta` tag (beta channel)
 
-This repository is currently configured to use Changesets prerelease mode for the `next` channel.
+This repository is currently configured to use Changesets prerelease mode for the `beta` channel.
 
 ### Prerelease Mode (Changesets)
 
 Enable prerelease mode (once per prerelease cycle):
 
 ```bash
-npx changeset pre enter next
+npx changeset pre enter beta
 ```
 
 Exit prerelease mode when ready to return to stable versioning:
@@ -60,10 +60,10 @@ Exit prerelease mode when ready to return to stable versioning:
 npx changeset pre exit
 ```
 
-Consumers can install prereleases with:
+Consumers can install the beta with:
 
 ```bash
-npm install @devsym/graph-toolkit-react@next
+npm install @devsym/graph-toolkit-react@beta
 ```
 
 When ready for stable releases, exit prerelease mode (`npx changeset pre exit`) and switch `publishConfig.tag` to `latest`.
