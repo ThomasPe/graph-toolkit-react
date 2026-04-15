@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-next.18
+
+### Patch Changes
+
+- 1aa5927: Replace the Person component loading text with Fluent UI Skeleton placeholders.
+
 ## 1.0.0-next.17
 
 ### Patch Changes
