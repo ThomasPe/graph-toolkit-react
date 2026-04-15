@@ -46,6 +46,7 @@ const renderAvatarGroupItem = (person: PeoplePerson) => {
   return (
     <AvatarGroupItem
       key={person.id}
+      name={label}
       avatar={{
         name: label,
         image: person.photoUrl ? { src: person.photoUrl } : undefined,
