@@ -1,6 +1,6 @@
 # React MSAL Sample - Quick Setup Guide
 
-This guide is intentionally minimal and sample-specific. For provider API details and up-to-date scope requirements, use the root docs: [Graph Toolkit React README](../../readme.md).
+This guide is intentionally minimal and sample-specific. For provider API details and up-to-date scope requirements, use the root docs: [Graph Toolkit React README](../../README.md).
 
 ## Step 1: Azure AD App Registration
 
@@ -39,7 +39,7 @@ export const authConfig = {
 authority: 'https://login.microsoftonline.com/common',
 ```
 
-For optional scopes (such as presence), see [Scopes by feature](../../readme.md#scopes-by-feature).
+For optional scopes (such as presence), see [Permissions](../../README.md#permissions).
 
 ## Step 3: Install & Run
 
@@ -70,8 +70,8 @@ If port 3000 is already in use, free that port first. This sample is intentional
 → This is expected with redirect flow. MSAL redirects to Entra ID and back; `handleRedirectPromise()` picks up the auth code on the return trip.
 
 ### Person component doesn't load
-→ Check browser console for errors. Verify required scopes are granted for enabled features (see [Scopes by feature](../../readme.md#scopes-by-feature)).
+→ Check browser console for errors. Verify required scopes are granted for enabled features (see [Permissions](../../README.md#permissions)).
 
 ---
 
-Need help? Start with [sample README](./README.md), then use [root README](../../readme.md) for canonical provider/component guidance.
+Need help? Start with [sample README](./README.md), then use [root README](../../README.md) for canonical provider/component guidance.

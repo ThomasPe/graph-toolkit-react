@@ -16,7 +16,8 @@
     "dist",
     "README.md",
     "AGENTS.md",
-    "MGT_MIGRATION.md",
+    "CONTRIBUTING.md",
+    "docs/MGT_MIGRATION.md",
     "LICENSE"
   ],
   "scripts": {

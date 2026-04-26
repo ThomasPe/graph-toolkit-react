@@ -2,7 +2,7 @@
 
 This sample demonstrates browser-hosted authentication with `MsalBrowserProvider`.
 
-For Teams-hosted apps, use `TeamsHostedProvider` with consumer-managed TeamsJS login and backend token exchange as documented in the root [README](../../readme.md).
+For Teams-hosted apps, use `TeamsHostedProvider` with consumer-managed TeamsJS login and backend token exchange as documented in the root [README](../../README.md).
 
 This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (Microsoft Authentication Library) authentication to display user information using the Person component.
 
@@ -46,7 +46,7 @@ This sample demonstrates how to use **@devsym/graph-toolkit-react** with MSAL (M
 4. The same `User.ReadBasic.All` permission also covers PeoplePicker typed user search
 5. Click **Grant admin consent** if you're an admin (optional but recommended)
 
-For additional optional scopes (for example presence), use the root documentation as the source of truth: [Scopes by feature](../../readme.md#scopes-by-feature).
+For additional optional scopes (for example presence), use the root documentation as the source of truth: [Permissions](../../README.md#permissions).
 
 ### 3. Copy Your Credentials
 
@@ -70,7 +70,7 @@ npm install
 
 3. Configure authentication in `src/authConfig.ts` by setting your `clientId` and `authority`.
    - Keep `scopes` to the minimum required for your scenario.
-   - For scope requirements by feature, see [Scopes by feature](../../readme.md#scopes-by-feature).
+   - For scope requirements by feature, see [Permissions](../../README.md#permissions).
    - Register the sample's redirect URI as `http://localhost:3000`.
 
 > **Tip**: You can also use `'common'` instead of your tenant ID to support any Microsoft account:
@@ -102,7 +102,7 @@ This sample keeps app-specific wiring in local files and relies on the main pack
 - `src/PeoplePickerPage.tsx` demonstrates the `PeoplePicker` component
 - `src/SelectedPeopleListPage.tsx` demonstrates storing picker IDs and resolving a sorted list with `usePeopleList`
 
-For current provider and component usage guidance, use [Graph Toolkit React Documentation](../../readme.md).
+For current provider and component usage guidance, use [Graph Toolkit React Documentation](../../README.md).
 
 ## File Structure
 
@@ -148,7 +148,7 @@ This can occur if `handleRedirectPromise()` is not called on page load. Ensure `
 
 1. Check browser console for errors
 2. Verify your client ID and tenant ID are correct
-3. Ensure you've granted the required scopes (see [Scopes by feature](../../readme.md#scopes-by-feature))
+3. Ensure you've granted the required scopes (see [Permissions](../../README.md#permissions))
 
 ### "Cannot find module '@devsym/graph-toolkit-react'"
 
@@ -163,7 +163,7 @@ npm install
 
 ## Learn More
 
-- [Graph Toolkit React Documentation](../../readme.md)
+- [Graph Toolkit React Documentation](../../README.md)
 - [MSAL.js Documentation](https://github.com/AzureAD/microsoft-authentication-library-for-js)
 - [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/)
 - [Fluent UI React](https://react.fluentui.dev/)
