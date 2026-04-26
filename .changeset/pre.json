@@ -4,5 +4,7 @@
   "initialVersions": {
     "@devsym/graph-toolkit-react": "1.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "first-beta-release"
+  ]
 }
