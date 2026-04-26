@@ -51,7 +51,7 @@ Choose the smallest appropriate bump and write the summary for package consumers
 
 Update the README, Storybook docs, sample docs, or migration guide when a change affects setup, supported scenarios, permissions, public APIs, or component behavior.
 
-For migration-related changes, update [docs/MGT_MIGRATION.md](docs/MGT_MIGRATION.md). For sample app changes, update [samples/react-msal-sample/README.md](samples/react-msal-sample/README.md).
+For sample app changes, update [samples/react-msal-sample/README.md](samples/react-msal-sample/README.md).
 
 ## Pull Request Checklist
 

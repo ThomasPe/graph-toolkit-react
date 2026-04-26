@@ -173,7 +173,6 @@ Request the smallest set of Microsoft Graph delegated scopes needed by the featu
 
 - [Storybook](https://thomaspe.github.io/graph-toolkit-react/) for interactive component docs.
 - [samples/react-msal-sample/README.md](samples/react-msal-sample/README.md) for a browser SPA with MSAL redirect auth.
-- [docs/MGT_MIGRATION.md](docs/MGT_MIGRATION.md) for migration from Microsoft Graph Toolkit.
 - [AGENTS.md](AGENTS.md) for a scenario-first reference that coding agents can consume.
 - [docs/COMPONENT_ROADMAP.md](docs/COMPONENT_ROADMAP.md) for planned component work.
 
