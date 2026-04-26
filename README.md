@@ -16,7 +16,7 @@ React components for Microsoft Graph, built with Fluent UI v9 and a provider mod
 
 ## Status
 
-Graph Toolkit React is in beta and published on the npm `beta` channel. It is ready for evaluation and early adopters, but public APIs may still change before the stable 1.0 release.
+Graph Toolkit React is in beta and published on the npm `beta` channel. It is ready for evaluation and early adopters, but public APIs may still change until the package exits prerelease mode and is published on the `latest` tag.
 
 ```bash
 npm install @devsym/graph-toolkit-react@beta
