@@ -10,6 +10,10 @@ React components for Microsoft Graph, built with Fluent UI v9 and a provider mod
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
 </p>
 
+<p align="center">
+  <img src="docs/assets/readme/banner.png" alt="Graph Toolkit React" width="100%">
+</p>
+
 ## Status
 
 Graph Toolkit React is in beta and published on the npm `beta` channel. It is ready for evaluation and early adopters, but public APIs may still change before the stable 1.0 release.
@@ -69,6 +73,10 @@ Choose one provider and pass it to `GraphProvider`.
 | Browser-hosted React SPA | `MsalBrowserProvider` | Uses `@azure/msal-browser` redirect flow. |
 | Microsoft Teams-hosted app | `TeamsHostedProvider` | Uses app-owned TeamsJS login plus a backend Graph token exchange. |
 | Existing auth stack | Custom `IProvider` | Implement token acquisition and state management yourself. |
+
+<p align="center">
+  <img src="docs/assets/readme/provider-flow.svg" alt="Graph Toolkit React provider flow from React components through GraphProvider to Microsoft Graph" width="100%">
+</p>
 
 ### Browser SPA With MSAL
 
@@ -134,110 +142,18 @@ export function App() {
 
 ## Components
 
-Explore live examples in [Storybook](https://thomaspe.github.io/graph-toolkit-react/).
+The README keeps component examples intentionally short so it stays useful as new components are added. Explore live examples, props, and behavior in [Storybook](https://thomaspe.github.io/graph-toolkit-react/).
 
-| Component or hook | Purpose |
-| --- | --- |
-| `Person` | Render a Microsoft Graph user with Fluent UI `Persona`, profile photo, presence, and configurable text lines. |
-| `People` | Render compact avatar groups from direct data, explicit user IDs, group membership, or directory defaults. |
-| `PeoplePicker` | Search, select, exclude, and manage people using Fluent UI `TagPicker`. |
-| `usePersonData` | Resolve person data for custom UI. |
-| `usePeopleList` | Resolve and optionally sort a list of people. |
-| `usePeopleSearch` | Search users for custom picker experiences. |
+| Component or hook | Purpose | Where to start |
+| --- | --- | --- |
+| `Person` | Render a Microsoft Graph user with Fluent UI `Persona`, profile photo, presence, and configurable text lines. | Storybook examples for profile views, line rendering, direct data, and presence. |
+| `People` | Render compact avatar groups from direct data, explicit user IDs, group membership, or directory defaults. | Storybook examples for avatar layouts, group lookups, direct data, and overflow behavior. |
+| `PeoplePicker` | Search, select, exclude, and manage people using Fluent UI `TagPicker`. | Storybook examples for default selections, exclusions, limits, and controlled selection. |
+| `usePersonData` | Resolve person data for custom UI. | Use when the built-in `Person` layout is not enough. |
+| `usePeopleList` | Resolve and optionally sort a list of people. | Use when apps need to compose their own list or grid UI. |
+| `usePeopleSearch` | Search users for custom picker experiences. | Use when apps need a fully custom search or picker surface. |
 
-### Person
-
-```tsx
-import { Person } from '@devsym/graph-toolkit-react';
-
-<Person
-  userId="me"
-  view="threelines"
-  line1Property="displayName"
-  line2Property="mail,userPrincipalName"
-  line3Property="presenceAvailability"
-  showPresence
-/>
-```
-
-`Person` supports Fluent UI `Persona` props directly. Use render callbacks when you need full control over displayed lines.
-
-```tsx
-<Person
-  personDetails={{
-    displayName: 'Megan Bowen',
-    jobTitle: 'CEO',
-    department: 'Leadership',
-    officeLocation: 'Seattle',
-  }}
-  view="fourlines"
-  renderLine1={({ text }) => <span>Name: {text}</span>}
-  renderLine2={({ text }) => <span>Role: {text}</span>}
-  renderLine3={({ text }) => <span>Org: {text}</span>}
-  renderLine4={({ text }) => <span>Location: {text}</span>}
-/>
-```
-
-### People
-
-```tsx
-import { People } from '@devsym/graph-toolkit-react';
-
-<People userIds={['me', 'user@contoso.com']} showMax={2} showPresence />
-```
-
-You can also provide app-owned person data directly.
-
-```tsx
-<People
-  people={[
-    { id: 'adele', displayName: 'Adele Vance', mail: 'adelev@contoso.com' },
-    { id: 'alex', displayName: 'Alex Wilber', mail: 'alexw@contoso.com' },
-  ]}
-/>
-```
-
-Use `usePeopleList` when you need to resolve IDs first and render your own list UI.
-
-```tsx
-import { Person, usePeopleList } from '@devsym/graph-toolkit-react';
-
-function TeamList({ objectIds }: { objectIds: string[] }) {
-  const { people, loading } = usePeopleList({
-    userIds: objectIds,
-    sortBy: 'surname',
-    selectFields: ['givenName', 'surname'],
-  });
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <ul>
-      {people.map(person => (
-        <li key={person.id}>
-          <Person personDetails={person} view="twolines" />
-        </li>
-      ))}
-    </ul>
-  );
-}
-```
-
-### PeoplePicker
-
-```tsx
-import { PeoplePicker } from '@devsym/graph-toolkit-react';
-
-<PeoplePicker
-  maxPeople={5}
-  excludeUserIds={['current-user-id']}
-  onSelectionChange={people => console.log(people)}
-/>
-```
-
-`Person`, `People`, and `PeoplePicker` also expose `onUpdated` callbacks so apps can react to direct data changes, resolved content loads, and picker state updates with trigger metadata.
+`Person`, `People`, and `PeoplePicker` expose `onUpdated` callbacks so apps can react to direct data changes, resolved content loads, and picker state updates with trigger metadata.
 
 ## Permissions
 
@@ -295,6 +211,12 @@ Build the static Storybook site:
 
 ```bash
 npm run build-storybook
+```
+
+Regenerate the README component screenshot from real Storybook renders:
+
+```bash
+npm run screenshots:readme
 ```
 
 ### Project Structure
