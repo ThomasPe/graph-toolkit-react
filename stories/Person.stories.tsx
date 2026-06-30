@@ -91,6 +91,14 @@ Story organization follows Fluent Persona docs, while Graph-specific stories foc
         defaultValue: { summary: 'false' },
       },
     },
+    personCardInteraction: {
+      control: 'select',
+      options: ['none', 'hover', 'click'],
+      description: 'Show a details card on hover or click interaction.',
+      table: {
+        defaultValue: { summary: 'none' },
+      },
+    },
     presenceOnly: {
       control: 'boolean',
       description: 'Render PresenceBadge only instead of avatar',
@@ -344,5 +352,25 @@ export const GraphLoadingState: Story = {
     userId: 'test-user',
     view: 'twolines',
     size: 'medium',
+  },
+};
+
+export const GraphPersonCardHover: Story = {
+  name: 'Graph: Person Card Hover',
+  args: {
+    userId: 'test-user',
+    view: 'twolines',
+    showPresence: true,
+    personCardInteraction: 'hover',
+  },
+};
+
+export const GraphPersonCardClick: Story = {
+  name: 'Graph: Person Card Click',
+  args: {
+    userId: 'test-user',
+    view: 'twolines',
+    showPresence: true,
+    personCardInteraction: 'click',
   },
 };

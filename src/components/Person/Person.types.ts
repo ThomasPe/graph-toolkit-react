@@ -8,6 +8,11 @@ import type { ReactElement } from 'react';
 export type PersonView = 'avatar' | 'oneline' | 'twolines' | 'threelines' | 'fourlines';
 
 /**
+ * Interaction mode used to open a person details card.
+ */
+export type PersonCardInteraction = 'none' | 'hover' | 'click';
+
+/**
  * Triggers reported by the {@link PersonProps.onUpdated} callback.
  */
 export type PersonUpdateTrigger = 'personDetailsChanged' | 'personLoaded' | 'personLoadFailed';
@@ -66,6 +71,14 @@ export interface PersonDetails {
    * The person's email address (alias for some data sources).
    */
   email?: string | null;
+  /**
+   * The person's mobile phone number.
+   */
+  mobilePhone?: string | null;
+  /**
+   * The person's business phone numbers.
+   */
+  businessPhones?: string[] | null;
   /**
    * Current presence activity (for example, "InAMeeting" or "Presenting"), when available.
    */
@@ -146,6 +159,14 @@ export interface PersonProps extends PersonaProps {
   // Display options
   view?: PersonView;
   showPresence?: boolean;
+  /**
+   * Determines whether a details card is shown when users interact with the person.
+   *
+   * - `none`: disables the details card.
+   * - `hover`: opens on hover with a short delay.
+   * - `click`: toggles on click or Enter/Space.
+   */
+  personCardInteraction?: PersonCardInteraction;
 
   /**
    * Mapping for the first text line.

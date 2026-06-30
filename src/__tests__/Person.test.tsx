@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Skeleton, SkeletonItem } from '@fluentui/react-components';
 import { Person } from '../components/Person';
 import { usePersonData } from '../hooks/usePersonData';
@@ -228,6 +228,28 @@ describe('Person', () => {
         personaProps.onClick?.(event);
 
         expect(onClick).toHaveBeenCalledWith(event);
+    });
+
+    it('requests person-card fields and renders an interactive trigger when personCardInteraction is enabled', () => {
+        render(<Person userId="user-1" personCardInteraction="hover" />);
+
+        expect(mockedUsePersonData).toHaveBeenCalledWith(
+            expect.objectContaining({
+                userId: 'user-1',
+                selectFields: expect.arrayContaining([
+                    'mail',
+                    'userPrincipalName',
+                    'jobTitle',
+                    'department',
+                    'officeLocation',
+                    'mobilePhone',
+                    'businessPhones',
+                ]),
+            })
+        );
+
+        const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+        expect(trigger).toBeTruthy();
     });
 
     it('uses a pre-resolved photoUrl from personDetails without requiring a fetch result', () => {
