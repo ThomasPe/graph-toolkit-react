@@ -314,6 +314,36 @@ describe('Person', () => {
         }
     });
 
+    it('keeps the person card open when the pointer moves from the trigger onto the card', async () => {
+        vi.useFakeTimers();
+        try {
+            render(<Person userId="user-1" personCardInteraction="hover" />);
+
+            const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+
+            fireEvent.mouseEnter(trigger);
+
+            act(() => {
+                vi.advanceTimersByTime(500);
+            });
+
+            const emailLink = screen.getByRole('link', { name: 'adelev@contoso.com' });
+            const card = emailLink.closest('[role="dialog"]') ?? emailLink.parentElement!;
+
+            // Leaving the trigger schedules a close; entering the card must cancel it.
+            fireEvent.mouseLeave(trigger);
+            fireEvent.mouseEnter(card);
+
+            act(() => {
+                vi.advanceTimersByTime(500);
+            });
+
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).not.toBeNull();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     it('opens the person card on click in hover mode as a touch-friendly fallback', async () => {
         render(<Person userId="user-1" personCardInteraction="hover" />);
 

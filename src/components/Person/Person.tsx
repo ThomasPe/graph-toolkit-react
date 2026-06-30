@@ -252,13 +252,15 @@ export const Person: React.FC<PersonProps> = ({
       return;
     }
 
-    if (isPersonCardOpen) {
-      return;
-    }
-
+    // Always cancel a pending close first so moving the pointer from the trigger
+    // onto the open card (or back) keeps it open.
     if (hoverCloseTimeoutRef.current !== null) {
       window.clearTimeout(hoverCloseTimeoutRef.current);
       hoverCloseTimeoutRef.current = null;
+    }
+
+    if (isPersonCardOpen) {
+      return;
     }
 
     if (hoverOpenTimeoutRef.current === null) {
