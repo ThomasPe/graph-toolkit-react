@@ -35,6 +35,7 @@ export interface UsePeopleSearchResult {
 
 const PEOPLE_SEARCH_SELECT_FIELDS =
   'id,displayName,mail,userPrincipalName,jobTitle,department';
+const EMPTY_RESULTS: PeopleSearchResult[] = [];
 
 /**
  * Normalize a people search query before it is sent to a provider or Graph.
@@ -74,14 +75,13 @@ export const usePeopleSearch = (
 
   const [results, setResults] = useState<PeopleSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const normalizedQuery = normalizePeopleSearchQuery(query);
+  const shouldLoadInitialResults = loadInitialResults && query.length === 0;
+  const shouldSkipSearch =
+    !shouldLoadInitialResults && (!normalizedQuery || normalizedQuery.length < minChars);
 
   useEffect(() => {
-    const normalizedQuery = normalizePeopleSearchQuery(query);
-    const shouldLoadInitialResults = loadInitialResults && query.length === 0;
-
-    if (!shouldLoadInitialResults && (!normalizedQuery || normalizedQuery.length < minChars)) {
-      setResults([]);
-      setLoading(false);
+    if (shouldSkipSearch) {
       return;
     }
 
@@ -145,6 +145,7 @@ export const usePeopleSearch = (
 
       return () => {
         cancelled = true;
+        setLoading(false);
       };
     }
 
@@ -155,8 +156,23 @@ export const usePeopleSearch = (
     return () => {
       cancelled = true;
       clearTimeout(debounceHandle);
+      setLoading(false);
     };
-  }, [query, graphClient, provider, providerState, minChars, maxResults, loadInitialResults]);
+  }, [
+    query,
+    graphClient,
+    provider,
+    providerState,
+    minChars,
+    maxResults,
+    loadInitialResults,
+    normalizedQuery,
+    shouldLoadInitialResults,
+    shouldSkipSearch,
+  ]);
 
-  return { results, loading };
+  return {
+    results: shouldSkipSearch ? EMPTY_RESULTS : results,
+    loading: shouldSkipSearch ? false : loading,
+  };
 };
