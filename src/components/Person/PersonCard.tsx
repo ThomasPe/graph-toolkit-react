@@ -4,10 +4,7 @@ import {
   Chat24Regular,
   CheckmarkCircle16Filled,
   Mail24Regular,
-  MoreHorizontal24Regular,
-  Organization24Regular,
   Phone24Regular,
-  Video24Regular,
 } from '@fluentui/react-icons';
 import { PersonDetails } from './Person.types';
 
@@ -68,12 +65,8 @@ const toPhoneHref = (value: string): string => `tel:${value.replace(/\s+/g, '')}
 const renderActionButton = (
   label: string,
   icon: React.ReactElement,
-  href?: string,
+  href: string,
 ): React.ReactElement => {
-  if (!href) {
-    return <Button appearance="subtle" icon={icon} aria-label={`${label} unavailable`} disabled />;
-  }
-
   return <Button appearance="subtle" icon={icon} aria-label={label} as="a" href={href} />;
 };
 
@@ -153,14 +146,17 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
               : null}
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
-          {renderActionButton('Chat', <Chat24Regular />, teamsChatRecipient ? `https://teams.microsoft.com/l/chat/0/0?users=${teamsChatRecipient}` : undefined)}
-          {renderActionButton('Organization', <Organization24Regular />)}
-          {renderActionButton('Video', <Video24Regular />)}
-          {renderActionButton('Call', <Phone24Regular />, callHref)}
-          {renderActionButton('Email', <Mail24Regular />, resolvedPersonEmail ? `mailto:${resolvedPersonEmail}` : undefined)}
-          {renderActionButton('More', <MoreHorizontal24Regular />)}
-        </div>
+        {resolvedPersonEmail || callHref
+          ? (
+            <div style={{ display: 'flex', gap: 16, marginTop: 18 }}>
+              {teamsChatRecipient
+                ? renderActionButton('Chat', <Chat24Regular />, `https://teams.microsoft.com/l/chat/0/0?users=${teamsChatRecipient}`)
+                : null}
+              {callHref ? renderActionButton('Call', <Phone24Regular />, callHref) : null}
+              {resolvedPersonEmail ? renderActionButton('Email', <Mail24Regular />, `mailto:${resolvedPersonEmail}`) : null}
+            </div>
+          )
+          : null}
       </div>
       {presenceAvailability || presenceActivity
         ? (
