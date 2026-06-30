@@ -525,6 +525,7 @@ export const Person: React.FC<PersonProps> = ({
           tabIndex={0}
           role="button"
           aria-label={`Show details for ${displayName}`}
+          aria-haspopup="dialog"
           aria-expanded={isPersonCardOpen}
           onClick={handleTriggerClick}
           onKeyDown={handleTriggerKeyDown}

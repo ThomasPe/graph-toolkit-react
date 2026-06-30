@@ -146,7 +146,8 @@ The README keeps component examples intentionally short so it stays useful as ne
 
 | Component or hook | Purpose | Where to start |
 | --- | --- | --- |
-| `Person` | Render a Microsoft Graph user with Fluent UI `Persona`, profile photo, presence, and configurable text lines. | Storybook examples for profile views, line rendering, direct data, and presence. |
+| `Person` | Render a Microsoft Graph user with Fluent UI `Persona`, profile photo, presence, and configurable text lines. Set `personCardInteraction` to `"hover"` or `"click"` to reveal a contact details card. | Storybook examples for profile views, line rendering, direct data, and presence. |
+| `PersonCard` | Standalone contact details card with profile fields and quick actions (email, Teams chat, call). Rendered automatically by `Person` when `personCardInteraction` is enabled, or used directly with resolved `PersonDetails`. | Storybook person-card hover and click examples. |
 | `People` | Render compact avatar groups from direct data, explicit user IDs, group membership, or directory defaults. | Storybook examples for avatar layouts, group lookups, direct data, and overflow behavior. |
 | `PeoplePicker` | Search, select, exclude, and manage people using Fluent UI `TagPicker`. | Storybook examples for default selections, exclusions, limits, and controlled selection. |
 | `usePersonData` | Resolve person data for custom UI. | Use when the built-in `Person` layout is not enough. |
@@ -168,6 +169,7 @@ Request the smallest set of Microsoft Graph delegated scopes needed by the featu
 | `PeoplePicker` focus suggestions | `User.ReadBasic.All` | Uses the initial `/users` directory list shown before typing. |
 | Presence | `Presence.Read` | UI still renders without presence if unavailable. |
 | Profile photo | `User.Read` | Falls back to initials if no photo is available. |
+| `Person` card details (`personCardInteraction`) | `User.Read` for `userId="me"`, otherwise `User.ReadBasic.All` | Surfaces extra profile fields (`jobTitle`, `department`, `officeLocation`, `mobilePhone`, `businessPhones`). Add `Presence.Read` for the card's presence badge. |
 
 ## Examples and Documentation
 

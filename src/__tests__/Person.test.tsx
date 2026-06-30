@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Skeleton, SkeletonItem } from '@fluentui/react-components';
 import { Person } from '../components/Person';
 import { usePersonData } from '../hooks/usePersonData';
@@ -250,6 +250,38 @@ describe('Person', () => {
 
         const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
         expect(trigger).toBeTruthy();
+    });
+
+    it('toggles the person card open and closed on trigger click', async () => {
+        render(<Person userId="user-1" personCardInteraction="click" />);
+
+        const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+        expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+
+        fireEvent.click(trigger);
+
+        const emailLink = await screen.findByRole('link', { name: 'adelev@contoso.com' });
+        expect(emailLink).toBeTruthy();
+
+        fireEvent.click(trigger);
+
+        await waitFor(() => {
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+        });
+    });
+
+    it('closes the person card when Escape is pressed inside the card', async () => {
+        render(<Person userId="user-1" personCardInteraction="click" />);
+
+        const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+        fireEvent.click(trigger);
+
+        const emailLink = await screen.findByRole('link', { name: 'adelev@contoso.com' });
+        fireEvent.keyDown(emailLink, { key: 'Escape' });
+
+        await waitFor(() => {
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+        });
     });
 
     it('uses a pre-resolved photoUrl from personDetails without requiring a fetch result', () => {

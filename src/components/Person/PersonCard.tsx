@@ -1,5 +1,13 @@
 import React from 'react';
-import { Avatar, Button, Card, Divider, Text, tokens } from '@fluentui/react-components';
+import {
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  PresenceBadgeStatus,
+  Text,
+  tokens,
+} from '@fluentui/react-components';
 import {
   Chat24Regular,
   Location24Regular,
@@ -7,6 +15,32 @@ import {
   Phone24Regular,
 } from '@fluentui/react-icons';
 import { PersonDetails } from './Person.types';
+
+/**
+ * Map a Microsoft Graph presence availability value to a Fluent UI presence status.
+ *
+ * @param availability - The Graph availability string (for example, "Available" or "Busy").
+ * @returns The matching Fluent UI {@link PresenceBadgeStatus}, or `undefined` when unknown.
+ */
+const mapPresenceStatus = (availability?: string | null): PresenceBadgeStatus | undefined => {
+  switch (availability?.toLowerCase()) {
+    case 'available':
+    case 'availableidle':
+      return 'available';
+    case 'away':
+    case 'berightback':
+      return 'away';
+    case 'busy':
+    case 'busyidle':
+      return 'busy';
+    case 'donotdisturb':
+      return 'do-not-disturb';
+    case 'offline':
+      return 'offline';
+    default:
+      return undefined;
+  }
+};
 
 /**
  * Props for the {@link PersonCard} component.
@@ -84,6 +118,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
     : resolvedBusinessPhone
       ? toPhoneHref(resolvedBusinessPhone)
       : undefined;
+  const presenceStatus = mapPresenceStatus(toDisplayText(person.presenceAvailability));
 
   return (
     <Card
@@ -105,26 +140,13 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
     >
       <div style={{ padding: '24px 28px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-          <div style={{ position: 'relative', flex: '0 0 auto' }}>
+          <div style={{ flex: '0 0 auto' }}>
             <Avatar
               image={person.photoUrl ? { src: person.photoUrl } : undefined}
               name={displayName}
               size={72}
               color="colorful"
-            />
-            <span
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                right: 1,
-                bottom: 1,
-                width: 22,
-                height: 22,
-                borderRadius: '50%',
-                background: '#13a10e',
-                border: '3px solid white',
-                boxSizing: 'border-box',
-              }}
+              badge={presenceStatus ? { status: presenceStatus } : undefined}
             />
           </div>
           <div style={{ minWidth: 0 }}>
