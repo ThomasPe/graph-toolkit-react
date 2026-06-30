@@ -453,6 +453,9 @@ export const Person: React.FC<PersonProps> = ({
     isAvatarOnlyView ? undefined : personaProps.tertiaryText ?? defaultTertiaryText;
   const resolvedQuaternaryText =
     isAvatarOnlyView ? undefined : personaProps.quaternaryText ?? defaultQuaternaryText;
+  const resolvedPersonForCard: PersonDetails = resolvedPhotoUrl
+    ? { ...resolvedPerson, photoUrl: resolvedPhotoUrl }
+    : resolvedPerson;
 
   const personaElement = (
     <Persona
@@ -536,7 +539,7 @@ export const Person: React.FC<PersonProps> = ({
         onMouseEnter={scheduleOpenPersonCard}
         onMouseLeave={scheduleClosePersonCard}
       >
-        <PersonCard person={resolvedPerson} displayName={displayName} onEscape={closePersonCard} />
+        <PersonCard person={resolvedPersonForCard} displayName={displayName} onEscape={closePersonCard} />
       </PopoverSurface>
     </Popover>
   );
