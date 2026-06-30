@@ -74,14 +74,13 @@ export const usePeopleSearch = (
 
   const [results, setResults] = useState<PeopleSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const normalizedQuery = normalizePeopleSearchQuery(query);
+  const shouldLoadInitialResults = loadInitialResults && query.length === 0;
+  const shouldSkipSearch =
+    !shouldLoadInitialResults && (!normalizedQuery || normalizedQuery.length < minChars);
 
   useEffect(() => {
-    const normalizedQuery = normalizePeopleSearchQuery(query);
-    const shouldLoadInitialResults = loadInitialResults && query.length === 0;
-
-    if (!shouldLoadInitialResults && (!normalizedQuery || normalizedQuery.length < minChars)) {
-      setResults([]);
-      setLoading(false);
+    if (shouldSkipSearch) {
       return;
     }
 
@@ -156,7 +155,21 @@ export const usePeopleSearch = (
       cancelled = true;
       clearTimeout(debounceHandle);
     };
-  }, [query, graphClient, provider, providerState, minChars, maxResults, loadInitialResults]);
+  }, [
+    query,
+    graphClient,
+    provider,
+    providerState,
+    minChars,
+    maxResults,
+    loadInitialResults,
+    normalizedQuery,
+    shouldLoadInitialResults,
+    shouldSkipSearch,
+  ]);
 
-  return { results, loading };
+  return {
+    results: shouldSkipSearch ? [] : results,
+    loading: shouldSkipSearch ? false : loading,
+  };
 };
