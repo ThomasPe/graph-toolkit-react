@@ -62,6 +62,7 @@ const PERSON_CARD_SELECT_FIELDS = [
   'mobilePhone',
   'businessPhones',
 ];
+type PersonCardOpenReason = 'hover' | 'keyboard' | 'click' | null;
 /**
  * Widths are intentionally staggered to resemble typical person metadata lengths instead of
  * rendering every placeholder line at the same width. The numeric keys map directly to the
@@ -224,6 +225,9 @@ export const Person: React.FC<PersonProps> = ({
   const hoverOpenTimeoutRef = useRef<number | null>(null);
   const hoverCloseTimeoutRef = useRef<number | null>(null);
   const [isPersonCardOpen, setIsPersonCardOpen] = useState(false);
+  const [personCardOpenReason, setPersonCardOpenReason] = useState<PersonCardOpenReason>(null);
+
+  const isHoverInteraction = personCardInteraction === 'hover';
 
   const clearPersonCardTimers = () => {
     if (hoverOpenTimeoutRef.current !== null) {
@@ -237,18 +241,18 @@ export const Person: React.FC<PersonProps> = ({
     }
   };
 
-  const openPersonCard = () => {
-    clearPersonCardTimers();
-    setIsPersonCardOpen(true);
-  };
-
   const closePersonCard = () => {
     clearPersonCardTimers();
+    setPersonCardOpenReason(null);
     setIsPersonCardOpen(false);
   };
 
   const scheduleOpenPersonCard = () => {
-    if (personCardInteraction !== 'hover') {
+    if (!isHoverInteraction) {
+      return;
+    }
+
+    if (isPersonCardOpen) {
       return;
     }
 
@@ -260,13 +264,18 @@ export const Person: React.FC<PersonProps> = ({
     if (hoverOpenTimeoutRef.current === null) {
       hoverOpenTimeoutRef.current = window.setTimeout(() => {
         hoverOpenTimeoutRef.current = null;
+        setPersonCardOpenReason('hover');
         setIsPersonCardOpen(true);
       }, PERSON_CARD_HOVER_OPEN_DELAY_MS);
     }
   };
 
   const scheduleClosePersonCard = () => {
-    if (personCardInteraction !== 'hover') {
+    if (!isHoverInteraction) {
+      return;
+    }
+
+    if (!isPersonCardOpen) {
       return;
     }
 
@@ -474,11 +483,9 @@ export const Person: React.FC<PersonProps> = ({
     return personaElement;
   }
 
-  const handleTriggerClick = () => {
-    if (personCardInteraction !== 'click') {
-      return;
-    }
-
+  const handleTriggerClickCapture = (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.stopPropagation();
+    setPersonCardOpenReason('click');
     setIsPersonCardOpen(previous => !previous);
   };
 
@@ -494,12 +501,8 @@ export const Person: React.FC<PersonProps> = ({
 
     event.preventDefault();
 
-    if (personCardInteraction === 'click') {
-      setIsPersonCardOpen(previous => !previous);
-      return;
-    }
-
-    openPersonCard();
+    setPersonCardOpenReason('keyboard');
+    setIsPersonCardOpen(previous => !previous);
   };
 
   return (
@@ -511,13 +514,9 @@ export const Person: React.FC<PersonProps> = ({
           closePersonCard();
           return;
         }
-
-        if (personCardInteraction === 'click') {
-          setIsPersonCardOpen(true);
-        }
       }}
       positioning="below-start"
-      trapFocus
+      trapFocus={personCardOpenReason !== 'hover'}
     >
       <PopoverTrigger disableButtonEnhancement>
         <span
@@ -527,7 +526,7 @@ export const Person: React.FC<PersonProps> = ({
           aria-label={`Show details for ${displayName}`}
           aria-haspopup="dialog"
           aria-expanded={isPersonCardOpen}
-          onClick={handleTriggerClick}
+          onClickCapture={handleTriggerClickCapture}
           onKeyDown={handleTriggerKeyDown}
           onMouseEnter={scheduleOpenPersonCard}
           onMouseLeave={scheduleClosePersonCard}
