@@ -35,6 +35,7 @@ export interface UsePeopleSearchResult {
 
 const PEOPLE_SEARCH_SELECT_FIELDS =
   'id,displayName,mail,userPrincipalName,jobTitle,department';
+const EMPTY_RESULTS: PeopleSearchResult[] = [];
 
 /**
  * Normalize a people search query before it is sent to a provider or Graph.
@@ -144,6 +145,7 @@ export const usePeopleSearch = (
 
       return () => {
         cancelled = true;
+        setLoading(false);
       };
     }
 
@@ -154,6 +156,7 @@ export const usePeopleSearch = (
     return () => {
       cancelled = true;
       clearTimeout(debounceHandle);
+      setLoading(false);
     };
   }, [
     query,
@@ -169,7 +172,7 @@ export const usePeopleSearch = (
   ]);
 
   return {
-    results: shouldSkipSearch ? [] : results,
+    results: shouldSkipSearch ? EMPTY_RESULTS : results,
     loading: shouldSkipSearch ? false : loading,
   };
 };

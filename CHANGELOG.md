@@ -4,9 +4,7 @@
 
 ### Minor Changes
 
-- 7e618ab: First beta release of `@devsym/graph-toolkit-react`.
-
-  This release promotes the package to a stable `1.1.0` release.
+- 7e618ab: Promote `@devsym/graph-toolkit-react` to stable `1.1.0`.
 
   Refreshes the README for beta readiness, adds contributor guidance, and aligns published package metadata with the documented files.
 
