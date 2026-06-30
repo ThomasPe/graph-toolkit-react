@@ -515,7 +515,6 @@ export const Person: React.FC<PersonProps> = ({
       }}
       positioning="below-start"
       trapFocus
-      withArrow
     >
       <PopoverTrigger disableButtonEnhancement>
         <span
@@ -533,6 +532,7 @@ export const Person: React.FC<PersonProps> = ({
         </span>
       </PopoverTrigger>
       <PopoverSurface
+        style={{ padding: 0, backgroundColor: 'transparent', border: 'none', boxShadow: 'none' }}
         onMouseEnter={scheduleOpenPersonCard}
         onMouseLeave={scheduleClosePersonCard}
       >
