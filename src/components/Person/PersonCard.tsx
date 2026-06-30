@@ -2,7 +2,6 @@ import React from 'react';
 import { Avatar, Button, Card, Divider, Text, tokens } from '@fluentui/react-components';
 import {
   Chat24Regular,
-  CheckmarkCircle16Filled,
   Location24Regular,
   Mail24Regular,
   Phone24Regular,
@@ -77,8 +76,6 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
   const resolvedBusinessPhone = getFirstBusinessPhone(person);
   const teamsChatRecipient = resolvedPersonEmail ? encodeURIComponent(resolvedPersonEmail) : undefined;
   const officeLocation = toDisplayText(person.officeLocation);
-  const presenceAvailability = toDisplayText(person.presenceAvailability);
-  const presenceActivity = toDisplayText(person.presenceActivity);
   const personCardSubtitle = [toDisplayText(person.jobTitle), toDisplayText(person.department)]
     .filter((item): item is string => Boolean(item))
     .join(' · ');
@@ -159,36 +156,8 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
           )
           : null}
       </div>
-      {presenceAvailability || presenceActivity
-        ? (
-          <div style={{ padding: '0 16px 16px' }}>
-            <div
-              style={{
-                display: 'flex',
-                gap: 10,
-                alignItems: 'flex-start',
-                padding: '12px 14px',
-                border: `1px solid ${tokens.colorNeutralStroke2}`,
-                borderRadius: tokens.borderRadiusMedium,
-                background: tokens.colorNeutralBackground1,
-              }}
-            >
-              <CheckmarkCircle16Filled style={{ color: '#13a10e', flex: '0 0 auto', marginTop: 2 }} />
-              <div>
-                <Text weight="semibold" size={300}>
-                  {presenceAvailability ?? presenceActivity}
-                  {presenceAvailability && presenceActivity && presenceActivity !== presenceAvailability
-                    ? ` · ${presenceActivity}`
-                    : null}
-                </Text>
-              </div>
-            </div>
-          </div>
-        )
-        : null}
       <Divider />
       <div style={{ display: 'grid', gap: 14, padding: '18px 28px 24px' }}>
-        <Text weight="semibold">Contact</Text>
         {resolvedPersonEmail
           ? (
             <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>

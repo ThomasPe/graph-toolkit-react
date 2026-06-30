@@ -22,7 +22,6 @@ describe('PersonCard', () => {
 
     expect(screen.getByText('Adele Vance')).toBeTruthy();
     expect(screen.getByText('Program Manager · Product')).toBeTruthy();
-    expect(screen.getByText('Contact')).toBeTruthy();
     expect(screen.getByText('Office: Building 1')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'adele@contoso.com' }).getAttribute('href')).toBe('mailto:adele@contoso.com');
     expect(screen.getByRole('link', { name: 'Email' }).getAttribute('href')).toBe('mailto:adele@contoso.com');
