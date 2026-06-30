@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- 7e618ab: First beta release of `@devsym/graph-toolkit-react`.
+
+  This release promotes the package to a stable `1.1.0` release.
+
+  Refreshes the README for beta readiness, adds contributor guidance, and aligns published package metadata with the documented files.
+
+### Patch Changes
+
+- Refresh development tooling and dependency baselines without changing the public runtime API:
+
+  - Upgrade TypeScript to v6 and align `@typescript-eslint` packages.
+  - Upgrade Storybook, Fluent UI, Vitest, and related dev tooling.
+  - Upgrade `vite-plugin-dts` to v5 while keeping Vite pinned to 8.0.10 for build stability.
+  - Keep React 18 as the development baseline while maintaining peer support for React 18 and 19.
+
+## 1.1.0-beta.1
+
+### Patch Changes
+
+- Refresh development tooling and dependency baselines without changing the public runtime API:
+
+  - Upgrade TypeScript to v6 and align `@typescript-eslint` packages.
+  - Upgrade Storybook, Fluent UI, Vitest, and related dev tooling.
+  - Upgrade `vite-plugin-dts` to v5 while keeping Vite pinned to 8.0.10 for build stability.
+  - Keep React 18 as the development baseline while maintaining peer support for React 18 and 19.
+
 ## 1.1.0-beta.0
 
 ### Minor Changes
