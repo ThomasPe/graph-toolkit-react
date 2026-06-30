@@ -1,5 +1,14 @@
 import React from 'react';
-import { Card, CardHeader } from '@fluentui/react-components';
+import { Avatar, Button, Card, Divider, Text, tokens } from '@fluentui/react-components';
+import {
+  Chat24Regular,
+  CheckmarkCircle16Filled,
+  Mail24Regular,
+  MoreHorizontal24Regular,
+  Organization24Regular,
+  Phone24Regular,
+  Video24Regular,
+} from '@fluentui/react-icons';
 import { PersonDetails } from './Person.types';
 
 /**
@@ -56,19 +65,46 @@ const getFirstBusinessPhone = (person: PersonDetails): string | undefined => {
 
 const toPhoneHref = (value: string): string => `tel:${value.replace(/\s+/g, '')}`;
 
+const renderActionButton = (
+  label: string,
+  icon: React.ReactElement,
+  href?: string,
+): React.ReactElement => {
+  if (!href) {
+    return <Button appearance="subtle" icon={icon} aria-label={`${label} unavailable`} disabled />;
+  }
+
+  return <Button appearance="subtle" icon={icon} aria-label={label} as="a" href={href} />;
+};
+
 export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onEscape }) => {
   const resolvedPersonEmail = getEmailFromPerson(person);
   const resolvedMobilePhone = toDisplayText(person.mobilePhone);
   const resolvedBusinessPhone = getFirstBusinessPhone(person);
   const teamsChatRecipient = resolvedPersonEmail ? encodeURIComponent(resolvedPersonEmail) : undefined;
   const officeLocation = toDisplayText(person.officeLocation);
+  const presenceAvailability = toDisplayText(person.presenceAvailability);
+  const presenceActivity = toDisplayText(person.presenceActivity);
   const personCardSubtitle = [toDisplayText(person.jobTitle), toDisplayText(person.department)]
     .filter((item): item is string => Boolean(item))
     .join(' · ');
+  const callHref = resolvedMobilePhone
+    ? toPhoneHref(resolvedMobilePhone)
+    : resolvedBusinessPhone
+      ? toPhoneHref(resolvedBusinessPhone)
+      : undefined;
 
   return (
     <Card
-      style={{ minWidth: '18rem', maxWidth: '24rem' }}
+      appearance="filled-alternative"
+      style={{
+        width: '24rem',
+        maxWidth: 'calc(100vw - 2rem)',
+        padding: 0,
+        gap: 0,
+        overflow: 'hidden',
+        boxShadow: tokens.shadow16,
+      }}
       tabIndex={0}
       onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Escape') {
@@ -76,45 +112,122 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
         }
       }}
     >
-      <CardHeader header={displayName} description={personCardSubtitle || undefined} />
-      <div style={{ display: 'grid', gap: '0.5rem', padding: '0 16px 16px' }}>
-      {officeLocation ? <div>Office: {officeLocation}</div> : null}
-      {resolvedPersonEmail ? <div>Email: {resolvedPersonEmail}</div> : null}
-      {resolvedMobilePhone ? <div>Mobile: {resolvedMobilePhone}</div> : null}
-      {resolvedBusinessPhone ? <div>Business Phone: {resolvedBusinessPhone}</div> : null}
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+      <div style={{ padding: '24px 28px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{ position: 'relative', flex: '0 0 auto' }}>
+            <Avatar
+              image={person.photoUrl ? { src: person.photoUrl } : undefined}
+              name={displayName}
+              size={72}
+              color="colorful"
+            />
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                right: 1,
+                bottom: 1,
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#13a10e',
+                border: '3px solid white',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <Text
+              weight="semibold"
+              size={400}
+              title={displayName}
+              style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {displayName}
+            </Text>
+            {personCardSubtitle
+              ? (
+                <Text
+                  size={300}
+                  title={personCardSubtitle}
+                  style={{ color: tokens.colorNeutralForeground3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  {personCardSubtitle}
+                </Text>
+              )
+              : null}
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
+          {renderActionButton('Chat', <Chat24Regular />, teamsChatRecipient ? `https://teams.microsoft.com/l/chat/0/0?users=${teamsChatRecipient}` : undefined)}
+          {renderActionButton('Organization', <Organization24Regular />)}
+          {renderActionButton('Video', <Video24Regular />)}
+          {renderActionButton('Call', <Phone24Regular />, callHref)}
+          {renderActionButton('Email', <Mail24Regular />, resolvedPersonEmail ? `mailto:${resolvedPersonEmail}` : undefined)}
+          {renderActionButton('More', <MoreHorizontal24Regular />)}
+        </div>
+      </div>
+      {presenceAvailability || presenceActivity
+        ? (
+          <div style={{ padding: '0 16px 16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: 10,
+                alignItems: 'flex-start',
+                padding: '12px 14px',
+                border: `1px solid ${tokens.colorNeutralStroke2}`,
+                borderRadius: tokens.borderRadiusMedium,
+                background: tokens.colorNeutralBackground1,
+              }}
+            >
+              <CheckmarkCircle16Filled style={{ color: '#13a10e', flex: '0 0 auto', marginTop: 2 }} />
+              <div>
+                <Text weight="semibold" size={300}>
+                  {presenceAvailability ?? presenceActivity}
+                  {presenceAvailability && presenceActivity && presenceActivity !== presenceAvailability
+                    ? ` · ${presenceActivity}`
+                    : null}
+                </Text>
+              </div>
+            </div>
+          </div>
+        )
+        : null}
+      <Divider />
+      <div style={{ display: 'grid', gap: 14, padding: '18px 28px 24px' }}>
+        <Text weight="semibold">Contact</Text>
         {resolvedPersonEmail
           ? (
-            <a href={`mailto:${resolvedPersonEmail}`} target="_self" rel="noreferrer">
-              Email
-            </a>
-          )
-          : null}
-        {teamsChatRecipient
-          ? (
-            <a
-              href={`https://teams.microsoft.com/l/chat/0/0?users=${teamsChatRecipient}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Chat
-            </a>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+              <Mail24Regular style={{ color: tokens.colorNeutralForeground3 }} />
+              <a href={`mailto:${resolvedPersonEmail}`} target="_self" rel="noreferrer">
+                {resolvedPersonEmail}
+              </a>
+            </div>
           )
           : null}
         {resolvedMobilePhone
           ? (
-            <a href={toPhoneHref(resolvedMobilePhone)} target="_self" rel="noreferrer">
-              Call
-            </a>
-          )
-          : resolvedBusinessPhone
-            ? (
-              <a href={toPhoneHref(resolvedBusinessPhone)} target="_self" rel="noreferrer">
-                Call
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+              <Phone24Regular style={{ color: tokens.colorNeutralForeground3 }} />
+              <a href={toPhoneHref(resolvedMobilePhone)} target="_self" rel="noreferrer">
+                {resolvedMobilePhone}
               </a>
-            )
-            : null}
-      </div>
+            </div>
+          )
+          : null}
+        {resolvedBusinessPhone && !resolvedMobilePhone
+          ? (
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+              <Phone24Regular style={{ color: tokens.colorNeutralForeground3 }} />
+              <a href={toPhoneHref(resolvedBusinessPhone)} target="_self" rel="noreferrer">
+                {resolvedBusinessPhone}
+              </a>
+            </div>
+          )
+          : null}
+        {officeLocation ? <Text style={{ color: tokens.colorNeutralForeground3 }}>Office: {officeLocation}</Text> : null}
       </div>
     </Card>
   );
