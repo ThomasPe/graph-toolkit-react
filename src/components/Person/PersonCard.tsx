@@ -1,9 +1,21 @@
 import React from 'react';
 import { PersonDetails } from './Person.types';
 
+/**
+ * Props for the {@link PersonCard} component.
+ */
 export interface PersonCardProps {
+  /**
+   * Resolved person details displayed by the card.
+   */
   person: PersonDetails;
+  /**
+   * Display name shown in the card header.
+   */
   displayName: string;
+  /**
+   * Invoked when users press Escape while focused in the card.
+   */
   onEscape?: () => void;
 }
 

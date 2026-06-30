@@ -503,8 +503,14 @@ export const Person: React.FC<PersonProps> = ({
     <Popover
       open={isPersonCardOpen}
       onOpenChange={(_, data) => {
+        // Keep controlled state aligned when Popover requests a close (light dismiss/Escape)
+        if (!data.open) {
+          closePersonCard();
+          return;
+        }
+
         if (personCardInteraction === 'click') {
-          setIsPersonCardOpen(data.open);
+          setIsPersonCardOpen(true);
         }
       }}
       positioning="below-start"
