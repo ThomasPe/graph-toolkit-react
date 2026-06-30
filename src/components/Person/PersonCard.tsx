@@ -137,23 +137,18 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
             />
           </div>
           <div style={{ minWidth: 0 }}>
-            <Text
-              weight="semibold"
-              size={400}
-              title={displayName}
-              style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-            >
-              {displayName}
-            </Text>
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <Text weight="semibold" size={400} title={displayName}>
+                {displayName}
+              </Text>
+            </div>
             {personCardSubtitle
               ? (
-                <Text
-                  size={300}
-                  title={personCardSubtitle}
-                  style={{ color: tokens.colorNeutralForeground3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {personCardSubtitle}
-                </Text>
+                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <Text size={300} title={personCardSubtitle} style={{ color: tokens.colorNeutralForeground3 }}>
+                    {personCardSubtitle}
+                  </Text>
+                </div>
               )
               : null}
           </div>
