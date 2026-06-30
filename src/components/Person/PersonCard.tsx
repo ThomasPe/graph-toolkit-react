@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card, CardHeader } from '@fluentui/react-components';
 import { PersonDetails } from './Person.types';
 
 /**
@@ -66,16 +67,17 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
     .join(' · ');
 
   return (
-    <div
-      style={{ minWidth: '18rem', maxWidth: '24rem', display: 'grid', gap: '0.5rem' }}
+    <Card
+      style={{ minWidth: '18rem', maxWidth: '24rem' }}
+      tabIndex={0}
       onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Escape') {
           onEscape?.();
         }
       }}
     >
-      <div style={{ fontWeight: 600 }}>{displayName}</div>
-      {personCardSubtitle ? <div style={{ opacity: 0.85 }}>{personCardSubtitle}</div> : null}
+      <CardHeader header={displayName} description={personCardSubtitle || undefined} />
+      <div style={{ display: 'grid', gap: '0.5rem', padding: '0 16px 16px' }}>
       {officeLocation ? <div>Office: {officeLocation}</div> : null}
       {resolvedPersonEmail ? <div>Email: {resolvedPersonEmail}</div> : null}
       {resolvedMobilePhone ? <div>Mobile: {resolvedMobilePhone}</div> : null}
@@ -113,6 +115,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
             )
             : null}
       </div>
-    </div>
+      </div>
+    </Card>
   );
 };
