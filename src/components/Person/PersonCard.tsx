@@ -3,6 +3,7 @@ import { Avatar, Button, Card, Divider, Text, tokens } from '@fluentui/react-com
 import {
   Chat24Regular,
   CheckmarkCircle16Filled,
+  Location24Regular,
   Mail24Regular,
   Phone24Regular,
 } from '@fluentui/react-icons';
@@ -218,7 +219,14 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
             </div>
           )
           : null}
-        {officeLocation ? <Text style={{ color: tokens.colorNeutralForeground3 }}>Office: {officeLocation}</Text> : null}
+        {officeLocation
+          ? (
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+              <Location24Regular style={{ color: tokens.colorNeutralForeground3 }} />
+              <Text style={{ color: tokens.colorNeutralForeground3 }}>Office: {officeLocation}</Text>
+            </div>
+          )
+          : null}
       </div>
     </Card>
   );
