@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Skeleton, SkeletonItem } from '@fluentui/react-components';
 import { Person } from '../components/Person';
 import { usePersonData } from '../hooks/usePersonData';
@@ -30,6 +30,7 @@ describe('Person', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.useRealTimers();
         mockedUsePersonData.mockReturnValue({
             user: {
                 id: 'user-1',
@@ -59,6 +60,10 @@ describe('Person', () => {
 
         return call[0] as Record<string, unknown>;
     };
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
 
     /**
      * Assert that a captured Persona text slot contains the loading Skeleton structure.
@@ -228,6 +233,139 @@ describe('Person', () => {
         personaProps.onClick?.(event);
 
         expect(onClick).toHaveBeenCalledWith(event);
+    });
+
+    it('requests person-card fields and renders an interactive trigger when personCardInteraction is enabled', () => {
+        render(<Person userId="user-1" personCardInteraction="hover" />);
+
+        expect(mockedUsePersonData).toHaveBeenCalledWith(
+            expect.objectContaining({
+                userId: 'user-1',
+                selectFields: expect.arrayContaining([
+                    'mail',
+                    'userPrincipalName',
+                    'jobTitle',
+                    'department',
+                    'officeLocation',
+                    'mobilePhone',
+                    'businessPhones',
+                ]),
+            })
+        );
+
+        const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+        expect(trigger).toBeTruthy();
+    });
+
+    it('toggles the person card open and closed on trigger click', async () => {
+        render(<Person userId="user-1" personCardInteraction="click" />);
+
+        const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+        expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+
+        fireEvent.click(trigger);
+
+        const emailLink = await screen.findByRole('link', { name: 'adelev@contoso.com' });
+        expect(emailLink).toBeTruthy();
+
+        fireEvent.click(trigger);
+
+        await waitFor(() => {
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+        });
+    });
+
+    it('opens and closes the person card on hover with a delay', async () => {
+        vi.useFakeTimers();
+        try {
+            render(<Person userId="user-1" personCardInteraction="hover" />);
+
+            const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+
+            fireEvent.mouseEnter(trigger);
+
+            act(() => {
+                vi.advanceTimersByTime(499);
+            });
+
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+
+            act(() => {
+                vi.advanceTimersByTime(1);
+            });
+
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).not.toBeNull();
+
+            fireEvent.mouseLeave(trigger);
+
+            act(() => {
+                vi.advanceTimersByTime(499);
+            });
+
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).not.toBeNull();
+
+            act(() => {
+                vi.advanceTimersByTime(1);
+            });
+
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps the person card open when the pointer moves from the trigger onto the card', async () => {
+        vi.useFakeTimers();
+        try {
+            render(<Person userId="user-1" personCardInteraction="hover" />);
+
+            const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+
+            fireEvent.mouseEnter(trigger);
+
+            act(() => {
+                vi.advanceTimersByTime(500);
+            });
+
+            const emailLink = screen.getByRole('link', { name: 'adelev@contoso.com' });
+            const card = emailLink.closest('[role="dialog"]') ?? emailLink.parentElement!;
+
+            // Leaving the trigger schedules a close; entering the card must cancel it.
+            fireEvent.mouseLeave(trigger);
+            fireEvent.mouseEnter(card);
+
+            act(() => {
+                vi.advanceTimersByTime(500);
+            });
+
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).not.toBeNull();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('opens the person card on click in hover mode as a touch-friendly fallback', async () => {
+        render(<Person userId="user-1" personCardInteraction="hover" />);
+
+        const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+
+        fireEvent.click(trigger);
+
+        expect(await screen.findByRole('link', { name: 'adelev@contoso.com' })).toBeTruthy();
+    });
+
+    it('closes the person card when Escape is pressed inside the card', async () => {
+        render(<Person userId="user-1" personCardInteraction="click" />);
+
+        const trigger = screen.getByRole('button', { name: /show details for adele vance/i });
+        fireEvent.click(trigger);
+
+        const emailLink = await screen.findByRole('link', { name: 'adelev@contoso.com' });
+        fireEvent.keyDown(emailLink, { key: 'Escape' });
+
+        await waitFor(() => {
+            expect(screen.queryByRole('link', { name: 'adelev@contoso.com' })).toBeNull();
+        });
     });
 
     it('uses a pre-resolved photoUrl from personDetails without requiring a fetch result', () => {

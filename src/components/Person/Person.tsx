@@ -2,10 +2,19 @@
  * Person component - Display a person using Fluent UI Persona
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { Persona, PresenceBadgeStatus, Skeleton, SkeletonItem } from '@fluentui/react-components';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Persona,
+  Popover,
+  PopoverSurface,
+  PopoverTrigger,
+  PresenceBadgeStatus,
+  Skeleton,
+  SkeletonItem,
+} from '@fluentui/react-components';
 import { usePersonData } from '../../hooks/usePersonData';
 import { getInitials } from '../../utils/graph';
+import { PersonCard } from './PersonCard';
 import { PersonDetails, PersonLineRenderContext, PersonLineRenderer, PersonProps, PersonView } from './Person.types';
 
 /**
@@ -42,6 +51,18 @@ const PRESENCE_PROPERTIES = new Set(['presenceActivity', 'presenceAvailability']
 const USER_SELECT_EXCLUSIONS = new Set(['email', ...PRESENCE_PROPERTIES]);
 const PRIMARY_LOADING_LINE_SIZE = 16;
 const SECONDARY_LOADING_LINE_SIZE = 12;
+const PERSON_CARD_HOVER_OPEN_DELAY_MS = 500;
+const PERSON_CARD_HOVER_CLOSE_DELAY_MS = 500;
+const PERSON_CARD_SELECT_FIELDS = [
+  'mail',
+  'userPrincipalName',
+  'jobTitle',
+  'department',
+  'officeLocation',
+  'mobilePhone',
+  'businessPhones',
+];
+type PersonCardOpenReason = 'hover' | 'keyboard' | 'click' | null;
 /**
  * Widths are intentionally staggered to resemble typical person metadata lengths instead of
  * rendering every placeholder line at the same width. The numeric keys map directly to the
@@ -178,6 +199,7 @@ export const Person: React.FC<PersonProps> = ({
   personDetails,
   view = 'oneline',
   showPresence = false,
+  personCardInteraction = 'none',
   line1Property,
   line2Property,
   line3Property,
@@ -199,6 +221,86 @@ export const Person: React.FC<PersonProps> = ({
   const usesPresenceLine = [resolvedLine1Property, resolvedLine2Property, resolvedLine3Property, resolvedLine4Property]
     .some(property => parsePropertyList(property).some(item => PRESENCE_PROPERTIES.has(item)));
 
+  const isPersonCardEnabled = personCardInteraction !== 'none';
+  const hoverOpenTimeoutRef = useRef<number | null>(null);
+  const hoverCloseTimeoutRef = useRef<number | null>(null);
+  const [isPersonCardOpen, setIsPersonCardOpen] = useState(false);
+  const [personCardOpenReason, setPersonCardOpenReason] = useState<PersonCardOpenReason>(null);
+
+  const isHoverInteraction = personCardInteraction === 'hover';
+
+  const clearPersonCardTimers = () => {
+    if (hoverOpenTimeoutRef.current !== null) {
+      window.clearTimeout(hoverOpenTimeoutRef.current);
+      hoverOpenTimeoutRef.current = null;
+    }
+
+    if (hoverCloseTimeoutRef.current !== null) {
+      window.clearTimeout(hoverCloseTimeoutRef.current);
+      hoverCloseTimeoutRef.current = null;
+    }
+  };
+
+  const closePersonCard = () => {
+    clearPersonCardTimers();
+    setPersonCardOpenReason(null);
+    setIsPersonCardOpen(false);
+  };
+
+  const scheduleOpenPersonCard = () => {
+    if (!isHoverInteraction) {
+      return;
+    }
+
+    // Always cancel a pending close first so moving the pointer from the trigger
+    // onto the open card (or back) keeps it open.
+    if (hoverCloseTimeoutRef.current !== null) {
+      window.clearTimeout(hoverCloseTimeoutRef.current);
+      hoverCloseTimeoutRef.current = null;
+    }
+
+    if (isPersonCardOpen) {
+      return;
+    }
+
+    if (hoverOpenTimeoutRef.current === null) {
+      hoverOpenTimeoutRef.current = window.setTimeout(() => {
+        hoverOpenTimeoutRef.current = null;
+        setPersonCardOpenReason('hover');
+        setIsPersonCardOpen(true);
+      }, PERSON_CARD_HOVER_OPEN_DELAY_MS);
+    }
+  };
+
+  const scheduleClosePersonCard = () => {
+    if (!isHoverInteraction) {
+      return;
+    }
+
+    if (!isPersonCardOpen) {
+      return;
+    }
+
+    if (hoverOpenTimeoutRef.current !== null) {
+      window.clearTimeout(hoverOpenTimeoutRef.current);
+      hoverOpenTimeoutRef.current = null;
+    }
+
+    if (hoverCloseTimeoutRef.current === null) {
+      hoverCloseTimeoutRef.current = window.setTimeout(() => {
+        hoverCloseTimeoutRef.current = null;
+        setIsPersonCardOpen(false);
+      }, PERSON_CARD_HOVER_CLOSE_DELAY_MS);
+    }
+  };
+
+  useEffect(
+    () => () => {
+      clearPersonCardTimers();
+    },
+    []
+  );
+
   // Fetch data if not provided directly
   const { user, presence: graphPresence, photoUrl, loading, error } = usePersonData({
     userId: personDetails
@@ -211,6 +313,7 @@ export const Person: React.FC<PersonProps> = ({
       resolvedLine2Property,
       resolvedLine3Property,
       resolvedLine4Property,
+      ...(isPersonCardEnabled ? PERSON_CARD_SELECT_FIELDS : []),
     ]),
   });
 
@@ -361,8 +464,11 @@ export const Person: React.FC<PersonProps> = ({
     isAvatarOnlyView ? undefined : personaProps.tertiaryText ?? defaultTertiaryText;
   const resolvedQuaternaryText =
     isAvatarOnlyView ? undefined : personaProps.quaternaryText ?? defaultQuaternaryText;
+  const resolvedPersonForCard: PersonDetails = resolvedPhotoUrl
+    ? { ...resolvedPerson, photoUrl: resolvedPhotoUrl }
+    : resolvedPerson;
 
-  return (
+  const personaElement = (
     <Persona
       {...personaProps}
       name={resolvedName}
@@ -373,5 +479,69 @@ export const Person: React.FC<PersonProps> = ({
       tertiaryText={resolvedTertiaryText}
       quaternaryText={resolvedQuaternaryText}
     />
+  );
+
+  if (!isPersonCardEnabled) {
+    return personaElement;
+  }
+
+  const handleTriggerClick = () => {
+    setPersonCardOpenReason('click');
+    setIsPersonCardOpen(previous => !previous);
+  };
+
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === 'Escape') {
+      closePersonCard();
+      return;
+    }
+
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+
+    setPersonCardOpenReason('keyboard');
+    setIsPersonCardOpen(previous => !previous);
+  };
+
+  return (
+    <Popover
+      open={isPersonCardOpen}
+      onOpenChange={(_, data) => {
+        // Keep controlled state aligned when Popover requests a close (light dismiss/Escape)
+        if (!data.open) {
+          closePersonCard();
+          return;
+        }
+      }}
+      positioning="below-start"
+      trapFocus={personCardOpenReason !== 'hover'}
+    >
+      <PopoverTrigger disableButtonEnhancement>
+        <span
+          style={{ display: 'inline-flex', cursor: 'pointer' }}
+          tabIndex={0}
+          role="button"
+          aria-label={`Show details for ${displayName}`}
+          aria-haspopup="dialog"
+          aria-expanded={isPersonCardOpen}
+          onClick={handleTriggerClick}
+          onKeyDown={handleTriggerKeyDown}
+          onMouseEnter={scheduleOpenPersonCard}
+          onMouseLeave={scheduleClosePersonCard}
+        >
+          {personaElement}
+        </span>
+      </PopoverTrigger>
+      <PopoverSurface
+        style={{ padding: 0, backgroundColor: 'transparent', border: 'none', boxShadow: 'none' }}
+        onMouseEnter={scheduleOpenPersonCard}
+        onMouseLeave={scheduleClosePersonCard}
+      >
+        <PersonCard person={resolvedPersonForCard} displayName={displayName} onEscape={closePersonCard} />
+      </PopoverSurface>
+    </Popover>
   );
 };
