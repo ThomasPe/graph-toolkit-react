@@ -485,8 +485,7 @@ export const Person: React.FC<PersonProps> = ({
     return personaElement;
   }
 
-  const handleTriggerClickCapture = (event: React.MouseEvent<HTMLSpanElement>) => {
-    event.stopPropagation();
+  const handleTriggerClick = () => {
     setPersonCardOpenReason('click');
     setIsPersonCardOpen(previous => !previous);
   };
@@ -528,7 +527,7 @@ export const Person: React.FC<PersonProps> = ({
           aria-label={`Show details for ${displayName}`}
           aria-haspopup="dialog"
           aria-expanded={isPersonCardOpen}
-          onClickCapture={handleTriggerClickCapture}
+          onClick={handleTriggerClick}
           onKeyDown={handleTriggerKeyDown}
           onMouseEnter={scheduleOpenPersonCard}
           onMouseLeave={scheduleClosePersonCard}

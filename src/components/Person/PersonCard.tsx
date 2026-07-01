@@ -104,6 +104,17 @@ const renderActionButton = (
   return <Button appearance="subtle" icon={icon} aria-label={label} as="a" href={href} />;
 };
 
+/**
+ * Standalone contact details card for a Microsoft Graph person.
+ *
+ * Renders profile information (name, title, department, office location) alongside quick
+ * contact actions (email, Teams chat, call) derived from the supplied {@link PersonDetails}.
+ * `Person` renders this card automatically when `personCardInteraction` is enabled, and it can
+ * also be used directly with pre-resolved person data.
+ *
+ * @param props - The {@link PersonCardProps} describing the person and card behavior.
+ * @returns The rendered person card element.
+ */
 export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onEscape }) => {
   const resolvedPersonEmail = getEmailFromPerson(person);
   const resolvedMobilePhone = toDisplayText(person.mobilePhone);
