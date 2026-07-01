@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- 481f463: Add person-card interaction support to `Person` with `personCardInteraction` options (`none`, `hover`, `click`).
+
+  Add a reusable `PersonCard` component for rendering person contact details and quick contact actions.
+
+  When enabled, `Person` now shows a hover/click details popover with additional profile details and contact actions (email, Teams chat, call), plus fetches the extra profile fields needed for that card. The card's avatar shows real presence when presence data is available.
+
+  Adds `@fluentui/react-icons` as a runtime dependency for the person-card action icons.
+
 ## 1.1.0
 
 ### Minor Changes
