@@ -11,6 +11,7 @@ import {
   Spinner,
 } from '@fluentui/react-components';
 import { usePeopleList } from '../../hooks/usePeopleList';
+import { getInitials } from '../../utils/graph';
 import { PeoplePerson, PeopleProps } from './People.types';
 
 const DEFAULT_SHOW_MAX = 3;
@@ -50,6 +51,7 @@ const renderAvatarGroupItem = (person: PeoplePerson) => {
       avatar={{
         name: label,
         image: person.photoUrl ? { src: person.photoUrl } : undefined,
+        initials: person.photoUrl ? undefined : getInitials(person),
         badge: presence ? { status: presence } : undefined,
         color: 'colorful',
       }}

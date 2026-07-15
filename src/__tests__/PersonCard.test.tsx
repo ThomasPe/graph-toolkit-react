@@ -3,6 +3,22 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { PersonCard } from '../components/Person/PersonCard';
 
+const avatarMock = vi.fn();
+
+vi.mock('@fluentui/react-components', async () => {
+  const actual = await vi.importActual<typeof import('@fluentui/react-components')>(
+    '@fluentui/react-components'
+  );
+
+  return {
+    ...actual,
+    Avatar: (props: unknown) => {
+      avatarMock(props);
+      return <div data-testid="avatar" />;
+    },
+  };
+});
+
 describe('PersonCard', () => {
   it('renders person details and contact actions when data is available', () => {
     render(
@@ -45,5 +61,21 @@ describe('PersonCard', () => {
     expect(screen.queryByRole('link', { name: 'Email' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Chat' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Call' })).toBeNull();
+  });
+
+  it('uses shared initials logic for the avatar when no photo is available', () => {
+    render(
+      <PersonCard
+        displayName="Contoso User"
+        person={{
+          displayName: 'Contoso User',
+          givenName: 'Adele',
+          surname: 'Vance',
+        }}
+      />
+    );
+
+    const avatarProps = avatarMock.mock.calls[0]?.[0] as { initials?: string };
+    expect(avatarProps.initials).toBe('AV');
   });
 });

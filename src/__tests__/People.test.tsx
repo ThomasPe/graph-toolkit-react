@@ -17,7 +17,7 @@ vi.mock('@fluentui/react-components', async () => {
     AvatarGroup: ({ children }: { children: React.ReactNode }) => <div data-testid="avatar-group">{children}</div>,
     AvatarGroupItem: (props: unknown) => {
       avatarGroupItemMock(props);
-      const avatar = (props as { avatar?: { name?: string } }).avatar;
+      const avatar = (props as { avatar?: { name?: string; initials?: string } }).avatar;
       return <div data-testid="avatar-group-item">{avatar?.name ?? 'unknown'}</div>;
     },
     AvatarGroupPopover: ({ children, count }: { children: React.ReactNode; count?: number }) => {
@@ -111,7 +111,7 @@ describe('People', () => {
 
     const firstCallAvatar = (avatarGroupItemMock.mock.calls[0]?.[0] as {
       name?: string;
-      avatar?: { badge?: { status?: string }; image?: { src?: string } };
+      avatar?: { badge?: { status?: string }; image?: { src?: string }; initials?: string };
     });
     expect(firstCallAvatar.name).toBe('Adele Vance');
     const firstCallAvatarProps = firstCallAvatar.avatar;
@@ -120,9 +120,34 @@ describe('People', () => {
 
     const overflowCallAvatar = (avatarGroupItemMock.mock.calls[2]?.[0] as {
       name?: string;
+      avatar?: { initials?: string };
     });
     expect(overflowCallAvatar.name).toBe('Alex Wilber');
+    expect(overflowCallAvatar.avatar?.initials).toBe('AW');
     expect(avatarGroupPopoverMock).toHaveBeenCalledWith({ count: 1 });
+  });
+
+  it('prefers givenName and surname for avatar initials when no photo is available', () => {
+    mockedUsePeopleList.mockReturnValue({
+      people: [
+        {
+          id: '1',
+          displayName: 'Contoso User',
+          givenName: 'Adele',
+          surname: 'Vance',
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    render(<People />);
+
+    const firstCallAvatar = avatarGroupItemMock.mock.calls[0]?.[0] as {
+      avatar?: { initials?: string };
+    };
+
+    expect(firstCallAvatar.avatar?.initials).toBe('AV');
   });
 
   it('returns null when there are no people to render', () => {
