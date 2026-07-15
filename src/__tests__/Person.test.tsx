@@ -36,6 +36,7 @@ describe('Person', () => {
                 id: 'user-1',
                 displayName: 'Adele Vance',
                 givenName: 'Adele',
+                surname: 'Vance',
                 jobTitle: 'Program Manager',
                 department: 'Product',
                 officeLocation: 'Building 1',
@@ -424,6 +425,42 @@ describe('Person', () => {
         const avatar = personaProps.avatar as { image?: unknown; initials?: string };
         expect(avatar.image).toBeUndefined();
         expect(avatar.initials).toBeTruthy();
+    });
+
+    it('prefers givenName and surname when generating initials', () => {
+        render(
+            <Person
+                personDetails={{
+                    displayName: 'Contoso User',
+                    givenName: 'Adele',
+                    surname: 'Vance',
+                }}
+                fetchImage={false}
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        const avatar = personaProps.avatar as { initials?: string };
+
+        expect(avatar.initials).toBe('AV');
+    });
+
+    it('falls back to the display name first and last words when givenName and surname are missing', () => {
+        render(
+            <Person
+                personDetails={{
+                    displayName: 'Frank van Herbert',
+                    givenName: null,
+                    surname: null,
+                }}
+                fetchImage={false}
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        const avatar = personaProps.avatar as { initials?: string };
+
+        expect(avatar.initials).toBe('FH');
     });
 
     it('supports MGT-style line property mapping with fallbacks and presence fields', () => {
