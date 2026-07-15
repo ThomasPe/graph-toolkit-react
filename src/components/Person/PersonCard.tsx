@@ -155,7 +155,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
           <div style={{ flex: '0 0 auto' }}>
             <Avatar
               image={person.photoUrl ? { src: person.photoUrl } : undefined}
-              initials={person.photoUrl ? undefined : getInitials(person)}
+              initials={person.photoUrl ? undefined : (getInitials({ ...person, displayName }) || undefined)}
               name={displayName}
               size={72}
               color="colorful"
