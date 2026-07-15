@@ -410,7 +410,7 @@ export const Person: React.FC<PersonProps> = ({
 
   const resolvedPerson: PersonDetails = personWithPresence ?? personRecord!;
   const displayName = person.displayName || 'Unknown User';
-  const initials = getInitials(person);
+  const initials = getInitials({ ...person, displayName }) || undefined;
 
   const resolvedLine1Text = getTextFromProperty(resolvedPerson, resolvedLine1Property);
   const resolvedLine2Text = getTextFromProperty(resolvedPerson, resolvedLine2Property);
