@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { PersonCard } from '../components/Person/PersonCard';
@@ -20,6 +20,10 @@ vi.mock('@fluentui/react-components', async () => {
 });
 
 describe('PersonCard', () => {
+  beforeEach(() => {
+    avatarMock.mockClear();
+  });
+
   it('renders person details and contact actions when data is available', () => {
     render(
       <PersonCard
