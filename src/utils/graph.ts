@@ -22,12 +22,60 @@ export const createGraphClient = (provider: IProvider): Client => {
 };
 
 /**
- * Extract initials from a display name
+ * Person name fields used to derive avatar initials.
  */
-export const getInitials = (displayName?: string): string => {
-  if (!displayName) return '';
+export interface InitialsNameParts {
+  /**
+   * The person's first name.
+   */
+  givenName?: string | null;
+  /**
+   * The person's last name.
+   */
+  surname?: string | null;
+  /**
+   * The person's display name.
+   */
+  displayName?: string | null;
+}
 
-  const parts = displayName.trim().split(' ');
+/**
+ * Extract initials from a person's name details.
+ *
+ * Prefers first and last name when available, and otherwise falls back to the
+ * display name using the first and last words.
+ *
+ * @param nameOrDisplayName - Person name details or a plain display name
+ * @returns The resolved initials
+ */
+export const getInitials = (nameOrDisplayName?: InitialsNameParts | string): string => {
+  const nameParts = typeof nameOrDisplayName === 'string'
+    ? { displayName: nameOrDisplayName }
+    : nameOrDisplayName;
+
+  const givenName = nameParts?.givenName?.trim();
+  const surname = nameParts?.surname?.trim();
+  const displayName = nameParts?.displayName?.trim();
+
+  let initials = '';
+
+  if (givenName) {
+    initials += givenName[0]?.toUpperCase() ?? '';
+  }
+
+  if (surname) {
+    initials += surname[0]?.toUpperCase() ?? '';
+  }
+
+  if (initials) {
+    return initials;
+  }
+
+  if (!displayName) {
+    return '';
+  }
+
+  const parts = displayName.split(/\s+/);
   if (parts.length === 1) {
     return parts[0].substring(0, 2).toUpperCase();
   }

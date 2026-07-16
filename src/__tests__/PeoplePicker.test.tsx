@@ -167,6 +167,20 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-size')).toBe('16');
   });
 
+  it('prefers givenName and surname for selected interaction tag initials when no photo is available', () => {
+    const selected = [{
+      id: '1',
+      displayName: 'Contoso User',
+      givenName: 'Adele',
+      surname: 'Vance',
+      mail: 'adelev@contoso.com',
+    }];
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-initials')).toBe('AV');
+  });
+
   it('loads avatar images for selected interaction tags when available', () => {
     mockedUsePersonData.mockReturnValue({
       user: null,
@@ -247,6 +261,29 @@ describe('PeoplePicker', () => {
     const avatar = screen.getByTestId('avatar');
     expect(avatar.getAttribute('data-image-src')).toBe('data:image/png;base64,dropdown-photo');
     expect(avatar.getAttribute('data-initials')).toBeNull();
+  });
+
+  it('prefers givenName and surname for dropdown option initials when no photo is available', () => {
+    mockedUsePeopleSearch.mockReturnValue({
+      results: [
+        {
+          id: '1',
+          displayName: 'Contoso User',
+          givenName: 'Adele',
+          surname: 'Vance',
+          mail: 'adelev@contoso.com',
+          userPrincipalName: 'adelev@contoso.com',
+          jobTitle: 'Product Manager',
+          department: 'Marketing',
+        },
+      ],
+      loading: false,
+    });
+
+    render(<PeoplePicker />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-initials')).toBe('AV');
   });
 
   it('uses a preloaded photo for dropdown options without fetching person data', () => {

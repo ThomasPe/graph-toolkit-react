@@ -15,6 +15,7 @@ import {
   Phone24Regular,
 } from '@fluentui/react-icons';
 import { PersonDetails } from './Person.types';
+import { getInitials } from '../../utils/graph';
 
 /**
  * Map a Microsoft Graph presence availability value to a Fluent UI presence status.
@@ -154,6 +155,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person, displayName, onE
           <div style={{ flex: '0 0 auto' }}>
             <Avatar
               image={person.photoUrl ? { src: person.photoUrl } : undefined}
+              initials={person.photoUrl ? undefined : (getInitials({ ...person, displayName }) || undefined)}
               name={displayName}
               size={72}
               color="colorful"
