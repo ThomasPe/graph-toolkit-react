@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.3.0
+## 1.2.1
 
-### Minor Changes
+### Patch Changes
 
 - 3b628fa: Update avatar initials generation across avatar-rendering components to prefer givenName and surname, with fallback to displayName initials from the first and last words.
 
