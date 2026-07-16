@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.2
+
+### Patch Changes
+
+- d8bcb76: Fetch first and last names with person data so avatar initials prefer them over display names.
+
 ## 1.2.1
 
 ### Patch Changes
