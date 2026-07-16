@@ -199,6 +199,8 @@ describe('usePersonData caching', () => {
     // all defaults should still be present
     expect(selectedFields).toContain('id');
     expect(selectedFields).toContain('displayName');
+    expect(selectedFields).toContain('givenName');
+    expect(selectedFields).toContain('surname');
     // no empty strings in select
     expect(selectedFields.every((f) => f.length > 0)).toBe(true);
   });

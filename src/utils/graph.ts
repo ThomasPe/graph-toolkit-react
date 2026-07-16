@@ -57,18 +57,8 @@ export const getInitials = (nameOrDisplayName?: InitialsNameParts | string): str
   const surname = nameParts?.surname?.trim();
   const displayName = nameParts?.displayName?.trim();
 
-  let initials = '';
-
-  if (givenName) {
-    initials += givenName[0]?.toUpperCase() ?? '';
-  }
-
-  if (surname) {
-    initials += surname[0]?.toUpperCase() ?? '';
-  }
-
-  if (initials) {
-    return initials;
+  if (givenName && surname) {
+    return `${givenName[0]}${surname[0]}`.toUpperCase();
   }
 
   if (!displayName) {

@@ -35,6 +35,8 @@ export interface UsePersonDataOptions {
 const DEFAULT_USER_SELECT_FIELDS = [
   'id',
   'displayName',
+  'givenName',
+  'surname',
   'jobTitle',
   'mail',
   'department',
