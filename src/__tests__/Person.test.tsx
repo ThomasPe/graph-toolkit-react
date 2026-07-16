@@ -445,6 +445,24 @@ describe('Person', () => {
         expect(avatar.initials).toBe('AV');
     });
 
+    it('falls back to displayName initials when only one name part is available', () => {
+        render(
+            <Person
+                personDetails={{
+                    displayName: 'Adele Vance Dispalyname',
+                    givenName: 'Adele',
+                    surname: null,
+                }}
+                fetchImage={false}
+            />
+        );
+
+        const personaProps = getLastPersonaProps();
+        const avatar = personaProps.avatar as { initials?: string };
+
+        expect(avatar.initials).toBe('AD');
+    });
+
     it('falls back to the display name first and last words when givenName and surname are missing', () => {
         render(
             <Person
