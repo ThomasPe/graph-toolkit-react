@@ -449,7 +449,7 @@ describe('Person', () => {
         render(
             <Person
                 personDetails={{
-                    displayName: 'Adele Vance Dispalyname',
+                    displayName: 'Adele Vance Displayname',
                     givenName: 'Adele',
                     surname: null,
                 }}
