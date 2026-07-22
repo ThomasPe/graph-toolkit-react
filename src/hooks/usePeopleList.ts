@@ -114,17 +114,6 @@ const mergePresence = (person: PeoplePerson, presence: Presence | null): PeopleP
 const resolveIdentifier = (person: Pick<PeoplePerson, 'id' | 'userPrincipalName' | 'mail'>): string | undefined =>
   person.id ?? person.userPrincipalName ?? person.mail ?? undefined;
 
-/**
- * Resolve the best identifier for app-supplied direct people where `id` may be a local key.
- *
- * @param person - Directly supplied person data from application code
- * @returns A Graph-resolvable identifier, preferring UPN/mail before a local `id`
- */
-const resolveDirectPersonIdentifier = (
-  person: Pick<PeoplePerson, 'id' | 'userPrincipalName' | 'mail'>
-): string | undefined =>
-  person.userPrincipalName ?? person.mail ?? person.id ?? undefined;
-
 const uniqueNonEmpty = (values?: string[]): string[] =>
   Array.from(new Set((values ?? []).map(value => value.trim()).filter(Boolean)));
 
@@ -362,13 +351,8 @@ export const usePeopleList = (options?: UsePeopleListOptions): UsePeopleListResu
       }
 
       if (directPeople) {
-        const shouldEnrichResolvedPeople =
-          showPresence || directPeople.some(person => !person.photoUrl);
-        const nextPeople = shouldEnrichResolvedPeople
-          ? await enrichResolvedPeople(directPeople, resolveDirectPersonIdentifier)
-          : directPeople;
         if (!cancelled) {
-          setState({ people: sortPeople(nextPeople, sortBy, sortDirection), loading: false, error: null });
+          setState({ people: sortPeople(directPeople, sortBy, sortDirection), loading: false, error: null });
         }
         return;
       }
