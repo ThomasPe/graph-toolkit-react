@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.3
+
+### Patch Changes
+
+- 5f38e00: Refresh cached person data that lacks first and last names so avatar initials use current Graph profile fields.
+
 ## 1.2.2
 
 ### Patch Changes
