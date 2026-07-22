@@ -60,6 +60,8 @@ describe('usePersonData caching', () => {
     const cachedUser = {
       id: 'user-1',
       displayName: 'Cached User',
+      givenName: 'Cached',
+      surname: 'User',
       userPrincipalName: 'cached@contoso.com',
     } as User;
 
@@ -97,12 +99,62 @@ describe('usePersonData caching', () => {
     expect(mockedWritePersonCache).not.toHaveBeenCalled();
   });
 
+  it('refreshes a cached user that predates the default name-part selection', async () => {
+    const now = Date.now();
+    const selectMock = vi.fn().mockReturnValue({
+      get: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        displayName: 'Adele Vance Displayname',
+        givenName: 'Adele',
+        surname: 'Vance',
+      }),
+    });
+    const apiMock = vi.fn().mockReturnValue({ select: selectMock });
+    mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
+    mockedReadPersonCache.mockResolvedValue({
+      user: {
+        id: 'user-1',
+        displayName: 'Adele Vance Displayname',
+      } as User,
+      userCachedAt: now,
+    });
+
+    const { result } = renderHook(() =>
+      usePersonData({
+        userId: 'user-1',
+        fetchPresence: false,
+        fetchPhoto: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(apiMock).toHaveBeenCalledWith('/users/user-1');
+    expect(result.current.user).toMatchObject({
+      givenName: 'Adele',
+      surname: 'Vance',
+    });
+    expect(mockedWritePersonCache).toHaveBeenCalledWith(
+      'person:user-1',
+      expect.objectContaining({
+        user: expect.objectContaining({
+          givenName: 'Adele',
+          surname: 'Vance',
+        }),
+      })
+    );
+  });
+
   it('reuses cached user and refreshes stale presence only', async () => {
     const now = Date.now();
     const stale = now - 10 * 60 * 1000;
     const cachedUser = {
       id: 'user-1',
       displayName: 'Cached User',
+      givenName: 'Cached',
+      surname: 'User',
       userPrincipalName: 'cached@contoso.com',
     } as User;
 
