@@ -40,7 +40,7 @@ describe('usePeopleList', () => {
     mockedUseProviderState.mockReturnValue('SignedIn');
   });
 
-  it('enriches supplied people that are missing photos even when presence is disabled', async () => {
+  it('renders supplied people directly without resolving missing photos from Graph', async () => {
     const getPersonData = vi.fn().mockResolvedValue({
       user: {
         id: 'user-1',
@@ -74,54 +74,13 @@ describe('usePeopleList', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(getPersonData).toHaveBeenCalledWith({
-      identifier: 'user-1',
-      fetchPresence: false,
-      fetchPhoto: true,
-    });
-    expect(result.current.people[0]?.photoUrl).toBe('data:image/png;base64,AAAA');
-  });
-
-  it('prefers userPrincipalName or mail over a local id when enriching supplied people', async () => {
-    const getPersonData = vi.fn().mockResolvedValue({
-      user: {
+    expect(getPersonData).not.toHaveBeenCalled();
+    expect(result.current.people).toEqual([
+      {
         id: 'user-1',
         displayName: 'Adele Vance',
-        mail: 'adelev@contoso.com',
-        userPrincipalName: 'adelev@contoso.com',
       },
-      presence: null,
-      photoUrl: 'data:image/png;base64,AAAA',
-    });
-
-    mockedUseProvider.mockReturnValue({
-      getPersonData,
-    } as IProvider & IPersonDataProvider as never);
-
-    const { result } = renderHook(() =>
-      usePeopleList({
-        people: [
-          {
-            id: 'adele',
-            displayName: 'Adele Vance',
-            mail: 'adelev@contoso.com',
-          },
-        ],
-        showPresence: false,
-      })
-    );
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(getPersonData).toHaveBeenCalledTimes(1);
-    expect(getPersonData).toHaveBeenNthCalledWith(1, {
-      identifier: 'adelev@contoso.com',
-      fetchPresence: false,
-      fetchPhoto: true,
-    });
-    expect(result.current.people[0]?.photoUrl).toBe('data:image/png;base64,AAAA');
+    ]);
   });
 
   it('returns loading=true when a new fetch starts after provider state changes', async () => {
