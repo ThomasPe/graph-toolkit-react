@@ -44,6 +44,13 @@ const DEFAULT_USER_SELECT_FIELDS = [
   'userPrincipalName',
 ];
 
+const hasNameParts = (user: User): boolean => {
+  return (
+    Object.prototype.hasOwnProperty.call(user, 'givenName') &&
+    Object.prototype.hasOwnProperty.call(user, 'surname')
+  );
+};
+
 /**
  * Fetch person data from Microsoft Graph
  */
@@ -146,7 +153,9 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
       const cacheKey = getPersonCacheKey(identifier);
       const cached = personCacheOptions.enabled ? await readPersonCache(cacheKey) : null;
       const hasFreshUser = Boolean(
-        cached?.user && isTimestampFresh(cached.userCachedAt, personCacheOptions.userTtlMs)
+        cached?.user &&
+          hasNameParts(cached.user) &&
+          isTimestampFresh(cached.userCachedAt, personCacheOptions.userTtlMs)
       );
       const hasFreshPresence = Boolean(
         cached?.presenceCachedAt &&

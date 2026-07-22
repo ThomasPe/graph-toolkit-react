@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { PeoplePicker } from '@devsym/graph-toolkit-react';
+import { PeoplePicker, Person } from '@devsym/graph-toolkit-react';
 import type { PeoplePickerPerson } from '@devsym/graph-toolkit-react';
 import {
   Body1,
   Body2,
-  Badge,
   Card,
   Title3,
   makeStyles,
@@ -46,14 +45,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: '8px',
   },
-  selectedItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 12px',
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
-  },
 });
 
 export const PeoplePickerPage: React.FC = () => {
@@ -87,28 +78,14 @@ export const PeoplePickerPage: React.FC = () => {
         {selectedPeople.length > 0 && (
           <div className={styles.selectedList}>
             <Body2>Selected people ({selectedPeople.length}):</Body2>
-            {selectedPeople.map(person => {
-              const label =
-                person.displayName ??
-                person.mail ??
-                person.userPrincipalName ??
-                person.id;
-              return (
-                <div key={person.id} className={styles.selectedItem}>
-                  <Badge appearance="filled" color="brand" shape="circular">
-                    {label.charAt(0).toUpperCase()}
-                  </Badge>
-                  <div>
-                    <Body2>{label}</Body2>
-                    {person.mail && person.mail !== label && (
-                      <Body1 style={{ color: tokens.colorNeutralForeground3 }}>
-                        {person.mail}
-                      </Body1>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {selectedPeople.map(person => (
+              <Person
+                key={person.id}
+                userId={person.id}
+                view="threelines"
+                fetchImage={false}
+              />
+            ))}
           </div>
         )}
       </div>
