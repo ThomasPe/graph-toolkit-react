@@ -81,7 +81,7 @@ export const PeoplePickerPage: React.FC = () => {
             {selectedPeople.map(person => (
               <Person
                 key={person.id}
-                personDetails={person}
+                userId={person.id}
                 view="threelines"
                 fetchImage={false}
               />
