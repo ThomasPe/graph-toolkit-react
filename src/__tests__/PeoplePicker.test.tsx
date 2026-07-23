@@ -167,6 +167,15 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-size')).toBe('16');
   });
 
+  it('uses the person label and leaves initials unset when no name is available', () => {
+    const selected = [{ id: '1', mail: 'adelev@contoso.com' }];
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-name')).toBe('adelev@contoso.com');
+    expect(avatar.getAttribute('data-initials')).toBe('');
+  });
+
   it('prefers givenName and surname for selected interaction tag initials when no photo is available', () => {
     const selected = [{
       id: '1',
@@ -190,12 +199,18 @@ describe('PeoplePicker', () => {
       error: null,
     });
 
-    const selected = [{ id: '1', displayName: 'Adele Vance', mail: 'adelev@contoso.com' }];
+    const selected = [{
+      id: '1',
+      displayName: 'Adele Vance Displayname',
+      givenName: 'Adele',
+      surname: 'Vance',
+      mail: 'adelev@contoso.com',
+    }];
     render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
 
     const avatar = screen.getByTestId('avatar');
     expect(avatar.getAttribute('data-image-src')).toBe('data:image/png;base64,selected-photo');
-    expect(avatar.getAttribute('data-initials')).toBeNull();
+    expect(avatar.getAttribute('data-initials')).toBe('AV');
   });
 
   it('uses a preloaded photo for selected interaction tags without fetching person data', () => {
@@ -214,7 +229,7 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-image-src')).toBe(
       'data:image/png;base64,preloaded-selected-photo'
     );
-    expect(avatar.getAttribute('data-initials')).toBeNull();
+    expect(avatar.getAttribute('data-initials')).toBe('AV');
     expect(mockedUsePersonData).not.toHaveBeenCalled();
   });
 
@@ -260,7 +275,7 @@ describe('PeoplePicker', () => {
 
     const avatar = screen.getByTestId('avatar');
     expect(avatar.getAttribute('data-image-src')).toBe('data:image/png;base64,dropdown-photo');
-    expect(avatar.getAttribute('data-initials')).toBeNull();
+    expect(avatar.getAttribute('data-initials')).toBe('AV');
   });
 
   it('prefers givenName and surname for dropdown option initials when no photo is available', () => {
@@ -308,7 +323,7 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-image-src')).toBe(
       'data:image/png;base64,preloaded-dropdown-photo'
     );
-    expect(avatar.getAttribute('data-initials')).toBeNull();
+    expect(avatar.getAttribute('data-initials')).toBe('AV');
     expect(mockedUsePersonData).not.toHaveBeenCalled();
   });
 

@@ -382,7 +382,9 @@ describe('Person', () => {
             <Person
                 personDetails={{
                     id: 'user-1',
-                    displayName: 'Adele Vance',
+                    displayName: 'Adele Vance Displayname',
+                    givenName: 'Adele',
+                    surname: 'Vance',
                     photoUrl: 'https://contoso.example/avatar.png',
                 }}
                 view="oneline"
@@ -393,7 +395,7 @@ describe('Person', () => {
         const avatar = personaProps.avatar as { image?: { src?: string }; initials?: string };
 
         expect(avatar.image?.src).toBe('https://contoso.example/avatar.png');
-        expect(avatar.initials).toBeUndefined();
+        expect(avatar.initials).toBe('AV');
     });
 
     it('calls onUpdated after person data loads', () => {

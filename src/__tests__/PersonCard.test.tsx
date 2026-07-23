@@ -82,4 +82,25 @@ describe('PersonCard', () => {
     const avatarProps = avatarMock.mock.calls[0]?.[0] as { initials?: string };
     expect(avatarProps.initials).toBe('AV');
   });
+
+  it('retains name-part initials as an image fallback', () => {
+    render(
+      <PersonCard
+        displayName="Adele Vance Displayname"
+        person={{
+          displayName: 'Adele Vance Displayname',
+          givenName: 'Adele',
+          surname: 'Vance',
+          photoUrl: 'https://contoso.example/avatar.png',
+        }}
+      />
+    );
+
+    const avatarProps = avatarMock.mock.calls[0]?.[0] as {
+      image?: { src?: string };
+      initials?: string;
+    };
+    expect(avatarProps.image?.src).toBe('https://contoso.example/avatar.png');
+    expect(avatarProps.initials).toBe('AV');
+  });
 });

@@ -86,7 +86,9 @@ describe('People', () => {
       people: [
         {
           id: '1',
-          displayName: 'Adele Vance',
+          displayName: 'Adele Vance Displayname',
+          givenName: 'Adele',
+          surname: 'Vance',
           photoUrl: 'photo-1',
           presenceAvailability: 'Available',
         },
@@ -113,10 +115,11 @@ describe('People', () => {
       name?: string;
       avatar?: { badge?: { status?: string }; image?: { src?: string }; initials?: string };
     });
-    expect(firstCallAvatar.name).toBe('Adele Vance');
+    expect(firstCallAvatar.name).toBe('Adele Vance Displayname');
     const firstCallAvatarProps = firstCallAvatar.avatar;
     expect(firstCallAvatarProps?.badge).toEqual({ status: 'available' });
     expect(firstCallAvatarProps?.image).toEqual({ src: 'photo-1' });
+    expect(firstCallAvatarProps?.initials).toBe('AV');
 
     const overflowCallAvatar = (avatarGroupItemMock.mock.calls[2]?.[0] as {
       name?: string;
@@ -148,6 +151,30 @@ describe('People', () => {
     };
 
     expect(firstCallAvatar.avatar?.initials).toBe('AV');
+  });
+
+  it('does not derive initials from an email fallback label', () => {
+    mockedUsePeopleList.mockReturnValue({
+      people: [
+        {
+          id: '1',
+          mail: 'adelev@contoso.com',
+          photoUrl: 'photo-1',
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    render(<People />);
+
+    const firstCallAvatar = avatarGroupItemMock.mock.calls[0]?.[0] as {
+      name?: string;
+      avatar?: { initials?: string };
+    };
+
+    expect(firstCallAvatar.name).toBe('adelev@contoso.com');
+    expect(firstCallAvatar.avatar?.initials).toBe('');
   });
 
   it('returns null when there are no people to render', () => {

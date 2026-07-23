@@ -449,7 +449,7 @@ export const Person: React.FC<PersonProps> = ({
 
   const resolvedAvatar = personaProps.avatar ?? {
     image: resolvedPhotoUrl ? { src: resolvedPhotoUrl } : undefined,
-    initials: resolvedPhotoUrl ? undefined : initials,
+    initials,
     name: displayName,
   };
 
