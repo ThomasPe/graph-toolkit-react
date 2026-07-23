@@ -167,6 +167,15 @@ describe('PeoplePicker', () => {
     expect(avatar.getAttribute('data-size')).toBe('16');
   });
 
+  it('uses the person label and leaves initials unset when no name is available', () => {
+    const selected = [{ id: '1', mail: 'adelev@contoso.com' }];
+    render(<PeoplePicker selectedPeople={selected} onSelectionChange={() => {}} />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar.getAttribute('data-name')).toBe('adelev@contoso.com');
+    expect(avatar.getAttribute('data-initials')).toBeNull();
+  });
+
   it('prefers givenName and surname for selected interaction tag initials when no photo is available', () => {
     const selected = [{
       id: '1',
