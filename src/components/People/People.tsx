@@ -51,7 +51,7 @@ const renderAvatarGroupItem = (person: PeoplePerson) => {
       avatar={{
         name: label,
         image: person.photoUrl ? { src: person.photoUrl } : undefined,
-        initials: getInitials(person) || undefined,
+        initials: getInitials(person),
         badge: presence ? { status: presence } : undefined,
         color: 'colorful',
       }}

@@ -62,7 +62,7 @@ const BasePeoplePickerAvatar: React.FC<{
   <Avatar
     name={getPersonLabel(person)}
     image={photoUrl ? { src: photoUrl } : undefined}
-    initials={getInitials(person) || undefined}
+    initials={getInitials(person)}
     size={size}
   />
 );

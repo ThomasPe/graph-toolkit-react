@@ -174,7 +174,7 @@ describe('People', () => {
     };
 
     expect(firstCallAvatar.name).toBe('adelev@contoso.com');
-    expect(firstCallAvatar.avatar?.initials).toBeUndefined();
+    expect(firstCallAvatar.avatar?.initials).toBe('');
   });
 
   it('returns null when there are no people to render', () => {

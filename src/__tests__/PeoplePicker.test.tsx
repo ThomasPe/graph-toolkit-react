@@ -173,7 +173,7 @@ describe('PeoplePicker', () => {
 
     const avatar = screen.getByTestId('avatar');
     expect(avatar.getAttribute('data-name')).toBe('adelev@contoso.com');
-    expect(avatar.getAttribute('data-initials')).toBeNull();
+    expect(avatar.getAttribute('data-initials')).toBe('');
   });
 
   it('prefers givenName and surname for selected interaction tag initials when no photo is available', () => {
