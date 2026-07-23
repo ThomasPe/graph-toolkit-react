@@ -153,6 +153,30 @@ describe('People', () => {
     expect(firstCallAvatar.avatar?.initials).toBe('AV');
   });
 
+  it('does not derive initials from an email fallback label', () => {
+    mockedUsePeopleList.mockReturnValue({
+      people: [
+        {
+          id: '1',
+          mail: 'adelev@contoso.com',
+          photoUrl: 'photo-1',
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    render(<People />);
+
+    const firstCallAvatar = avatarGroupItemMock.mock.calls[0]?.[0] as {
+      name?: string;
+      avatar?: { initials?: string };
+    };
+
+    expect(firstCallAvatar.name).toBe('adelev@contoso.com');
+    expect(firstCallAvatar.avatar?.initials).toBeUndefined();
+  });
+
   it('returns null when there are no people to render', () => {
     mockedUsePeopleList.mockReturnValue({
       people: [],
