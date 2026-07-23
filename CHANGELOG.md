@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.4
+
+### Patch Changes
+
+- 1d09650: Use first and last name initials as the avatar fallback when a profile image is available.
+
 ## 1.2.3
 
 ### Patch Changes
