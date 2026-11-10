@@ -21,6 +21,7 @@ export default defineConfig({
         'react-dom',
         'react/jsx-runtime',
         '@fluentui/react-components',
+        '@azure/msal-browser',
         '@microsoft/microsoft-graph-client',
         '@microsoft/microsoft-graph-types',
       ],

@@ -19,6 +19,14 @@ export interface TeamsHostedProviderOptions {
     params: ExchangeForGraphTokenParams
   ) => Promise<string | ExchangedGraphToken>;
   refreshSkewMs?: number;
+  /**
+   * Returns a stable identifier for the signed-in user, for example
+   * `(await app.getContext()).user?.id` from TeamsJS.
+   *
+   * It scopes the persisted person cache to that account. When omitted, data for
+   * the current user (`userId="me"`) is not persisted.
+   */
+  getAccountId?: () => string | null | undefined;
 }
 
 export interface BackendTokenExchangeResponse extends ExchangedGraphToken {
@@ -91,6 +99,7 @@ export class TeamsHostedProvider implements IProvider {
     params: ExchangeForGraphTokenParams
   ) => Promise<string | ExchangedGraphToken>;
   private readonly refreshSkewMs: number;
+  private readonly getAccountIdFn?: () => string | null | undefined;
   private state: ProviderState = 'SignedOut';
   private listeners: StateListener[] = [];
   private readonly tokenCache = new Map<string, CachedToken>();
@@ -104,6 +113,7 @@ export class TeamsHostedProvider implements IProvider {
     this.getTeamsSsoTokenFn = options.getTeamsSsoToken;
     this.exchangeForGraphTokenFn = options.exchangeForGraphToken;
     this.refreshSkewMs = options.refreshSkewMs ?? DEFAULT_REFRESH_SKEW_MS;
+    this.getAccountIdFn = options.getAccountId;
   }
 
   async login(): Promise<void> {
@@ -150,6 +160,14 @@ export class TeamsHostedProvider implements IProvider {
 
   getState(): ProviderState {
     return this.state;
+  }
+
+  /**
+   * Returns the account identifier supplied through the `getAccountId` option, used to
+   * keep cached person data separate per account.
+   */
+  getAccountId(): string | null {
+    return this.getAccountIdFn?.() ?? null;
   }
 
   onStateChanged(handler: () => void): void {

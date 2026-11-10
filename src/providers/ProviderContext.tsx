@@ -6,12 +6,14 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   ReactNode,
   useMemo,
+  useRef,
   useSyncExternalStore,
 } from 'react';
 import { IProvider, ProviderState } from './IProvider';
-import { DEFAULT_PERSON_CACHE_OPTIONS, PersonCacheOptions } from '../utils/personCache';
+import { clearPersonCache, DEFAULT_PERSON_CACHE_OPTIONS, PersonCacheOptions } from '../utils/personCache';
 
 interface GraphProviderContextValue {
   provider: IProvider | null;
@@ -58,6 +60,18 @@ export const GraphProvider: React.FC<GraphProviderProps> = ({
   );
 
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  // Remove persisted person data when the user signs out so the next account
+  // on this browser cannot read it.
+  const previousSession = useRef<{ provider: IProvider; state: ProviderState } | null>(null);
+  useEffect(() => {
+    const previous = previousSession.current;
+    previousSession.current = { provider, state };
+
+    if (previous?.provider === provider && previous.state === 'SignedIn' && state === 'SignedOut') {
+      void clearPersonCache();
+    }
+  }, [provider, state]);
 
   const resolvedPersonCacheOptions = useMemo<PersonCacheOptions>(
     () => ({
