@@ -135,6 +135,8 @@ export class MyProvider implements IProvider {
 }
 ```
 
+Person data is cached in IndexedDB per signed-in account and cleared on sign-out. Custom providers can implement the optional `getAccountId()` (return a stable ID such as the Entra object ID) to enable caching for `userId="me"`; without it, the current user's data is not persisted. `MsalBrowserProvider` implements it, and `TeamsHostedProvider` accepts a `getAccountId` option.
+
 ## Scopes by Feature
 
 | Feature | Minimum delegated scope | Notes |

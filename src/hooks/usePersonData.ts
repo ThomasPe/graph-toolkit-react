@@ -150,8 +150,10 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         return;
       }
 
-      const cacheKey = getPersonCacheKey(identifier);
-      const cached = personCacheOptions.enabled ? await readPersonCache(cacheKey) : null;
+      const cacheKey = personCacheOptions.enabled
+        ? getPersonCacheKey(identifier, provider?.getAccountId?.())
+        : null;
+      const cached = cacheKey ? await readPersonCache(cacheKey) : null;
       const hasFreshUser = Boolean(
         cached?.user &&
           hasNameParts(cached.user) &&
@@ -182,7 +184,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
       try {
         setData((prev) => ({ ...prev, loading: true, error: null }));
 
-        const isCurrentUserQuery = identifier.toLowerCase() === 'me';
+        const isCurrentUserQuery = identifier.trim().toLowerCase() === 'me';
         const now = Date.now();
         let didFetchUser = false;
         let didFetchPresence = false;
@@ -262,7 +264,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         }
 
         if (
-          personCacheOptions.enabled &&
+          cacheKey &&
           (didFetchUser || didFetchPresence || didFetchPhoto) &&
           updatedCache.user
         ) {

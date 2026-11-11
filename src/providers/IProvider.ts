@@ -29,4 +29,14 @@ export interface IProvider {
    * Event handler for state changes
    */
   onStateChanged?: (handler: () => void) => void;
+
+  /**
+   * Get a stable identifier for the signed-in account (for example the Entra object ID
+   * or the MSAL home account ID).
+   *
+   * It scopes the persisted person cache so one account never reads data cached for
+   * another. Providers that do not implement it still cache other users, but data for
+   * the current user (`userId="me"`) is not persisted.
+   */
+  getAccountId?: () => string | null | undefined;
 }

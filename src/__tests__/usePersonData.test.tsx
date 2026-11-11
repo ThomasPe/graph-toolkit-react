@@ -18,11 +18,13 @@ vi.mock('../providers/ProviderContext', () => ({
   usePersonCacheOptions: vi.fn(),
 }));
 
-vi.mock('../utils/personCache', () => ({
+vi.mock('../utils/personCache', async () => ({
   USER_CACHE_TTL_MS: 60 * 60 * 1000,
   PHOTO_CACHE_TTL_MS: 60 * 60 * 1000,
   PRESENCE_CACHE_TTL_MS: 5 * 60 * 1000,
-  getPersonCacheKey: vi.fn((identifier: string) => `person:${identifier.trim().toLowerCase()}`),
+  getPersonCacheKey: (
+    await vi.importActual<typeof import('../utils/personCache')>('../utils/personCache')
+  ).getPersonCacheKey,
   isTimestampFresh: vi.fn((timestamp: number | undefined, ttlMs: number) => {
     if (!timestamp) {
       return false;
@@ -99,6 +101,57 @@ describe('usePersonData caching', () => {
     expect(mockedWritePersonCache).not.toHaveBeenCalled();
   });
 
+  it('does not persist the current user when the provider exposes no account', async () => {
+    const selectMock = vi.fn().mockReturnValue({
+      get: vi.fn().mockResolvedValue({ id: 'user-1', displayName: 'Signed In User' }),
+    });
+    const apiMock = vi.fn().mockReturnValue({ select: selectMock });
+    mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
+
+    const { result } = renderHook(() => usePersonData({ userId: 'me', fetchPhoto: false }));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.user?.displayName).toBe('Signed In User');
+    expect(apiMock).toHaveBeenCalledWith('/me');
+    expect(mockedReadPersonCache).not.toHaveBeenCalled();
+    expect(mockedWritePersonCache).not.toHaveBeenCalled();
+  });
+
+  it('scopes cached data for the current user to the signed-in account', async () => {
+    let accountId = 'account-a';
+    mockedUseProvider.mockReturnValue({ getAccountId: () => accountId } as never);
+
+    const selectMock = vi.fn().mockReturnValue({
+      get: vi.fn().mockResolvedValue({ id: 'user-1', displayName: 'Signed In User' }),
+    });
+    mockedUseGraphClient.mockReturnValue({
+      api: vi.fn().mockReturnValue({ select: selectMock }),
+    } as never);
+
+    const first = renderHook(() => usePersonData({ userId: 'me', fetchPhoto: false }));
+    await waitFor(() => {
+      expect(first.result.current.loading).toBe(false);
+    });
+
+    const keyForAccountA = mockedReadPersonCache.mock.calls[0][0];
+    expect(keyForAccountA).toContain('account-a');
+    expect(mockedWritePersonCache).toHaveBeenCalledWith(keyForAccountA, expect.anything());
+    first.unmount();
+
+    accountId = 'account-b';
+    const second = renderHook(() => usePersonData({ userId: 'me', fetchPhoto: false }));
+    await waitFor(() => {
+      expect(second.result.current.loading).toBe(false);
+    });
+
+    const keyForAccountB = mockedReadPersonCache.mock.calls[1][0];
+    expect(keyForAccountB).toContain('account-b');
+    expect(keyForAccountB).not.toBe(keyForAccountA);
+  });
+
   it('refreshes a cached user that predates the default name-part selection', async () => {
     const now = Date.now();
     const selectMock = vi.fn().mockReturnValue({
@@ -137,7 +190,7 @@ describe('usePersonData caching', () => {
       surname: 'Vance',
     });
     expect(mockedWritePersonCache).toHaveBeenCalledWith(
-      'person:user-1',
+      'person::user-1',
       expect.objectContaining({
         user: expect.objectContaining({
           givenName: 'Adele',
