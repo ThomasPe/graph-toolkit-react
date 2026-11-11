@@ -125,8 +125,7 @@ describe('usePeopleSearch', () => {
 
     await waitFor(() => {
       expect(searchPeople).toHaveBeenCalledWith('Adele', 3);
+      expect(result.current.results).toHaveLength(1);
     });
-
-    expect(result.current.results).toHaveLength(1);
   });
 });
