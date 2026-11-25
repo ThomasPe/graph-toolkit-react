@@ -184,8 +184,10 @@ export class MsalBrowserProvider implements IProvider {
   }
 
   /**
-   * Notify listeners when the app switches MSAL's active account (for example through
+   * Follow MSAL's active account when the app changes it (for example through
    * `setActiveAccount` in a multi-account app), so account-scoped data is reloaded.
+   * Clearing the active account signs the provider out instead of keeping the
+   * previous account as a fallback.
    */
   private listenForAccountChanges(): void {
     if (this.isListeningForAccountChanges) {
@@ -198,11 +200,8 @@ export class MsalBrowserProvider implements IProvider {
         return;
       }
 
-      const active = this.msalInstance.getActiveAccount();
-      if (active) {
-        this.account = active;
-      }
-      this.emit();
+      this.account = this.msalInstance.getActiveAccount();
+      this.setState(this.account ? 'SignedIn' : 'SignedOut');
     });
   }
 

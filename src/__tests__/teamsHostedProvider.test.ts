@@ -117,12 +117,15 @@ describe('TeamsHostedProvider', () => {
       getAccountId: () => 'Teams-User-Id',
     });
 
+    expect(provider.getAccountId()).toBeNull();
+
     await provider.login();
     expect(provider.getAccountId()).toBe('Teams-User-Id');
     expect(clearSpy).not.toHaveBeenCalled();
 
     await provider.logout();
     expect(provider.getState()).toBe('SignedOut');
+    expect(provider.getAccountId()).toBeNull();
     expect(clearSpy).toHaveBeenCalledTimes(1);
 
     clearSpy.mockRestore();

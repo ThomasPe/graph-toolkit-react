@@ -177,10 +177,15 @@ export class TeamsHostedProvider implements IProvider {
   }
 
   /**
-   * Returns the account identifier supplied through the `getAccountId` option, used to
-   * keep cached person data separate per account.
+   * Returns the account identifier supplied through the `getAccountId` option while
+   * signed in, used to keep cached person data separate per account. Returns `null`
+   * when signed out.
    */
   getAccountId(): string | null {
+    if (this.state !== 'SignedIn') {
+      return null;
+    }
+
     return this.getAccountIdFn?.() ?? null;
   }
 

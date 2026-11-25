@@ -762,4 +762,41 @@ describe('MsalBrowserProvider active account changes', () => {
     expect(provider.getAccountId()).toBe('account-b');
     expect(provider.getState()).toBe('SignedIn');
   });
+
+  it('signs out and drops the previous account when MSAL clears the active account', async () => {
+    const accountA = { homeAccountId: 'account-a' };
+    let activeAccount: { homeAccountId: string } | null = accountA;
+    let eventCallback: (event: { eventType: string }) => void = () => undefined;
+
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockResolvedValue(null),
+        getActiveAccount: () => activeAccount,
+        getAllAccounts: () => [accountA],
+        setActiveAccount: vi.fn(),
+        addEventCallback: (callback: (event: { eventType: string }) => void) => {
+          eventCallback = callback;
+          return 'callback-id';
+        },
+      } as never,
+      ['User.Read']
+    );
+
+    await provider.initialize();
+    expect(provider.getState()).toBe('SignedIn');
+
+    activeAccount = null;
+    eventCallback({ eventType: 'msal:activeAccountChanged' });
+
+    expect(provider.getState()).toBe('SignedOut');
+    expect(provider.getAccountId()).toBeNull();
+    await expect(provider.getAccessToken()).rejects.toThrow('No active account');
+
+    activeAccount = accountA;
+    eventCallback({ eventType: 'msal:activeAccountChanged' });
+
+    expect(provider.getState()).toBe('SignedIn');
+    expect(provider.getAccountId()).toBe('account-a');
+  });
 });
