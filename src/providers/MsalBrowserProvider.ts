@@ -16,6 +16,9 @@ import { clearPersonCache } from '../utils/personCache';
  * @param error - The error thrown by `acquireTokenSilent`
  * @returns True when MSAL requires user interaction to issue the token
  */
+/** Value of MSAL's `EventType.ACTIVE_ACCOUNT_CHANGED`, inlined to avoid a runtime import. */
+const MSAL_ACTIVE_ACCOUNT_CHANGED_EVENT = 'msal:activeAccountChanged';
+
 const isInteractionRequiredError = (error: unknown): boolean =>
   typeof error === 'object' &&
   error !== null &&
@@ -43,6 +46,7 @@ export class MsalBrowserProvider implements IProvider {
   private account: AccountInfo | null = null;
   private state: ProviderState = 'Loading';
   private listeners: Array<() => void> = [];
+  private isListeningForAccountChanges = false;
 
   constructor(msalInstance: IPublicClientApplication, defaultScopes: string[]) {
     this.msalInstance = msalInstance;
@@ -52,9 +56,12 @@ export class MsalBrowserProvider implements IProvider {
   /**
    * Initializes MSAL, completes a pending redirect and resolves the signed-in account.
    *
-   * The provider always leaves the `Loading` state. If MSAL initialization or redirect
-   * handling fails, the state is resolved from any cached account (otherwise `SignedOut`)
-   * and the original error is rethrown so the app can surface it.
+   * The provider always leaves the `Loading` state, and the original error is rethrown
+   * so the app can surface it:
+   * - If MSAL itself fails to initialize, the state becomes `SignedOut`. MSAL cannot issue
+   *   tokens in that case, so a cached account is deliberately not reported as signed in.
+   * - If only redirect handling fails, the state is resolved from any cached account
+   *   (otherwise `SignedOut`).
    */
   async initialize(): Promise<void> {
     try {
@@ -64,6 +71,8 @@ export class MsalBrowserProvider implements IProvider {
       this.setState('SignedOut');
       throw error;
     }
+
+    this.listenForAccountChanges();
 
     let redirectError: unknown;
     let hasRedirectError = false;
@@ -172,6 +181,29 @@ export class MsalBrowserProvider implements IProvider {
 
   removeStateChangedHandler(handler: () => void): void {
     this.listeners = this.listeners.filter((listener) => listener !== handler);
+  }
+
+  /**
+   * Notify listeners when the app switches MSAL's active account (for example through
+   * `setActiveAccount` in a multi-account app), so account-scoped data is reloaded.
+   */
+  private listenForAccountChanges(): void {
+    if (this.isListeningForAccountChanges) {
+      return;
+    }
+
+    this.isListeningForAccountChanges = true;
+    this.msalInstance.addEventCallback?.((event) => {
+      if (event.eventType !== MSAL_ACTIVE_ACCOUNT_CHANGED_EVENT) {
+        return;
+      }
+
+      const active = this.msalInstance.getActiveAccount();
+      if (active) {
+        this.account = active;
+      }
+      this.emit();
+    });
   }
 
   private setState(next: ProviderState): void {

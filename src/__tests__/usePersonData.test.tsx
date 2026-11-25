@@ -3,7 +3,12 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { User, Presence } from '@microsoft/microsoft-graph-types';
 import { usePersonData } from '../hooks/usePersonData';
 import { useGraphClient } from '../hooks/useGraphClient';
-import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
+import {
+  usePersonCacheOptions,
+  useProvider,
+  useProviderAccountId,
+  useProviderState,
+} from '../providers/ProviderContext';
 import * as personCache from '../utils/personCache';
 import { IProvider } from '../providers/IProvider';
 import { IPersonDataProvider } from '../providers/IPersonDataProvider';
@@ -15,6 +20,7 @@ vi.mock('../hooks/useGraphClient', () => ({
 vi.mock('../providers/ProviderContext', () => ({
   useProvider: vi.fn(),
   useProviderState: vi.fn(),
+  useProviderAccountId: vi.fn(() => null),
   usePersonCacheOptions: vi.fn(),
 }));
 
@@ -25,6 +31,7 @@ vi.mock('../utils/personCache', async () => ({
   getPersonCacheKey: (
     await vi.importActual<typeof import('../utils/personCache')>('../utils/personCache')
   ).getPersonCacheKey,
+  getPersonCacheGeneration: vi.fn(() => 0),
   isTimestampFresh: vi.fn((timestamp: number | undefined, ttlMs: number) => {
     if (!timestamp) {
       return false;
@@ -40,12 +47,16 @@ describe('usePersonData caching', () => {
   const mockedUseProvider = vi.mocked(useProvider);
   const mockedUseProviderState = vi.mocked(useProviderState);
   const mockedUsePersonCacheOptions = vi.mocked(usePersonCacheOptions);
+  const mockedUseProviderAccountId = vi.mocked(useProviderAccountId);
   const mockedReadPersonCache = vi.mocked(personCache.readPersonCache);
   const mockedWritePersonCache = vi.mocked(personCache.writePersonCache);
+  const mockedGetPersonCacheGeneration = vi.mocked(personCache.getPersonCacheGeneration);
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockedUseProvider.mockReturnValue({} as never);
+    mockedUseProviderAccountId.mockReturnValue(null);
+    mockedGetPersonCacheGeneration.mockReturnValue(0);
     mockedUseProviderState.mockReturnValue('SignedIn');
     mockedUsePersonCacheOptions.mockReturnValue({
       enabled: true,
@@ -123,33 +134,108 @@ describe('usePersonData caching', () => {
   it('scopes cached data for the current user to the signed-in account', async () => {
     let accountId = 'account-a';
     mockedUseProvider.mockReturnValue({ getAccountId: () => accountId } as never);
+    mockedUseProviderAccountId.mockImplementation(() => accountId);
 
-    const selectMock = vi.fn().mockReturnValue({
-      get: vi.fn().mockResolvedValue({ id: 'user-1', displayName: 'Signed In User' }),
-    });
+    const getMock = vi.fn().mockResolvedValue({ id: 'user-1', displayName: 'Signed In User' });
     mockedUseGraphClient.mockReturnValue({
-      api: vi.fn().mockReturnValue({ select: selectMock }),
+      api: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ get: getMock }) }),
     } as never);
 
-    const first = renderHook(() => usePersonData({ userId: 'me', fetchPhoto: false }));
+    const { result, rerender } = renderHook(() => usePersonData({ userId: 'me', fetchPhoto: false }));
     await waitFor(() => {
-      expect(first.result.current.loading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     const keyForAccountA = mockedReadPersonCache.mock.calls[0][0];
     expect(keyForAccountA).toContain('account-a');
     expect(mockedWritePersonCache).toHaveBeenCalledWith(keyForAccountA, expect.anything());
-    first.unmount();
 
+    // The app switches the active account while the provider stays signed in
     accountId = 'account-b';
-    const second = renderHook(() => usePersonData({ userId: 'me', fetchPhoto: false }));
+    rerender();
+
     await waitFor(() => {
-      expect(second.result.current.loading).toBe(false);
+      expect(mockedReadPersonCache).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
     });
 
     const keyForAccountB = mockedReadPersonCache.mock.calls[1][0];
     expect(keyForAccountB).toContain('account-b');
     expect(keyForAccountB).not.toBe(keyForAccountA);
+    expect(getMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not write to the cache when the cache was cleared while loading', async () => {
+    let resolveUser: (user: User) => void = () => undefined;
+    const getMock = vi.fn().mockReturnValue(
+      new Promise<User>((resolve) => {
+        resolveUser = resolve;
+      })
+    );
+    mockedUseGraphClient.mockReturnValue({
+      api: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ get: getMock }) }),
+    } as never);
+
+    const { result } = renderHook(() => usePersonData({ userId: 'user-1', fetchPhoto: false }));
+    await waitFor(() => {
+      expect(getMock).toHaveBeenCalledTimes(1);
+    });
+
+    // Sign-out clears the cache (and bumps its generation) before the request returns
+    mockedGetPersonCacheGeneration.mockReturnValue(1);
+    resolveUser({ id: 'user-1', displayName: 'Previous Session User' } as User);
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+    expect(mockedWritePersonCache).not.toHaveBeenCalled();
+  });
+
+  it('does not write to the cache when the provider signed out or switched account while loading', async () => {
+    let providerState = 'SignedIn';
+    let providerAccountId = 'account-a';
+    mockedUseProvider.mockReturnValue({
+      getState: () => providerState,
+      getAccountId: () => providerAccountId,
+    } as never);
+    mockedUseProviderAccountId.mockReturnValue('account-a');
+
+    const pending: Array<(user: User) => void> = [];
+    const getMock = vi.fn().mockImplementation(
+      () =>
+        new Promise<User>((resolve) => {
+          pending.push(resolve);
+        })
+    );
+    mockedUseGraphClient.mockReturnValue({
+      api: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ get: getMock }) }),
+    } as never);
+
+    const signedOut = renderHook(() => usePersonData({ userId: 'user-1', fetchPhoto: false }));
+    await waitFor(() => {
+      expect(pending).toHaveLength(1);
+    });
+    providerState = 'SignedOut';
+    pending[0]({ id: 'user-1', displayName: 'User One' } as User);
+    await waitFor(() => {
+      expect(signedOut.result.current.loading).toBe(false);
+    });
+    signedOut.unmount();
+
+    providerState = 'SignedIn';
+    const switched = renderHook(() => usePersonData({ userId: 'user-2', fetchPhoto: false }));
+    await waitFor(() => {
+      expect(pending).toHaveLength(2);
+    });
+    providerAccountId = 'account-b';
+    pending[1]({ id: 'user-2', displayName: 'User Two' } as User);
+    await waitFor(() => {
+      expect(switched.result.current.loading).toBe(false);
+    });
+
+    expect(mockedWritePersonCache).not.toHaveBeenCalled();
   });
 
   it('refreshes a cached user that predates the default name-part selection', async () => {

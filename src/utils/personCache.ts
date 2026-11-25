@@ -74,20 +74,33 @@ const CURRENT_USER_IDENTIFIER = 'me';
  * Returns `null` when the entry must not be persisted: `me` resolves to a different
  * person for every account, so it is only cacheable when the account is known.
  *
+ * The account ID is treated as opaque: it is trimmed and encoded but its case is kept,
+ * because provider-supplied identifiers may be case-sensitive.
+ *
  * @param identifier - User ID, UPN, mail or `me`
  * @param accountId - Stable identifier of the signed-in account, if the provider exposes one
  * @returns The cache key, or `null` when the entry must not be cached
  */
 export const getPersonCacheKey = (identifier: string, accountId?: string | null): string | null => {
   const normalizedIdentifier = identifier.trim().toLowerCase();
-  const normalizedAccountId = accountId?.trim().toLowerCase();
+  const trimmedAccountId = accountId?.trim();
 
-  if (!normalizedAccountId) {
+  if (!trimmedAccountId) {
     return normalizedIdentifier === CURRENT_USER_IDENTIFIER ? null : `person::${normalizedIdentifier}`;
   }
 
-  return `person:${encodeURIComponent(normalizedAccountId)}:${normalizedIdentifier}`;
+  return `person:${encodeURIComponent(trimmedAccountId)}:${normalizedIdentifier}`;
 };
+
+let personCacheGeneration = 0;
+
+/**
+ * Get the current cache generation. It changes every time the cache is cleared, so a
+ * caller can detect that data it started loading belongs to a session that has since ended.
+ *
+ * @returns A counter that is incremented by {@link clearPersonCache}
+ */
+export const getPersonCacheGeneration = (): number => personCacheGeneration;
 
 export const isTimestampFresh = (timestamp: number | undefined, ttlMs: number): boolean => {
   if (!timestamp) {
@@ -139,6 +152,9 @@ export const writePersonCache = async (key: string, value: PersonCacheEntry): Pr
  * Remove all cached person data, for example when the user signs out.
  */
 export const clearPersonCache = async (): Promise<void> => {
+  // Invalidate synchronously so in-flight loads started before the clear do not write back
+  personCacheGeneration += 1;
+
   if (!isIndexedDbAvailable()) {
     return;
   }

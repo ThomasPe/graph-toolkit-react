@@ -26,7 +26,10 @@ export interface IProvider {
   getState(): ProviderState;
 
   /**
-   * Event handler for state changes
+   * Event handler for state changes.
+   *
+   * Providers that implement {@link IProvider.getAccountId} should also notify these
+   * handlers when the signed-in account changes without a state change.
    */
   onStateChanged?: (handler: () => void) => void;
 
@@ -35,7 +38,7 @@ export interface IProvider {
    * or the MSAL home account ID).
    *
    * It scopes the persisted person cache so one account never reads data cached for
-   * another. Providers that do not implement it still cache other users, but data for
+   * another. The value is treated as an opaque, case-sensitive string. Providers that do not implement it still cache other users, but data for
    * the current user (`userId="me"`) is not persisted.
    */
   getAccountId?: () => string | null | undefined;

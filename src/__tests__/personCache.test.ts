@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPersonCacheKey } from '../utils/personCache';
+import { clearPersonCache, getPersonCacheGeneration, getPersonCacheKey } from '../utils/personCache';
 
 describe('getPersonCacheKey', () => {
   it('scopes keys to the signed-in account', () => {
@@ -10,10 +10,14 @@ describe('getPersonCacheKey', () => {
     expect(keyForAccountA).not.toBe(keyForAccountB);
   });
 
-  it('normalizes identifier and account casing and whitespace', () => {
-    expect(getPersonCacheKey('  AdeleV@Contoso.com ', ' Account-A ')).toBe(
+  it('normalizes identifier casing and surrounding whitespace', () => {
+    expect(getPersonCacheKey('  AdeleV@Contoso.com ', ' account-a ')).toBe(
       getPersonCacheKey('adelev@contoso.com', 'account-a')
     );
+  });
+
+  it('treats account IDs as case-sensitive', () => {
+    expect(getPersonCacheKey('me', 'Account-A')).not.toBe(getPersonCacheKey('me', 'account-a'));
   });
 
   it('does not cache the current user when the account is unknown', () => {
@@ -29,5 +33,17 @@ describe('getPersonCacheKey', () => {
   it('cannot collide across the account/identifier boundary', () => {
     expect(getPersonCacheKey('b:c', 'a')).not.toBe(getPersonCacheKey('c', 'a:b'));
     expect(getPersonCacheKey('a:b')).not.toBe(getPersonCacheKey('b', 'a'));
+  });
+});
+
+describe('clearPersonCache', () => {
+  it('advances the cache generation so in-flight loads can detect the clear', async () => {
+    const before = getPersonCacheGeneration();
+
+    const clearing = clearPersonCache();
+    expect(getPersonCacheGeneration()).toBe(before + 1);
+
+    await clearing;
+    expect(getPersonCacheGeneration()).toBe(before + 1);
   });
 });

@@ -2,7 +2,12 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { InteractionRequiredAuthError } from '@azure/msal-browser';
-import { GraphProvider, useProvider, useProviderState } from '../providers/ProviderContext';
+import {
+  GraphProvider,
+  useProvider,
+  useProviderAccountId,
+  useProviderState,
+} from '../providers/ProviderContext';
 import { MockProvider } from '../providers/MockProvider';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
 import { IProvider } from '../providers/IProvider';
@@ -59,6 +64,69 @@ describe('GraphProvider person cache', () => {
     expect(clearSpy).toHaveBeenCalledTimes(1);
 
     clearSpy.mockRestore();
+  });
+
+  it('clears cached person data when sign-out is followed by sign-in before React renders', async () => {
+    const clearSpy = vi.spyOn(personCache, 'clearPersonCache').mockResolvedValue();
+    const mock = new MockProvider({ autoSignIn: true });
+
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <GraphProvider provider={mock}>{children}</GraphProvider>
+    );
+
+    const { result } = renderHook(() => useProviderState(), { wrapper });
+
+    await act(async () => {
+      // Both transitions happen in the same tick, so no render ever sees `SignedOut`
+      void mock.logout();
+      void mock.login();
+    });
+
+    expect(result.current).toBe('SignedIn');
+    expect(clearSpy).toHaveBeenCalledTimes(1);
+
+    clearSpy.mockRestore();
+  });
+});
+
+describe('GraphProvider account ID', () => {
+  it('exposes the provider account ID and updates it when the provider reports a change', async () => {
+    let accountId: string | null = 'account-a';
+    const listeners: Array<() => void> = [];
+    const provider: IProvider = {
+      getAccessToken: () => Promise.resolve('token'),
+      login: () => Promise.resolve(),
+      logout: () => Promise.resolve(),
+      getState: () => 'SignedIn',
+      onStateChanged: (handler) => {
+        listeners.push(handler);
+      },
+      getAccountId: () => accountId,
+    };
+
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <GraphProvider provider={provider}>{children}</GraphProvider>
+    );
+
+    const { result } = renderHook(() => useProviderAccountId(), { wrapper });
+    expect(result.current).toBe('account-a');
+
+    act(() => {
+      accountId = 'account-b';
+      listeners.forEach((listener) => listener());
+    });
+
+    expect(result.current).toBe('account-b');
+  });
+
+  it('returns null for providers without getAccountId', () => {
+    const mock = new MockProvider({ autoSignIn: true });
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <GraphProvider provider={mock}>{children}</GraphProvider>
+    );
+
+    const { result } = renderHook(() => useProviderAccountId(), { wrapper });
+    expect(result.current).toBeNull();
   });
 });
 
@@ -653,5 +721,45 @@ describe('MsalBrowserProvider.getAccountId', () => {
     );
 
     expect(provider.getAccountId()).toBeNull();
+  });
+});
+
+describe('MsalBrowserProvider active account changes', () => {
+  it('notifies listeners and reports the new account when MSAL switches the active account', async () => {
+    const accountA = { homeAccountId: 'account-a' };
+    const accountB = { homeAccountId: 'account-b' };
+    let activeAccount: { homeAccountId: string } | null = accountA;
+    let eventCallback: (event: { eventType: string }) => void = () => undefined;
+
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockResolvedValue(null),
+        getActiveAccount: () => activeAccount,
+        getAllAccounts: () => [accountA, accountB],
+        setActiveAccount: vi.fn(),
+        addEventCallback: (callback: (event: { eventType: string }) => void) => {
+          eventCallback = callback;
+          return 'callback-id';
+        },
+      } as never,
+      ['User.Read']
+    );
+
+    await provider.initialize();
+    expect(provider.getAccountId()).toBe('account-a');
+
+    const listener = vi.fn();
+    provider.onStateChanged(listener);
+
+    eventCallback({ eventType: 'msal:loginSuccess' });
+    expect(listener).not.toHaveBeenCalled();
+
+    activeAccount = accountB;
+    eventCallback({ eventType: 'msal:activeAccountChanged' });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(provider.getAccountId()).toBe('account-b');
+    expect(provider.getState()).toBe('SignedIn');
   });
 });

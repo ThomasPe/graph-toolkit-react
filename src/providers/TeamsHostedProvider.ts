@@ -1,4 +1,5 @@
 import { IProvider, ProviderState } from './IProvider';
+import { clearPersonCache } from '../utils/personCache';
 
 type StateListener = () => void;
 
@@ -20,11 +21,21 @@ export interface TeamsHostedProviderOptions {
   ) => Promise<string | ExchangedGraphToken>;
   refreshSkewMs?: number;
   /**
-   * Returns a stable identifier for the signed-in user, for example
-   * `(await app.getContext()).user?.id` from TeamsJS.
+   * Returns a stable identifier for the signed-in user. It scopes the persisted person
+   * cache to that account. When omitted, data for the current user (`userId="me"`) is
+   * not persisted.
    *
-   * It scopes the persisted person cache to that account. When omitted, data for
-   * the current user (`userId="me"`) is not persisted.
+   * The callback is synchronous, so resolve asynchronous sources such as the TeamsJS
+   * context before constructing the provider:
+   *
+   * @example
+   * ```ts
+   * const context = await app.getContext();
+   * const provider = new TeamsHostedProvider({
+   *   // ...
+   *   getAccountId: () => context.user?.id,
+   * });
+   * ```
    */
   getAccountId?: () => string | null | undefined;
 }
@@ -130,6 +141,9 @@ export class TeamsHostedProvider implements IProvider {
   async logout(): Promise<void> {
     this.clearCache();
     this.setState('SignedOut');
+
+    // Remove cached person data before the caller can sign in as another account
+    await clearPersonCache();
   }
 
   async getAccessToken(scopes?: string[]): Promise<string> {

@@ -5,10 +5,16 @@
 import { useState, useEffect } from 'react';
 import { User, Presence } from '@microsoft/microsoft-graph-types';
 import { useGraphClient } from './useGraphClient';
-import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
+import {
+  usePersonCacheOptions,
+  useProvider,
+  useProviderAccountId,
+  useProviderState,
+} from '../providers/ProviderContext';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
 import { encodeGraphPathSegment, photoResponseToDataUrl } from '../utils/graph';
 import {
+  getPersonCacheGeneration,
   getPersonCacheKey,
   isTimestampFresh,
   PersonCacheEntry,
@@ -58,6 +64,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
   const graphClient = useGraphClient();
   const provider = useProvider();
   const providerState = useProviderState();
+  const accountId = useProviderAccountId();
   const personCacheOptions = usePersonCacheOptions();
   const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true, selectFields } = options;
   const resolvedSelectFields = [
@@ -150,9 +157,14 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         return;
       }
 
-      const cacheKey = personCacheOptions.enabled
-        ? getPersonCacheKey(identifier, provider?.getAccountId?.())
-        : null;
+      const cacheKey = personCacheOptions.enabled ? getPersonCacheKey(identifier, accountId) : null;
+      const cacheGeneration = getPersonCacheGeneration();
+      // The loaded data may only be persisted while the session it was loaded for is still
+      // current: no sign-out (which clears the cache) and no account switch in the meantime.
+      const isSameSession = (): boolean =>
+        getPersonCacheGeneration() === cacheGeneration &&
+        (provider?.getState?.() ?? providerState) === 'SignedIn' &&
+        (provider?.getAccountId?.() ?? null) === accountId;
       const cached = cacheKey ? await readPersonCache(cacheKey) : null;
       const hasFreshUser = Boolean(
         cached?.user &&
@@ -266,7 +278,8 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         if (
           cacheKey &&
           (didFetchUser || didFetchPresence || didFetchPhoto) &&
-          updatedCache.user
+          updatedCache.user &&
+          isSameSession()
         ) {
           await writePersonCache(cacheKey, updatedCache);
         }
@@ -298,7 +311,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
     return () => {
       cancelled = true;
     };
-  }, [graphClient, provider, providerState, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, resolvedSelectFields]);
+  }, [graphClient, provider, providerState, accountId, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, resolvedSelectFields]);
 
   return data;
 };
