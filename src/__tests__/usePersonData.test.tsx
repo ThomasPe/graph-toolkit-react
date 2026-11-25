@@ -151,8 +151,13 @@ describe('usePersonData caching', () => {
     expect(mockedWritePersonCache).toHaveBeenCalledWith(keyForAccountA, expect.anything(), 0);
 
     // The app switches the active account while the provider stays signed in
+    getMock.mockResolvedValue({ id: 'user-2', displayName: 'Other Signed In User' });
     accountId = 'account-b';
     rerender();
+
+    // The previous account's data is dropped immediately, before the reload finishes
+    expect(result.current.user).toBeNull();
+    expect(result.current.loading).toBe(true);
 
     await waitFor(() => {
       expect(mockedReadPersonCache).toHaveBeenCalledTimes(2);
@@ -165,6 +170,7 @@ describe('usePersonData caching', () => {
     expect(keyForAccountB).toContain('account-b');
     expect(keyForAccountB).not.toBe(keyForAccountA);
     expect(getMock).toHaveBeenCalledTimes(2);
+    expect(result.current.user?.displayName).toBe('Other Signed In User');
   });
 
   it('does not write to the cache when the cache was cleared while loading', async () => {

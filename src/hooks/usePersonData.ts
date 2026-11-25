@@ -50,6 +50,14 @@ const DEFAULT_USER_SELECT_FIELDS = [
   'userPrincipalName',
 ];
 
+const INITIAL_PERSON_DATA: PersonData = {
+  user: null,
+  presence: null,
+  photoUrl: null,
+  loading: true,
+  error: null,
+};
+
 const hasNameParts = (user: User): boolean => {
   return (
     Object.prototype.hasOwnProperty.call(user, 'givenName') &&
@@ -75,13 +83,16 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         .filter((f) => f.length > 0 && /^[a-zA-Z0-9_./]+$/.test(f)),
     ]),
   ].join(',');
-  const [data, setData] = useState<PersonData>({
-    user: null,
-    presence: null,
-    photoUrl: null,
-    loading: true,
-    error: null,
-  });
+  const [data, setData] = useState<PersonData>(INITIAL_PERSON_DATA);
+
+  // Data loaded for one account must never be shown for another (`me` is a different
+  // person per account), so drop it during render as soon as the account changes
+  // instead of waiting for the reload below to finish.
+  const [dataAccountId, setDataAccountId] = useState(accountId);
+  if (dataAccountId !== accountId) {
+    setDataAccountId(accountId);
+    setData(INITIAL_PERSON_DATA);
+  }
 
   useEffect(() => {
     let cancelled = false;
