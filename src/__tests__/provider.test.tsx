@@ -2,11 +2,17 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { InteractionRequiredAuthError } from '@azure/msal-browser';
-import { GraphProvider, useProvider, useProviderState } from '../providers/ProviderContext';
+import {
+  GraphProvider,
+  useProvider,
+  useProviderAccountId,
+  useProviderState,
+} from '../providers/ProviderContext';
 import { MockProvider } from '../providers/MockProvider';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
 import { IProvider } from '../providers/IProvider';
 import { MsalBrowserProvider, RedirectInProgressError } from '../providers/MsalBrowserProvider';
+import * as personCache from '../utils/personCache';
 
 describe('ProviderContext', () => {
   it('exposes provider and state transitions', async () => {
@@ -32,6 +38,95 @@ describe('ProviderContext', () => {
       await mock.logout();
     });
     expect(stateResult.current).toBe('SignedOut');
+  });
+});
+
+describe('GraphProvider person cache', () => {
+  it('clears cached person data when the user signs out', async () => {
+    const clearSpy = vi.spyOn(personCache, 'clearPersonCache').mockResolvedValue();
+    const mock = new MockProvider({ autoSignIn: true });
+
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <GraphProvider provider={mock}>{children}</GraphProvider>
+    );
+
+    renderHook(() => useProviderState(), { wrapper });
+    expect(clearSpy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await mock.logout();
+    });
+    expect(clearSpy).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await mock.login();
+    });
+    expect(clearSpy).toHaveBeenCalledTimes(1);
+
+    clearSpy.mockRestore();
+  });
+
+  it('clears cached person data when sign-out is followed by sign-in before React renders', async () => {
+    const clearSpy = vi.spyOn(personCache, 'clearPersonCache').mockResolvedValue();
+    const mock = new MockProvider({ autoSignIn: true });
+
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <GraphProvider provider={mock}>{children}</GraphProvider>
+    );
+
+    const { result } = renderHook(() => useProviderState(), { wrapper });
+
+    await act(async () => {
+      // Both transitions happen in the same tick, so no render ever sees `SignedOut`
+      void mock.logout();
+      void mock.login();
+    });
+
+    expect(result.current).toBe('SignedIn');
+    expect(clearSpy).toHaveBeenCalledTimes(1);
+
+    clearSpy.mockRestore();
+  });
+});
+
+describe('GraphProvider account ID', () => {
+  it('exposes the provider account ID and updates it when the provider reports a change', async () => {
+    let accountId: string | null = 'account-a';
+    const listeners: Array<() => void> = [];
+    const provider: IProvider = {
+      getAccessToken: () => Promise.resolve('token'),
+      login: () => Promise.resolve(),
+      logout: () => Promise.resolve(),
+      getState: () => 'SignedIn',
+      onStateChanged: (handler) => {
+        listeners.push(handler);
+      },
+      getAccountId: () => accountId,
+    };
+
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <GraphProvider provider={provider}>{children}</GraphProvider>
+    );
+
+    const { result } = renderHook(() => useProviderAccountId(), { wrapper });
+    expect(result.current).toBe('account-a');
+
+    act(() => {
+      accountId = 'account-b';
+      listeners.forEach((listener) => listener());
+    });
+
+    expect(result.current).toBe('account-b');
+  });
+
+  it('returns null for providers without getAccountId', () => {
+    const mock = new MockProvider({ autoSignIn: true });
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <GraphProvider provider={mock}>{children}</GraphProvider>
+    );
+
+    const { result } = renderHook(() => useProviderAccountId(), { wrapper });
+    expect(result.current).toBeNull();
   });
 });
 
@@ -506,5 +601,226 @@ describe('MsalBrowserProvider.logout', () => {
     await provider.logout();
 
     expect(logoutRedirect).toHaveBeenCalledWith({ account: undefined });
+  });
+});
+
+describe('MsalBrowserProvider.initialize failures', () => {
+  const account = {
+    homeAccountId: 'home-account-id',
+    environment: 'login.microsoftonline.com',
+    tenantId: 'tenant-id',
+    username: 'user@contoso.com',
+    localAccountId: 'local-account-id',
+    name: 'Test User',
+  };
+
+  it('leaves Loading and rethrows when redirect handling fails without a cached account', async () => {
+    const redirectError = new Error('redirect failed');
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockRejectedValue(redirectError),
+        getActiveAccount: vi.fn().mockReturnValue(null),
+        getAllAccounts: vi.fn().mockReturnValue([]),
+        setActiveAccount: vi.fn(),
+      } as never,
+      ['User.Read']
+    );
+    const listener = vi.fn();
+    provider.onStateChanged(listener);
+
+    await expect(provider.initialize()).rejects.toBe(redirectError);
+
+    expect(provider.getState()).toBe('SignedOut');
+    expect(listener).toHaveBeenCalled();
+  });
+
+  it('keeps a cached account signed in when redirect handling fails', async () => {
+    const redirectError = new Error('redirect failed');
+    const setActiveAccount = vi.fn();
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockRejectedValue(redirectError),
+        getActiveAccount: vi.fn().mockReturnValue(null),
+        getAllAccounts: vi.fn().mockReturnValue([account]),
+        setActiveAccount,
+      } as never,
+      ['User.Read']
+    );
+
+    await expect(provider.initialize()).rejects.toBe(redirectError);
+
+    expect(provider.getState()).toBe('SignedIn');
+    expect(setActiveAccount).toHaveBeenCalledWith(account);
+  });
+
+  it('sets SignedOut and rethrows when MSAL initialization fails', async () => {
+    const initError = new Error('init failed');
+    const handleRedirectPromise = vi.fn();
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockRejectedValue(initError),
+        handleRedirectPromise,
+      } as never,
+      ['User.Read']
+    );
+
+    await expect(provider.initialize()).rejects.toBe(initError);
+
+    expect(provider.getState()).toBe('SignedOut');
+    expect(handleRedirectPromise).not.toHaveBeenCalled();
+  });
+});
+
+describe('MsalBrowserProvider interaction-required detection', () => {
+  it('redirects for an interaction-required error from a different copy of MSAL', async () => {
+    // Simulates the app and this library resolving separate copies of @azure/msal-browser,
+    // where an `instanceof` check against our copy of the class would fail.
+    class InteractionRequiredAuthError extends Error {
+      constructor(message: string) {
+        super(message);
+        this.name = 'InteractionRequiredAuthError';
+      }
+    }
+
+    const account = { homeAccountId: 'home-account-id' };
+    const acquireTokenRedirect = vi.fn().mockResolvedValue(undefined);
+    const provider = new MsalBrowserProvider(
+      {
+        getActiveAccount: vi.fn().mockReturnValue(account),
+        acquireTokenSilent: vi
+          .fn()
+          .mockRejectedValue(new InteractionRequiredAuthError('interaction_required')),
+        acquireTokenRedirect,
+      } as never,
+      ['User.Read']
+    );
+
+    await expect(provider.getAccessToken()).rejects.toBeInstanceOf(RedirectInProgressError);
+    expect(acquireTokenRedirect).toHaveBeenCalledWith({ scopes: ['User.Read'], account });
+  });
+});
+
+describe('MsalBrowserProvider.getAccountId', () => {
+  it('returns the home account ID of the active account once signed in', async () => {
+    const account = { homeAccountId: 'home-account-id' };
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockResolvedValue(null),
+        getActiveAccount: vi.fn().mockReturnValue(account),
+        getAllAccounts: vi.fn().mockReturnValue([account]),
+        setActiveAccount: vi.fn(),
+      } as never,
+      ['User.Read']
+    );
+
+    expect(provider.getAccountId()).toBeNull();
+
+    await provider.initialize();
+
+    expect(provider.getAccountId()).toBe('home-account-id');
+  });
+
+  it('returns null when MSAL still has a cached account but initialization failed', async () => {
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockRejectedValue(new Error('init failed')),
+        getActiveAccount: vi.fn().mockReturnValue({ homeAccountId: 'home-account-id' }),
+      } as never,
+      ['User.Read']
+    );
+
+    await expect(provider.initialize()).rejects.toThrow('init failed');
+
+    expect(provider.getState()).toBe('SignedOut');
+    expect(provider.getAccountId()).toBeNull();
+  });
+
+  it('returns null when no account is signed in', () => {
+    const provider = new MsalBrowserProvider(
+      { getActiveAccount: vi.fn().mockReturnValue(null) } as never,
+      ['User.Read']
+    );
+
+    expect(provider.getAccountId()).toBeNull();
+  });
+});
+
+describe('MsalBrowserProvider active account changes', () => {
+  it('notifies listeners and reports the new account when MSAL switches the active account', async () => {
+    const accountA = { homeAccountId: 'account-a' };
+    const accountB = { homeAccountId: 'account-b' };
+    let activeAccount: { homeAccountId: string } | null = accountA;
+    let eventCallback: (event: { eventType: string }) => void = () => undefined;
+
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockResolvedValue(null),
+        getActiveAccount: () => activeAccount,
+        getAllAccounts: () => [accountA, accountB],
+        setActiveAccount: vi.fn(),
+        addEventCallback: (callback: (event: { eventType: string }) => void) => {
+          eventCallback = callback;
+          return 'callback-id';
+        },
+      } as never,
+      ['User.Read']
+    );
+
+    await provider.initialize();
+    expect(provider.getAccountId()).toBe('account-a');
+
+    const listener = vi.fn();
+    provider.onStateChanged(listener);
+
+    eventCallback({ eventType: 'msal:loginSuccess' });
+    expect(listener).not.toHaveBeenCalled();
+
+    activeAccount = accountB;
+    eventCallback({ eventType: 'msal:activeAccountChanged' });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(provider.getAccountId()).toBe('account-b');
+    expect(provider.getState()).toBe('SignedIn');
+  });
+
+  it('signs out and drops the previous account when MSAL clears the active account', async () => {
+    const accountA = { homeAccountId: 'account-a' };
+    let activeAccount: { homeAccountId: string } | null = accountA;
+    let eventCallback: (event: { eventType: string }) => void = () => undefined;
+
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockResolvedValue(null),
+        getActiveAccount: () => activeAccount,
+        getAllAccounts: () => [accountA],
+        setActiveAccount: vi.fn(),
+        addEventCallback: (callback: (event: { eventType: string }) => void) => {
+          eventCallback = callback;
+          return 'callback-id';
+        },
+      } as never,
+      ['User.Read']
+    );
+
+    await provider.initialize();
+    expect(provider.getState()).toBe('SignedIn');
+
+    activeAccount = null;
+    eventCallback({ eventType: 'msal:activeAccountChanged' });
+
+    expect(provider.getState()).toBe('SignedOut');
+    expect(provider.getAccountId()).toBeNull();
+    await expect(provider.getAccessToken()).rejects.toThrow('No active account');
+
+    activeAccount = accountA;
+    eventCallback({ eventType: 'msal:activeAccountChanged' });
+
+    expect(provider.getState()).toBe('SignedIn');
+    expect(provider.getAccountId()).toBe('account-a');
   });
 });

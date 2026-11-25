@@ -51,6 +51,24 @@ const normalizePeopleSearchQuery = (query: string): string => {
 };
 
 /**
+ * Build the `$search` query value for a people search.
+ *
+ * Backslashes are escaped so they cannot break out of the quoted search terms, and the
+ * whole expression is URL-encoded because the Graph client appends query values to the
+ * request URL as-is (an unencoded `&` or `#` would otherwise split or truncate the query).
+ *
+ * @param normalizedQuery - Query already processed by {@link normalizePeopleSearchQuery}
+ * @returns The encoded `$search` expression
+ */
+const buildPeopleSearchExpression = (normalizedQuery: string): string => {
+  const term = normalizedQuery.replace(/\\/g, '\\\\');
+
+  return encodeURIComponent(
+    `"displayName:${term}" OR "mail:${term}" OR "userPrincipalName:${term}"`
+  );
+};
+
+/**
  * Hook to search for people by name, email, or UPN.
  *
  * When used with a {@link MockProvider} the search is performed locally against mock data.
@@ -113,7 +131,7 @@ export const usePeopleSearch = (
             const response = (await graphClient
               .api('/users')
               .header('ConsistencyLevel', 'eventual')
-              .search(`"displayName:${normalizedQuery}" OR "mail:${normalizedQuery}" OR "userPrincipalName:${normalizedQuery}"`)
+              .search(buildPeopleSearchExpression(normalizedQuery))
               .select(PEOPLE_SEARCH_SELECT_FIELDS)
               .top(maxResults)
               .get()) as { value?: PeopleSearchResult[] };

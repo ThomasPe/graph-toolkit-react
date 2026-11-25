@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createBackendTokenExchange, TeamsHostedProvider } from '../providers/TeamsHostedProvider';
+import * as personCache from '../utils/personCache';
 
 describe('TeamsHostedProvider', () => {
   it('logs in and transitions to SignedIn', async () => {
@@ -105,6 +106,29 @@ describe('TeamsHostedProvider', () => {
     await provider.logout();
 
     expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears cached person data on logout and exposes the configured account ID', async () => {
+    const clearSpy = vi.spyOn(personCache, 'clearPersonCache').mockResolvedValue();
+    const provider = new TeamsHostedProvider({
+      defaultScopes: ['User.Read'],
+      getTeamsSsoToken: vi.fn().mockResolvedValue('teams-sso-token'),
+      exchangeForGraphToken: vi.fn().mockResolvedValue('graph-token'),
+      getAccountId: () => 'Teams-User-Id',
+    });
+
+    expect(provider.getAccountId()).toBeNull();
+
+    await provider.login();
+    expect(provider.getAccountId()).toBe('Teams-User-Id');
+    expect(clearSpy).not.toHaveBeenCalled();
+
+    await provider.logout();
+    expect(provider.getState()).toBe('SignedOut');
+    expect(provider.getAccountId()).toBeNull();
+    expect(clearSpy).toHaveBeenCalledTimes(1);
+
+    clearSpy.mockRestore();
   });
 
   it('creates a backend token exchange callback', async () => {

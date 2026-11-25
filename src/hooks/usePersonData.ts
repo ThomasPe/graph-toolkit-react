@@ -5,10 +5,16 @@
 import { useState, useEffect } from 'react';
 import { User, Presence } from '@microsoft/microsoft-graph-types';
 import { useGraphClient } from './useGraphClient';
-import { usePersonCacheOptions, useProvider, useProviderState } from '../providers/ProviderContext';
+import {
+  usePersonCacheOptions,
+  useProvider,
+  useProviderAccountId,
+  useProviderState,
+} from '../providers/ProviderContext';
 import { isPersonDataProvider } from '../providers/IPersonDataProvider';
 import { encodeGraphPathSegment, photoResponseToDataUrl } from '../utils/graph';
 import {
+  getPersonCacheGeneration,
   getPersonCacheKey,
   isTimestampFresh,
   PersonCacheEntry,
@@ -44,6 +50,14 @@ const DEFAULT_USER_SELECT_FIELDS = [
   'userPrincipalName',
 ];
 
+const INITIAL_PERSON_DATA: PersonData = {
+  user: null,
+  presence: null,
+  photoUrl: null,
+  loading: true,
+  error: null,
+};
+
 const hasNameParts = (user: User): boolean => {
   return (
     Object.prototype.hasOwnProperty.call(user, 'givenName') &&
@@ -58,6 +72,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
   const graphClient = useGraphClient();
   const provider = useProvider();
   const providerState = useProviderState();
+  const accountId = useProviderAccountId();
   const personCacheOptions = usePersonCacheOptions();
   const { userId, userPrincipalName, fetchPresence = false, fetchPhoto = true, selectFields } = options;
   const resolvedSelectFields = [
@@ -68,13 +83,16 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         .filter((f) => f.length > 0 && /^[a-zA-Z0-9_./]+$/.test(f)),
     ]),
   ].join(',');
-  const [data, setData] = useState<PersonData>({
-    user: null,
-    presence: null,
-    photoUrl: null,
-    loading: true,
-    error: null,
-  });
+  const [data, setData] = useState<PersonData>(INITIAL_PERSON_DATA);
+
+  // Data loaded for one account must never be shown for another (`me` is a different
+  // person per account), so drop it during render as soon as the account changes
+  // instead of waiting for the reload below to finish.
+  const [dataAccountId, setDataAccountId] = useState(accountId);
+  if (dataAccountId !== accountId) {
+    setDataAccountId(accountId);
+    setData(INITIAL_PERSON_DATA);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -150,8 +168,15 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         return;
       }
 
-      const cacheKey = getPersonCacheKey(identifier);
-      const cached = personCacheOptions.enabled ? await readPersonCache(cacheKey) : null;
+      const cacheKey = personCacheOptions.enabled ? getPersonCacheKey(identifier, accountId) : null;
+      const cacheGeneration = getPersonCacheGeneration();
+      // The loaded data may only be persisted while the session it was loaded for is still
+      // current: no sign-out (which clears the cache) and no account switch in the meantime.
+      const isSameSession = (): boolean =>
+        getPersonCacheGeneration() === cacheGeneration &&
+        (provider?.getState?.() ?? providerState) === 'SignedIn' &&
+        (provider?.getAccountId?.() ?? null) === accountId;
+      const cached = cacheKey ? await readPersonCache(cacheKey) : null;
       const hasFreshUser = Boolean(
         cached?.user &&
           hasNameParts(cached.user) &&
@@ -182,7 +207,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
       try {
         setData((prev) => ({ ...prev, loading: true, error: null }));
 
-        const isCurrentUserQuery = identifier.toLowerCase() === 'me';
+        const isCurrentUserQuery = identifier.trim().toLowerCase() === 'me';
         const now = Date.now();
         let didFetchUser = false;
         let didFetchPresence = false;
@@ -262,11 +287,12 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
         }
 
         if (
-          personCacheOptions.enabled &&
+          cacheKey &&
           (didFetchUser || didFetchPresence || didFetchPhoto) &&
-          updatedCache.user
+          updatedCache.user &&
+          isSameSession()
         ) {
-          await writePersonCache(cacheKey, updatedCache);
+          await writePersonCache(cacheKey, updatedCache, cacheGeneration);
         }
 
         if (!cancelled) {
@@ -296,7 +322,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
     return () => {
       cancelled = true;
     };
-  }, [graphClient, provider, providerState, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, resolvedSelectFields]);
+  }, [graphClient, provider, providerState, accountId, userId, userPrincipalName, fetchPresence, fetchPhoto, personCacheOptions, resolvedSelectFields]);
 
   return data;
 };

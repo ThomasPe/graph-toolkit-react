@@ -1,4 +1,5 @@
 import { IProvider, ProviderState } from './IProvider';
+import { clearPersonCache } from '../utils/personCache';
 
 type StateListener = () => void;
 
@@ -19,6 +20,24 @@ export interface TeamsHostedProviderOptions {
     params: ExchangeForGraphTokenParams
   ) => Promise<string | ExchangedGraphToken>;
   refreshSkewMs?: number;
+  /**
+   * Returns a stable identifier for the signed-in user. It scopes the persisted person
+   * cache to that account. When omitted, data for the current user (`userId="me"`) is
+   * not persisted.
+   *
+   * The callback is synchronous, so resolve asynchronous sources such as the TeamsJS
+   * context before constructing the provider:
+   *
+   * @example
+   * ```ts
+   * const context = await app.getContext();
+   * const provider = new TeamsHostedProvider({
+   *   // ...
+   *   getAccountId: () => context.user?.id,
+   * });
+   * ```
+   */
+  getAccountId?: () => string | null | undefined;
 }
 
 export interface BackendTokenExchangeResponse extends ExchangedGraphToken {
@@ -91,6 +110,7 @@ export class TeamsHostedProvider implements IProvider {
     params: ExchangeForGraphTokenParams
   ) => Promise<string | ExchangedGraphToken>;
   private readonly refreshSkewMs: number;
+  private readonly getAccountIdFn?: () => string | null | undefined;
   private state: ProviderState = 'SignedOut';
   private listeners: StateListener[] = [];
   private readonly tokenCache = new Map<string, CachedToken>();
@@ -104,6 +124,7 @@ export class TeamsHostedProvider implements IProvider {
     this.getTeamsSsoTokenFn = options.getTeamsSsoToken;
     this.exchangeForGraphTokenFn = options.exchangeForGraphToken;
     this.refreshSkewMs = options.refreshSkewMs ?? DEFAULT_REFRESH_SKEW_MS;
+    this.getAccountIdFn = options.getAccountId;
   }
 
   async login(): Promise<void> {
@@ -120,6 +141,9 @@ export class TeamsHostedProvider implements IProvider {
   async logout(): Promise<void> {
     this.clearCache();
     this.setState('SignedOut');
+
+    // Remove cached person data before the caller can sign in as another account
+    await clearPersonCache();
   }
 
   async getAccessToken(scopes?: string[]): Promise<string> {
@@ -150,6 +174,19 @@ export class TeamsHostedProvider implements IProvider {
 
   getState(): ProviderState {
     return this.state;
+  }
+
+  /**
+   * Returns the account identifier supplied through the `getAccountId` option while
+   * signed in, used to keep cached person data separate per account. Returns `null`
+   * when signed out.
+   */
+  getAccountId(): string | null {
+    if (this.state !== 'SignedIn') {
+      return null;
+    }
+
+    return this.getAccountIdFn?.() ?? null;
   }
 
   onStateChanged(handler: () => void): void {

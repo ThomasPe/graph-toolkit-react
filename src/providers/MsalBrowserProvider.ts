@@ -2,9 +2,27 @@
  * Native MSAL browser provider for Graph Toolkit React
  */
 
-import { InteractionRequiredAuthError } from '@azure/msal-browser';
 import type { AccountInfo, IPublicClientApplication, RedirectRequest, SilentRequest } from '@azure/msal-browser';
 import { IProvider, ProviderState } from './IProvider';
+import { clearPersonCache } from '../utils/personCache';
+
+/**
+ * Detects MSAL's `InteractionRequiredAuthError` without importing the class.
+ *
+ * An `instanceof` check only works when this library and the consuming app share the
+ * exact same copy of `@azure/msal-browser`. Matching on the error name works across
+ * copies and keeps `@azure/msal-browser` a types-only (truly optional) dependency.
+ *
+ * @param error - The error thrown by `acquireTokenSilent`
+ * @returns True when MSAL requires user interaction to issue the token
+ */
+/** Value of MSAL's `EventType.ACTIVE_ACCOUNT_CHANGED`, inlined to avoid a runtime import. */
+const MSAL_ACTIVE_ACCOUNT_CHANGED_EVENT = 'msal:activeAccountChanged';
+
+const isInteractionRequiredError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  (error as { name?: unknown }).name === 'InteractionRequiredAuthError';
 
 /**
  * Error indicating that an interactive redirect has been initiated and token acquisition
@@ -28,32 +46,70 @@ export class MsalBrowserProvider implements IProvider {
   private account: AccountInfo | null = null;
   private state: ProviderState = 'Loading';
   private listeners: Array<() => void> = [];
+  private isListeningForAccountChanges = false;
 
   constructor(msalInstance: IPublicClientApplication, defaultScopes: string[]) {
     this.msalInstance = msalInstance;
     this.defaultScopes = defaultScopes;
   }
 
+  /**
+   * Initializes MSAL, completes a pending redirect and resolves the signed-in account.
+   *
+   * The provider always leaves the `Loading` state, and the original error is rethrown
+   * so the app can surface it:
+   * - If MSAL itself fails to initialize, the state becomes `SignedOut`. MSAL cannot issue
+   *   tokens in that case, so a cached account is deliberately not reported as signed in.
+   * - If only redirect handling fails, the state is resolved from any cached account
+   *   (otherwise `SignedOut`).
+   */
   async initialize(): Promise<void> {
-    await this.msalInstance.initialize();
-
-    const response = await this.msalInstance.handleRedirectPromise();
-    if (response?.account) {
-      this.account = response.account;
-      this.msalInstance.setActiveAccount(this.account);
-      this.setState('SignedIn');
-      return;
+    try {
+      await this.msalInstance.initialize();
+    } catch (error) {
+      this.account = null;
+      this.setState('SignedOut');
+      throw error;
     }
 
-    const active = this.msalInstance.getActiveAccount();
-    const accounts = this.msalInstance.getAllAccounts();
+    this.listenForAccountChanges();
 
-    this.account = active ?? accounts[0] ?? null;
-    if (this.account) {
-      this.msalInstance.setActiveAccount(this.account);
-      this.setState('SignedIn');
-    } else {
-      this.setState('SignedOut');
+    let redirectError: unknown;
+    let hasRedirectError = false;
+
+    try {
+      const response = await this.msalInstance.handleRedirectPromise();
+      if (response?.account) {
+        this.account = response.account;
+        this.msalInstance.setActiveAccount(this.account);
+        this.setState('SignedIn');
+        return;
+      }
+    } catch (error) {
+      redirectError = error;
+      hasRedirectError = true;
+    }
+
+    try {
+      const active = this.msalInstance.getActiveAccount();
+      const accounts = this.msalInstance.getAllAccounts();
+
+      this.account = active ?? accounts[0] ?? null;
+      if (this.account) {
+        this.msalInstance.setActiveAccount(this.account);
+      }
+    } catch (error) {
+      this.account = null;
+      if (!hasRedirectError) {
+        redirectError = error;
+        hasRedirectError = true;
+      }
+    }
+
+    this.setState(this.account ? 'SignedIn' : 'SignedOut');
+
+    if (hasRedirectError) {
+      throw redirectError;
     }
   }
 
@@ -69,6 +125,9 @@ export class MsalBrowserProvider implements IProvider {
     this.account = null;
     this.msalInstance.setActiveAccount(null);
     this.setState('SignedOut');
+
+    // The redirect navigates away, so remove cached person data before starting it
+    await clearPersonCache();
 
     await this.msalInstance.logoutRedirect({ account });
   }
@@ -90,7 +149,7 @@ export class MsalBrowserProvider implements IProvider {
       const response = await this.msalInstance.acquireTokenSilent(silentRequest);
       return response.accessToken;
     } catch (error) {
-      if (error instanceof InteractionRequiredAuthError) {
+      if (isInteractionRequiredError(error)) {
         const redirectRequest: RedirectRequest = {
           scopes: targetScopes,
           account,
@@ -107,12 +166,47 @@ export class MsalBrowserProvider implements IProvider {
     return this.state;
   }
 
+  /**
+   * Returns the MSAL home account ID of the signed-in account, used to keep cached
+   * person data separate per account. Returns `null` unless the provider is signed in.
+   */
+  getAccountId(): string | null {
+    if (this.state !== 'SignedIn') {
+      return null;
+    }
+
+    const account = this.msalInstance.getActiveAccount() ?? this.account;
+    return account?.homeAccountId ?? null;
+  }
+
   onStateChanged(handler: () => void): void {
     this.listeners.push(handler);
   }
 
   removeStateChangedHandler(handler: () => void): void {
     this.listeners = this.listeners.filter((listener) => listener !== handler);
+  }
+
+  /**
+   * Follow MSAL's active account when the app changes it (for example through
+   * `setActiveAccount` in a multi-account app), so account-scoped data is reloaded.
+   * Clearing the active account signs the provider out instead of keeping the
+   * previous account as a fallback.
+   */
+  private listenForAccountChanges(): void {
+    if (this.isListeningForAccountChanges) {
+      return;
+    }
+
+    this.isListeningForAccountChanges = true;
+    this.msalInstance.addEventCallback?.((event) => {
+      if (event.eventType !== MSAL_ACTIVE_ACCOUNT_CHANGED_EVENT) {
+        return;
+      }
+
+      this.account = this.msalInstance.getActiveAccount();
+      this.setState(this.account ? 'SignedIn' : 'SignedOut');
+    });
   }
 
   private setState(next: ProviderState): void {

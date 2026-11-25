@@ -90,6 +90,30 @@ describe('usePeopleSearch', () => {
     ]);
   });
 
+  it('encodes the Graph search expression so special characters cannot alter the request', async () => {
+    const getMock = vi.fn().mockResolvedValue({ value: [] });
+    const topMock = vi.fn().mockReturnValue({ get: getMock });
+    const selectMock = vi.fn().mockReturnValue({ top: topMock });
+    const searchMock = vi.fn().mockReturnValue({ select: selectMock });
+    const headerMock = vi.fn().mockReturnValue({ search: searchMock });
+    mockedUseGraphClient.mockReturnValue({
+      api: vi.fn().mockReturnValue({ header: headerMock }),
+    } as never);
+
+    renderHook(() => usePeopleSearch('R&D #1 a+b \\', { minChars: 1 }));
+
+    await waitFor(() => {
+      expect(searchMock).toHaveBeenCalledTimes(1);
+    });
+
+    const searchExpression = searchMock.mock.calls[0][0] as string;
+
+    expect(searchExpression).not.toMatch(/[&#+ "]/);
+    expect(decodeURIComponent(searchExpression)).toBe(
+      '"displayName:R&D #1 a+b \\\\" OR "mail:R&D #1 a+b \\\\" OR "userPrincipalName:R&D #1 a+b \\\\"'
+    );
+  });
+
   it('does not turn a quotes-only query into initial suggestions', async () => {
     const apiMock = vi.fn();
     mockedUseGraphClient.mockReturnValue({ api: apiMock } as never);
