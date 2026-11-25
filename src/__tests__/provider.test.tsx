@@ -703,15 +703,39 @@ describe('MsalBrowserProvider interaction-required detection', () => {
 });
 
 describe('MsalBrowserProvider.getAccountId', () => {
-  it('returns the home account ID of the active account', () => {
+  it('returns the home account ID of the active account once signed in', async () => {
+    const account = { homeAccountId: 'home-account-id' };
     const provider = new MsalBrowserProvider(
       {
+        initialize: vi.fn().mockResolvedValue(undefined),
+        handleRedirectPromise: vi.fn().mockResolvedValue(null),
+        getActiveAccount: vi.fn().mockReturnValue(account),
+        getAllAccounts: vi.fn().mockReturnValue([account]),
+        setActiveAccount: vi.fn(),
+      } as never,
+      ['User.Read']
+    );
+
+    expect(provider.getAccountId()).toBeNull();
+
+    await provider.initialize();
+
+    expect(provider.getAccountId()).toBe('home-account-id');
+  });
+
+  it('returns null when MSAL still has a cached account but initialization failed', async () => {
+    const provider = new MsalBrowserProvider(
+      {
+        initialize: vi.fn().mockRejectedValue(new Error('init failed')),
         getActiveAccount: vi.fn().mockReturnValue({ homeAccountId: 'home-account-id' }),
       } as never,
       ['User.Read']
     );
 
-    expect(provider.getAccountId()).toBe('home-account-id');
+    await expect(provider.initialize()).rejects.toThrow('init failed');
+
+    expect(provider.getState()).toBe('SignedOut');
+    expect(provider.getAccountId()).toBeNull();
   });
 
   it('returns null when no account is signed in', () => {

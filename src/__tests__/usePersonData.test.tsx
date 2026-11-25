@@ -148,7 +148,7 @@ describe('usePersonData caching', () => {
 
     const keyForAccountA = mockedReadPersonCache.mock.calls[0][0];
     expect(keyForAccountA).toContain('account-a');
-    expect(mockedWritePersonCache).toHaveBeenCalledWith(keyForAccountA, expect.anything());
+    expect(mockedWritePersonCache).toHaveBeenCalledWith(keyForAccountA, expect.anything(), 0);
 
     // The app switches the active account while the provider stays signed in
     accountId = 'account-b';
@@ -282,7 +282,8 @@ describe('usePersonData caching', () => {
           givenName: 'Adele',
           surname: 'Vance',
         }),
-      })
+      }),
+      0
     );
   });
 

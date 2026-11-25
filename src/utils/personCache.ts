@@ -129,7 +129,20 @@ export const readPersonCache = async (key: string): Promise<PersonCacheEntry | n
   }
 };
 
-export const writePersonCache = async (key: string, value: PersonCacheEntry): Promise<void> => {
+/**
+ * Persist a cache entry.
+ *
+ * @param key - Cache key from {@link getPersonCacheKey}
+ * @param value - Entry to store
+ * @param generation - Cache generation the data was loaded under. When provided, the
+ * write is dropped if the cache has been cleared since, including while the database
+ * was being opened, so data from an ended session is never written back.
+ */
+export const writePersonCache = async (
+  key: string,
+  value: PersonCacheEntry,
+  generation?: number
+): Promise<void> => {
   if (!isIndexedDbAvailable()) {
     return;
   }
@@ -138,6 +151,13 @@ export const writePersonCache = async (key: string, value: PersonCacheEntry): Pr
 
   try {
     db = await openPersonCacheDb();
+
+    // Checked in the same synchronous step that creates the transaction: a clear requested
+    // before this point is detected here, and one requested later runs after this write.
+    if (generation !== undefined && generation !== personCacheGeneration) {
+      return;
+    }
+
     const transaction = db.transaction(PERSON_CACHE_STORE_NAME, 'readwrite');
     const store = transaction.objectStore(PERSON_CACHE_STORE_NAME);
     await requestToPromise(store.put(value, key));

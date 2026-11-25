@@ -168,9 +168,13 @@ export class MsalBrowserProvider implements IProvider {
 
   /**
    * Returns the MSAL home account ID of the signed-in account, used to keep cached
-   * person data separate per account.
+   * person data separate per account. Returns `null` unless the provider is signed in.
    */
   getAccountId(): string | null {
+    if (this.state !== 'SignedIn') {
+      return null;
+    }
+
     const account = this.msalInstance.getActiveAccount() ?? this.account;
     return account?.homeAccountId ?? null;
   }

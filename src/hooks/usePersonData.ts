@@ -281,7 +281,7 @@ export const usePersonData = (options: UsePersonDataOptions): PersonData => {
           updatedCache.user &&
           isSameSession()
         ) {
-          await writePersonCache(cacheKey, updatedCache);
+          await writePersonCache(cacheKey, updatedCache, cacheGeneration);
         }
 
         if (!cancelled) {
